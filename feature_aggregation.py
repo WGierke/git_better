@@ -1,17 +1,22 @@
 from tqdm import tqdm
+import re
 
 
 def add_count_features(data_frame, repo, index):
-    data_frame.set_value(index, 'watchers_count', repo.watchers_count)
-    data_frame.set_value(index, 'forks_count', repo.forks_count)
     data_frame.set_value(index, 'open_issues_count', repo.open_issues_count)
+    # Open Pull Requests
+
+    #Watchers Count
     data_frame.set_value(index, 'stargazers_count', repo.stargazers_count)
+    data_frame.set_value(index, 'forks_count', repo.forks_count)
     return data_frame
 
 
 def add_text_features(data_frame, repo, index):
+    regex = re.compile('[^a-zA-Z0-9 :\/]')
+    readme = regex.sub('', repo.get_readme().decoded_content)
+    data_frame.set_value(index, 'readme', readme)
     data_frame.set_value(index, 'description', repo.description)
-    data_frame.set_value(index, 'readme', repo.get_readme().decoded_content)
     return data_frame
 
 
