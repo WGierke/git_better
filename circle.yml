@@ -1,0 +1,11 @@
+machine:
+    python:
+        version: 2.7.9
+
+dependencies:
+  pre:
+    # update locally with:
+    # openssl aes-256-cbc -e -in config.ini -out config.ini.enc -k $KEY
+    - openssl aes-256-cbc -d -in config.ini.enc -k $KEY >> ~/config.ini
+  override:
+    - pip install -r requirements.txt
