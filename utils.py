@@ -80,3 +80,8 @@ def request_graph_features(repo_owner, repo_name):
       }}
     }}""".format(repo_owner, repo_name)
     return request_graph_api(query)
+
+
+def website_exists(url):
+    response = requests.get(url)
+    return response.status_code < 400
