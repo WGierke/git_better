@@ -1,13 +1,16 @@
 import unittest2
+from process import process_data
+
+TEST_DATA_PATH = 'tests/test_data.csv'
 
 
-class TestUM(unittest2.TestCase):
+class TestCase(unittest2.TestCase):
 
     def setUp(self):
         pass
 
-    def test_numbers_3_4(self):
-        self.assertEqual(True, True)
+    def test_integration(self):
+        print process_data(training_data_path=TEST_DATA_PATH)
 
 if __name__ == '__main__':
     unittest2.main()

@@ -48,9 +48,12 @@ def get_graph_features(repo_owner, repo_name):
 def add_rest_features(data_frame, index, repo):
     data_frame.set_value(index, 'size', repo.size)
     # Readme
-    regex = re.compile('[^a-zA-Z0-9 :\/]')
-    readme = regex.sub('', repo.get_readme().decoded_content)
-    data_frame.set_value(index, 'readme', readme)
+    try:
+        regex = re.compile('[^a-zA-Z0-9 :\/]')
+        readme = regex.sub('', repo.get_readme().decoded_content)
+        data_frame.set_value(index, 'readme', readme)
+    except:
+        data_frame.set_value(index, 'readme', '')
     # Language_Rate
     sum_loc = sum(repo.get_languages().values())
     languages = repo.get_languages()
