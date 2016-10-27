@@ -1,12 +1,10 @@
 import pandas
 pandas.set_option('display.max_columns', 50)
 
-TRAINING_DATA_PATH = 'data/small_data.csv'
 
-
-def load_training_data():
+def load_training_data(training_data_path):
     """Read the training data"""
-    return pandas.read_csv(TRAINING_DATA_PATH)
+    return pandas.read_csv(training_data_path)
 
 
 def clean_data(data_frame):
