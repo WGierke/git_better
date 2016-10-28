@@ -38,6 +38,8 @@ class TestCase(unittest2.TestCase):
         self.assertEqual(data_frame['size'], 119701)
         self.assertEqual(data_frame['hasHomepage'], False)
         self.assertEqual(data_frame['isOwnerHomepage'], False)
+        self.assertEqual(data_frame['commitsCount'], 1752)
+        self.assertEqual(data_frame['branchesCount'], 116)
 
     def check_homepage_github_repo(self, data_frame):
         self.assertEqual(data_frame['repository'], 'WGierke/wgierke.github.io')
@@ -59,6 +61,8 @@ class TestCase(unittest2.TestCase):
         self.assertEqual(data_frame['size'], 0)
         self.assertEqual(data_frame['hasHomepage'], True)
         self.assertEqual(data_frame['isOwnerHomepage'], True)
+        self.assertEqual(data_frame['commitsCount'], 1)
+        self.assertEqual(data_frame['branchesCount'], 1)
 
 
 if __name__ == '__main__':
