@@ -8,16 +8,27 @@ from utils import request_graph_features, website_exists
 import json
 import re
 import requests
+import pdb
 
-def aggregate_features(data_frame, index, row, bar):
+
+def aggregate_features(shared_data_frame, index, row, bar, lock):
     repo = get_client().get_repo(row['repository'])
-    owner = data_frame['owner'][index]
-    name = data_frame['name'][index]
-    data_frame = add_graph_features(data_frame, index, owner, name)
-    data_frame = add_rest_features(data_frame, index, repo)
-    data_frame = add_custom_features(data_frame, index, owner, name)
-    data_frame = fix_closed_issues(data_frame, index)
+    owner = shared_data_frame['owner'][index]
+    name = shared_data_frame['name'][index]
+    new_data_frame = shared_data_frame.copy()
+    #new_data_frame = add_graph_features(new_data_frame, index, owner, name)
+    new_data_frame = add_rest_features(new_data_frame, index, repo)
+    new_data_frame = add_custom_features(new_data_frame, index, owner, name)
+    #new_data_frame = fix_closed_issues(new_data_frame, index)
+
+
+    lock.acquire(True)
+    for col in new_data_frame.columns:
+        shared_data_frame.set_value(index, col, new_data_frame[index][col])
+    lock.release()
+
     bar.update()
+    print bar.n
 
 
 def add_graph_features(data_frame, index, owner, name):
@@ -49,19 +60,26 @@ def get_graph_features_of_renamed_repo(data_frame, index, repo_owner, repo_name)
 def get_graph_features(data_frame, index, repo_owner, repo_name):
     response = request_graph_features(repo_owner, repo_name)
     response = json.loads(response)
-    data = response["data"]["repositoryOwner"]["repository"]
-    features = {}
-    if data is None:
-        return get_graph_features_of_renamed_repo(data_frame, index, repo_owner, repo_name)
-    for k in data.keys():
-        if isinstance(data[k], dict):
-            features[k] = data[k]['totalCount']
-        else:
-            if data[k]:
-                features[k] = data[k]
+
+    if "data" in response.keys():
+        data = response["data"]["repositoryOwner"]["repository"]
+        features = {}
+        if data is None:
+            return get_graph_features_of_renamed_repo(data_frame, index, repo_owner, repo_name)
+        for k in data.keys():
+            if isinstance(data[k], dict):
+                features[k] = data[k]['totalCount']
             else:
-                features[k] = ''
-    return features
+                if data[k]:
+                    features[k] = data[k]
+                else:
+                    features[k] = ''
+        return features
+    elif "message" in response.keys():
+        print "An error occured while fetching GraphQL API: " + response["message"]
+    else:
+        print "An error occured while fetching GraphQL API: " + response
+    return {}
 
 
 def add_rest_features(data_frame, index, repo):

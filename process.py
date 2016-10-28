@@ -10,10 +10,12 @@ PROCESSED_DATA_PATH = 'data/processed_data.csv'
 
 def load_features_async(data_frame):
     bar = tqdm(total=len(data_frame))
+    lock = threading.Lock()
+
     threads = []
     print "Loading features for " + str(len(data_frame)) + " repositories"
     for index, row in data_frame.iterrows():
-        t = threading.Thread(target=aggregate_features, args=(data_frame, index, row, bar))
+        t = threading.Thread(target=aggregate_features, args=(data_frame, index, row, bar, lock))
         t.daemon = True
         threads.append(t)
 
