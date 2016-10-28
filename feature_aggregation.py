@@ -7,6 +7,7 @@ import re
 from utils import request_graph_features, website_exists
 import json
 from utils import get_client, get_last_repos_pagination_page
+import requests
 
 
 def aggregate_features(data_frame):
@@ -25,17 +26,36 @@ def aggregate_features(data_frame):
 def add_graph_features(data_frame, index, owner, name):
     """closed_issues, open_issues, closed_pull_requests, merged_pull_requests, open_pull_requests,
     projects, watchers, stargazers, forks, mentionableUsers, description"""
-    features = get_graph_features(owner, name)
+    features = get_graph_features(data_frame, index, owner, name)
     for k in features.keys():
         data_frame.set_value(index, k, features[k])
     return data_frame
 
 
-def get_graph_features(repo_owner, repo_name):
+def get_graph_features_of_renamed_repo(data_frame, index, repo_owner, repo_name):
+    try:
+        r = requests.get("https://github.com/{}/{}".format(repo_owner, repo_name))
+        new_repo_link = r.history[0].headers['location']
+        new_repo_link = new_repo_link.replace('https://github.com/', '')
+        new_repo_owner = new_repo_link.split("/")[0]
+        new_repo_name = new_repo_link.split("/")[1]
+        #data_frame.set_value(index, "repository", new_repo_link)
+        #data_frame.set_value(index, "owner", new_repo_owner)
+        #data_frame.set_value(index, "name", new_repo_name)
+        return get_graph_features(data_frame, index, new_repo_owner, new_repo_name)
+    except Exception, e:
+        print "Error while requesting renamed repo {}:{}".format(new_repo_name, e)
+        return {}
+
+
+
+def get_graph_features(data_frame, index, repo_owner, repo_name):
     response = request_graph_features(repo_owner, repo_name)
     response = json.loads(response)
     data = response["data"]["repositoryOwner"]["repository"]
     features = {}
+    if data is None:
+        return get_graph_features_of_renamed_repo(data_frame, index, repo_owner, repo_name)
     for k in data.keys():
         if isinstance(data[k], dict):
             features[k] = data[k]['totalCount']

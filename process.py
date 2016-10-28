@@ -2,7 +2,7 @@ from preprocess import load_training_data, clean_data
 from feature_aggregation import aggregate_features
 from utils import load_config
 
-TRAINING_DATA_PATH = 'data/small_data.csv'
+TRAINING_DATA_PATH = 'data/training_data.csv'
 PROCESSED_DATA_PATH = 'data/processed_data.csv'
 
 
