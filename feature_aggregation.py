@@ -6,7 +6,7 @@ from tqdm import tqdm
 import re
 from utils import request_graph_features, website_exists
 import json
-from utils import get_client, get_last_pagination_page
+from utils import get_client, get_last_repos_pagination_page
 
 
 def aggregate_features(data_frame):
@@ -68,15 +68,17 @@ def add_custom_features(data_frame, index, owner, name):
     """isOwnerHomepage, hasHomepage, commitsCount, branchesCount"""
     is_owner_homepage = name.lower() == "{}.github.io".format(owner.lower())
     has_homepage = website_exists("http://{}.github.io/{}".format(owner, name))
-    commits_count = get_last_pagination_page(
-        "https://api.github.com/repos/{}/{}/commits?per_page=1".format(owner, name))
-    branches_count = get_last_pagination_page(
-        "https://api.github.com/repos/{}/{}/branches?per_page=1".format(owner, name))
+    commits_count = get_last_repos_pagination_page("{}/{}/commits?per_page=1".format(owner, name))
+    branches_count = get_last_repos_pagination_page("{}/{}/branches?per_page=1".format(owner, name))
+    tags_count = get_last_repos_pagination_page("{}/{}/tags?per_page=1".format(owner, name))
+    releases_count = get_last_repos_pagination_page("{}/{}/releases?per_page=1".format(owner, name))
 
     data_frame.set_value(index, "isOwnerHomepage", is_owner_homepage)
     data_frame.set_value(index, "hasHomepage", has_homepage)
     data_frame.set_value(index, "commitsCount", commits_count)
     data_frame.set_value(index, "branchesCount", branches_count)
+    data_frame.set_value(index, "tagsCount", tags_count)
+    data_frame.set_value(index, "releasesCount", releases_count)
     return data_frame
 
 
