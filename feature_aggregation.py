@@ -1,26 +1,23 @@
 """
 Aggregate the provided Data Frame with features we receive from the Github REST and GraphQL API
-TODO:       commits_count
+TODO:       hasCiConfig
 """
 from tqdm import tqdm
-import re
+from utils import get_client, get_last_repos_pagination_page
 from utils import request_graph_features, website_exists
 import json
-from utils import get_client, get_last_repos_pagination_page
+import re
 import requests
 
-
-def aggregate_features(data_frame):
-    print "Loading features for " + str(len(data_frame)) + " repositories"
-    for index, row in tqdm(data_frame.iterrows(), total=len(data_frame)):
-        repo = get_client().get_repo(row['repository'])
-        owner = data_frame['owner'][index]
-        name = data_frame['name'][index]
-        data_frame = add_graph_features(data_frame, index, owner, name)
-        data_frame = add_rest_features(data_frame, index, repo)
-        data_frame = add_custom_features(data_frame, index, owner, name)
-        data_frame = fix_closed_issues(data_frame, index)
-    return data_frame
+def aggregate_features(data_frame, index, row, bar):
+    repo = get_client().get_repo(row['repository'])
+    owner = data_frame['owner'][index]
+    name = data_frame['name'][index]
+    data_frame = add_graph_features(data_frame, index, owner, name)
+    data_frame = add_rest_features(data_frame, index, repo)
+    data_frame = add_custom_features(data_frame, index, owner, name)
+    data_frame = fix_closed_issues(data_frame, index)
+    bar.update()
 
 
 def add_graph_features(data_frame, index, owner, name):
