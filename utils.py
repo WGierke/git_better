@@ -82,6 +82,21 @@ def request_graph_features(repo_owner, repo_name):
     return request_graph_api(query)
 
 
+def get_response(url):
+    return requests.get(url)
+
+
 def website_exists(url):
-    response = requests.get(url)
-    return response.status_code < 400
+    return get_response(url).status_code < 400
+
+
+def get_last_pagination_page(url):
+    try:
+        link_header = get_response(url).headers['Link']
+        return int(link_header.split(',')[1].split("&page=")[1].split(">")[0])
+    except:
+        return 1
+
+
+def get_last_repos_pagination_page(url):
+    return get_last_pagination_page("https://api.github.com/repos/" + url)
