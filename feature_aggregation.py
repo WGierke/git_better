@@ -2,33 +2,34 @@
 Aggregate the provided Data Frame with features we receive from the Github REST and GraphQL API
 TODO:       hasCiConfig
 """
-from tqdm import tqdm
 from utils import get_client, get_last_repos_pagination_page
 from utils import request_graph_features, website_exists
 import json
 import re
 import requests
 import pdb
+import pandas as pd
 
 
-def aggregate_features(shared_data_frame, index, row, bar, lock):
+def aggregate_features(index, row, bar, q):
     repo = get_client().get_repo(row['repository'])
-    owner = shared_data_frame['owner'][index]
-    name = shared_data_frame['name'][index]
-    new_data_frame = shared_data_frame.copy()
-    #new_data_frame = add_graph_features(new_data_frame, index, owner, name)
-    new_data_frame = add_rest_features(new_data_frame, index, repo)
-    new_data_frame = add_custom_features(new_data_frame, index, owner, name)
-    #new_data_frame = fix_closed_issues(new_data_frame, index)
+    owner = row['owner']
+    name = row['name']
+    new_data_frame = pd.DataFrame.from_dict(row).T
+    new_data_frame = add_graph_features(new_data_frame, index, owner, name)
+    new_data_frame = add_rest_features(new_data_frame, 0, repo)
+    new_data_frame = add_custom_features(new_data_frame, 0, owner, name)
+    new_data_frame = fix_closed_issues(new_data_frame, index)
 
-
-    lock.acquire(True)
-    for col in new_data_frame.columns:
-        shared_data_frame.set_value(index, col, new_data_frame[index][col])
-    lock.release()
-
+    shared_data_frame = q.get()
+    update_columns = [col for col in new_data_frame.columns if col not in ['repository', 'owner', 'name', 'label']]
+    for col in update_columns:
+        try:
+            shared_data_frame.set_value(index, col, new_data_frame.loc[0, col])
+        except Exception, e:
+            print "An error occured while fetching {}/{} and setting {}: {}".format(owner, name, col, e)
+    q.put(shared_data_frame)
     bar.update()
-    print bar.n
 
 
 def add_graph_features(data_frame, index, owner, name):
