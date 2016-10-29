@@ -1,5 +1,5 @@
 import pandas
-pandas.set_option('display.max_columns', 50)
+pandas.set_option('display.max_columns', 100)
 
 
 def load_training_data(training_data_path):
