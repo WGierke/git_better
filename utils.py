@@ -15,10 +15,8 @@ def load_config():
         global PERSONAL_ACCESS_TOKEN
         config = ConfigParser.RawConfigParser(allow_no_value=False)
         config.read('config.ini')
-        username = config.get("github", "username")
-        password = config.get("github", "password")
-        GITHUB_CLIENT = Github(username, password)
         PERSONAL_ACCESS_TOKEN = config.get("github", "token")
+        GITHUB_CLIENT = Github(login_or_token=PERSONAL_ACCESS_TOKEN)
     else:
         print "Please provide a config.ini file which includes your Github credentials"
         sys.exit(1)
