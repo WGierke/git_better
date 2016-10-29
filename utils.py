@@ -83,7 +83,8 @@ def request_graph_features(repo_owner, repo_name):
 
 
 def get_response(url):
-    return requests.get(url)
+    headers = {'Authorization': 'token %s' % PERSONAL_ACCESS_TOKEN}
+    return requests.get(url, headers=headers)
 
 
 def website_exists(url):
@@ -92,10 +93,13 @@ def website_exists(url):
 
 def get_last_pagination_page(url):
     try:
-        link_header = get_response(url).headers['Link']
-        return int(link_header.split(',')[1].split("&page=")[1].split(">")[0])
+        response = get_response(url)
+        if 'Link' in response.headers:
+            return int(response.headers['Link'].split(',')[1].split("&page=")[1].split(">")[0])
+        else:
+            return len(json.loads(response.content))
     except:
-        return 1
+        return 0
 
 
 def get_last_repos_pagination_page(url):
