@@ -1,14 +1,15 @@
 """
 Aggregate the provided Data Frame with features we receive from the Github REST and GraphQL API
-TODO:       hasCiConfig
+TODO:       check folder names
 """
 from utils import get_client, get_last_repos_pagination_page
 from utils import request_graph_features, website_exists
 import json
 import re
 import requests
-import pdb
 import pandas as pd
+
+REPO_API_URL = "https://api.github.com/repos/"
 
 
 def aggregate_features(index, row, bar, q):
@@ -25,7 +26,6 @@ def aggregate_features(index, row, bar, q):
     update_columns = [col for col in new_data_frame.columns if col not in ['repository', 'owner', 'name', 'label']]
     for col in update_columns:
         try:
-            #print "fetching {}/{} and setting {}: {}".format(owner, name, col, new_data_frame.loc[0, col])
             shared_data_frame.set_value(index, col, new_data_frame.loc[0, col])
         except Exception, e:
             print "An error occured while fetching {}/{} and setting {}: {}".format(owner, name, col, e)
@@ -49,14 +49,10 @@ def get_graph_features_of_renamed_repo(data_frame, index, repo_owner, repo_name)
         new_repo_link = new_repo_link.replace('https://github.com/', '')
         new_repo_owner = new_repo_link.split("/")[0]
         new_repo_name = new_repo_link.split("/")[1]
-        #data_frame.set_value(index, "repository", new_repo_link)
-        #data_frame.set_value(index, "owner", new_repo_owner)
-        #data_frame.set_value(index, "name", new_repo_name)
         return get_graph_features(data_frame, index, new_repo_owner, new_repo_name)
     except Exception, e:
         print "Error while requesting renamed repo {}:{}".format(new_repo_name, e)
         return {}
-
 
 
 def get_graph_features(data_frame, index, repo_owner, repo_name):
@@ -103,9 +99,14 @@ def add_rest_features(data_frame, index, repo):
 
 
 def add_custom_features(data_frame, index, owner, name):
-    """isOwnerHomepage, hasHomepage, commitsCount, branchesCount"""
+    """isOwnerHomepage, hasHomepage, hasLicense, hasCiConfig,
+    commitsCount, branchesCount, tagsCount, releasesCount"""
     is_owner_homepage = name.lower() == "{}.github.io".format(owner.lower())
     has_homepage = website_exists("http://{}.github.io/{}".format(owner, name))
+    has_license = website_exists("{}/{}/license".format(owner, name), prefix=REPO_API_URL)
+    has_travis_config = website_exists("{}/{}/contents/.travis.yml".format(owner, name), prefix=REPO_API_URL)
+    has_circle_config = website_exists("{}/{}/contents/circle.yml".format(owner, name), prefix=REPO_API_URL)
+    has_ci_config = has_travis_config or has_circle_config
     commits_count = get_last_repos_pagination_page("{}/{}/commits?per_page=1".format(owner, name))
     branches_count = get_last_repos_pagination_page("{}/{}/branches?per_page=1".format(owner, name))
     tags_count = get_last_repos_pagination_page("{}/{}/tags?per_page=1".format(owner, name))
@@ -113,6 +114,8 @@ def add_custom_features(data_frame, index, owner, name):
 
     data_frame.set_value(index, "isOwnerHomepage", is_owner_homepage)
     data_frame.set_value(index, "hasHomepage", has_homepage)
+    data_frame.set_value(index, "hasLicense", has_license)
+    data_frame.set_value(index, "hasCiConfig", has_ci_config)
     data_frame.set_value(index, "commitsCount", commits_count)
     data_frame.set_value(index, "branchesCount", branches_count)
     data_frame.set_value(index, "tagsCount", tags_count)

@@ -87,8 +87,8 @@ def get_response(url):
     return requests.get(url, headers=headers)
 
 
-def website_exists(url):
-    return get_response(url).status_code < 400
+def website_exists(url, prefix=''):
+    return get_response(prefix + url).status_code < 400
 
 
 def get_last_pagination_page(url):
