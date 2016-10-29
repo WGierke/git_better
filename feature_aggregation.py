@@ -16,15 +16,16 @@ def aggregate_features(index, row, bar, q):
     owner = row['owner']
     name = row['name']
     new_data_frame = pd.DataFrame.from_dict(row).T
-    new_data_frame = add_graph_features(new_data_frame, index, owner, name)
+    new_data_frame = add_graph_features(new_data_frame, 0, owner, name)
     new_data_frame = add_rest_features(new_data_frame, 0, repo)
     new_data_frame = add_custom_features(new_data_frame, 0, owner, name)
-    new_data_frame = fix_closed_issues(new_data_frame, index)
+    new_data_frame = fix_closed_issues(new_data_frame, 0)
 
     shared_data_frame = q.get()
     update_columns = [col for col in new_data_frame.columns if col not in ['repository', 'owner', 'name', 'label']]
     for col in update_columns:
         try:
+            #print "fetching {}/{} and setting {}: {}".format(owner, name, col, new_data_frame.loc[0, col])
             shared_data_frame.set_value(index, col, new_data_frame.loc[0, col])
         except Exception, e:
             print "An error occured while fetching {}/{} and setting {}: {}".format(owner, name, col, e)
