@@ -6,3 +6,6 @@ pandas
 jupyter
 unittest2
 tqdm
+seaborn
+matplotlib
+xgboost
