@@ -101,7 +101,7 @@ def add_rest_features(data_frame, index, repo):
 def add_custom_features(data_frame, index, owner, name):
     """isOwnerHomepage, hasHomepage, hasLicense, hasCiConfig,
     commitsCount, branchesCount, tagsCount, releasesCount"""
-    is_owner_homepage = name.lower() == "{}.github.io".format(owner.lower())
+    is_owner_homepage = name.lower() == "{}.github.io".format(owner.lower()) or name.lower() == "{}.github.com".format(owner.lower())
     has_homepage = website_exists("http://{}.github.io/{}".format(owner, name))
     has_license = website_exists("{}/{}/license".format(owner, name), prefix=REPO_API_URL)
     has_travis_config = website_exists("{}/{}/contents/.travis.yml".format(owner, name), prefix=REPO_API_URL)
