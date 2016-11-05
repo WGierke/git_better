@@ -4,6 +4,13 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import accuracy_score, confusion_matrix
 
 
+def eval_classifier(clf, X, y_correct, classes, plot_cm=True):
+    """Given a classifier, the unlabeled data, the labels and the existing classes predict the corresponsing labels
+       and return the accuracy"""
+    y_pred = clf.predict(X)
+    return get_accuracy_and_plot_confusion(y_correct, y_pred, classes, plot=plot_cm)
+
+
 def get_accuracy_and_plot_confusion(y_correct, y_pred, classes, plot=True, title='Confusion matrix', cmap=plt.cm.Blues):
     """Return the accuracy of the prediction and plot the corresponding confusion matrix if desired"""
     if plot:
