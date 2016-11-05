@@ -5,16 +5,19 @@ import ConfigParser
 import json
 from github import Github
 
+GITHUB_USERNAME = "Username"
 PERSONAL_ACCESS_TOKEN = "Token"
 GITHUB_CLIENT = "Client"
 
 
 def load_config():
     if os.path.isfile("config.ini"):
-        global GITHUB_CLIENT
+        global GITHUB_USERNAME
         global PERSONAL_ACCESS_TOKEN
+        global GITHUB_CLIENT
         config = ConfigParser.RawConfigParser(allow_no_value=False)
         config.read('config.ini')
+        GITHUB_USERNAME = config.get("github", "username")
         PERSONAL_ACCESS_TOKEN = config.get("github", "token")
         GITHUB_CLIENT = Github(login_or_token=PERSONAL_ACCESS_TOKEN)
     else:
@@ -22,12 +25,16 @@ def load_config():
         sys.exit(1)
 
 
-def get_client():
-    return GITHUB_CLIENT
+def get_username():
+    return GITHUB_USERNAME
 
 
 def get_token():
     return PERSONAL_ACCESS_TOKEN
+
+
+def get_client():
+    return GITHUB_CLIENT
 
 
 def request_graph_api(query):
