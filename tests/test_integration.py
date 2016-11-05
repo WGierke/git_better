@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest2
-from process import process_data
+from app.process import process_data
 
 TEST_DATA_PATH = 'tests/test_data.csv'
 

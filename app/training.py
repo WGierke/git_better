@@ -24,7 +24,7 @@ def get_best_text_pipeline(df_values, labels, pipeline=None, params=None):
             'clf__n_iter': (10, 50, 80),
         }
 
-    grid_search = GridSearchCV(pipeline, parameters, n_jobs=-1, verbose=1)
+    grid_search = GridSearchCV(pipeline, parameters, n_jobs=-1, verbose=0)
     grid_search.fit(df_values, labels)
     best_parameters = grid_search.best_estimator_.get_params()
     pipeline.set_params(**best_parameters)
