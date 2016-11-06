@@ -35,6 +35,9 @@ def process_data(training_data_path=TRAINING_DATA_PATH):
     data_frame = load_training_data(training_data_path)
     data_frame = clean_data(data_frame)
     data_frame = load_features_async(data_frame)
+    data_frame["description"].fillna("", inplace=True)
+    data_frame["readme"].fillna("", inplace=True)
+    data_frame.fillna(0, inplace=True)
     return data_frame
 
 
