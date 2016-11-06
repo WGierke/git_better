@@ -8,15 +8,18 @@ import threading
 
 
 def load_features_async(data_frame):
-    """Put the data frame in a thread safe queue, spawn as many threads as
-    there are rows and aggregate the features asynchronously"""
+    """Put the data frame in a thread safe queue, spawn 5 worker threads and aggregate the features asynchronously"""
+    THREADS_COUNT = 10
     bar = tqdm(total=len(data_frame))
-    q = Queue.LifoQueue()
-    q.put(data_frame)
+    df_q = Queue.LifoQueue()
+    df_q.put(data_frame)
+    token_q = Queue.LifoQueue()
+    for i in range(THREADS_COUNT):
+        token_q.put(i)
 
     threads = []
     for index, row in data_frame.iterrows():
-        t = threading.Thread(target=aggregate_features, args=(index, row, bar, q))
+        t = threading.Thread(target=aggregate_features, args=(index, row, bar, df_q, token_q))
         t.daemon = True
         threads.append(t)
 
@@ -25,7 +28,7 @@ def load_features_async(data_frame):
 
     for t in threads:
         t.join()
-    return q.get()
+    return df_q.get()
 
 
 def process_data(training_data_path=TRAINING_DATA_PATH):
