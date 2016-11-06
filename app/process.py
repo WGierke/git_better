@@ -1,12 +1,10 @@
-from preprocess import load_training_data, clean_data
 from feature_aggregation import aggregate_features
-from utils import load_config
-import threading
+from preprocess import load_training_data, clean_data
 from tqdm import tqdm
+from utils import load_config
+from constants import TRAINING_DATA_PATH, PROCESSED_DATA_PATH
 import Queue
-
-TRAINING_DATA_PATH = 'data/small_data.csv'
-PROCESSED_DATA_PATH = 'data/processed_data.csv'
+import threading
 
 
 def load_features_async(data_frame):

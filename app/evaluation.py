@@ -1,6 +1,8 @@
 import itertools
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
+from constants import PROCESSED_DATA_PATH, VALIDATION_DATA_PATH
 from sklearn.metrics import accuracy_score, confusion_matrix
 
 
@@ -54,3 +56,19 @@ def drop_text_features(df):
     df.drop('owner', axis=1, inplace=True)
     df.drop('name', axis=1, inplace=True)
     return df
+
+
+def get_training_and_validation_df():
+    """Returns X_train, y_train, X_valid, y_valid"""
+    df = pd.DataFrame.from_csv(PROCESSED_DATA_PATH)
+    val_df = pd.DataFrame.from_csv(VALIDATION_DATA_PATH)
+    y_train = df.pop("label")
+    y_val = val_df.pop("label")
+
+    df, val_df = complete_columns(df, val_df)
+    df.fillna(0, inplace=True)
+    val_df.fillna(0, inplace=True)
+
+    df = drop_text_features(df)
+    val_df = drop_text_features(val_df)
+    return df.values, y_train, val_df.values, y_val
