@@ -58,9 +58,16 @@ def drop_text_features(df):
     return df
 
 
+def get_cleaned_processed_df():
+    df = pd.DataFrame.from_csv(PROCESSED_DATA_PATH)
+    for string_column in ["hasHomepage", "hasCiConfig", "hasLicense", "isOwnerHomepage"]:
+        df[string_column] = df[string_column].apply(lambda x: True if x == 'True' else False).astype(np.int)
+    return df
+
+
 def get_training_and_validation_df():
     """Returns X_train, y_train, X_valid, y_valid"""
-    df = pd.DataFrame.from_csv(PROCESSED_DATA_PATH)
+    df = get_cleaned_processed_df()
     val_df = pd.DataFrame.from_csv(VALIDATION_DATA_PATH)
     y_train = df.pop("label")
     y_val = val_df.pop("label")

@@ -10,10 +10,10 @@ test_str = "WGierke/wgierke.github.io"
 REPO_LINK_FILE = "data/{label}_links.txt"
 
 
-def get_repo_links(label='web'):
+def get_repo_links(q='github.io', label='web'):
     load_config()
     page = 0
-    url = "https://api.github.com/search/repositories?q=github.io&page={page}"
+    url = "https://api.github.com/search/repositories?q=" + q + " + &page={page}"
     links = None
     content = None
     web_link_file = REPO_LINK_FILE.format(label=label)
@@ -36,12 +36,10 @@ def get_repo_links(label='web'):
             repos = json.loads(r.text)["items"]
             for repo in repos:
                 name = repo["full_name"]
-                matches = re.finditer(REPO_REGEX, name, re.IGNORECASE)
-                for _, match in enumerate(matches):
-                    links_length = len(links)
-                    links.add("https://github.com/" + name)
-                    if links_length != len(links):
-                        print "Added: " + name
+                links_length = len(links)
+                links.add("https://github.com/" + name)
+                if links_length != len(links):
+                    print "Added: " + name
             time.sleep(2)
         overwrite_file_with_content(json.dumps(links, indent=4), web_link_file)
     except:
