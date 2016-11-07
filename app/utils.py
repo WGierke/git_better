@@ -89,11 +89,17 @@ def request_graph_features(repo_owner, repo_name):
 
 def get_response(url):
     headers = {'Authorization': 'token %s' % PERSONAL_ACCESS_TOKEN}
-    return requests.get(url, headers=headers)
+    try:
+        return requests.get(url, headers=headers)
+    except:
+        return None
 
 
 def website_exists(url, prefix=''):
-    return get_response(prefix + url).status_code < 400
+    try:
+        return get_response(prefix + url).status_code < 400
+    except:
+        return False
 
 
 def get_last_pagination_page(url):
