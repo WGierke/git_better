@@ -18,13 +18,18 @@ def aggregate_features(index, row, bar, df_q, token_q):
     name = row['name']
 
     token = token_q.get()
-    new_data_frame = pd.DataFrame.from_dict(row).T
-    new_data_frame = add_graph_features(new_data_frame, 0, owner, name)
-    new_data_frame = add_rest_features(new_data_frame, 0, repo)
-    new_data_frame = add_custom_features(new_data_frame, 0, owner, name)
-    new_data_frame = fix_closed_issues(new_data_frame, 0)
-    token_q.put(token)
+    try:
+        new_data_frame = pd.DataFrame.from_dict(row).T
+        new_data_frame = add_graph_features(new_data_frame, 0, owner, name)
+        new_data_frame = add_rest_features(new_data_frame, 0, repo)
+        new_data_frame = add_custom_features(new_data_frame, 0, owner, name)
+        new_data_frame = fix_closed_issues(new_data_frame, 0)
+    except Exception, e:
+        print "Exception in aggregate_features: " + str(e)
+        token_q.put(token)
+        return
 
+    token_q.put(token)
     shared_data_frame = df_q.get()
     update_columns = [col for col in new_data_frame.columns if col not in ['repository', 'owner', 'name', 'label']]
     for col in update_columns:
@@ -78,8 +83,10 @@ def get_graph_features(data_frame, index, repo_owner, repo_name):
         return features
     elif "message" in response.keys():
         print "An error occured while fetching GraphQL API: " + response["message"]
+        raise Exception('Graph QL Error: ' + response['message'])
     else:
         print "An error occured while fetching GraphQL API: " + response
+        raise Exception('Graph QL Error: ' + response['message'])
     return {}
 
 

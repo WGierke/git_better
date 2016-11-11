@@ -67,9 +67,13 @@ def get_label_links(label='web'):
     return links
 
 
-def write_label_links(links, label='web'):
+def write_label_links(links, label='web', path=None):
     links = list(links)
-    web_link_file = REPO_LINK_FILE.format(label=label)
+    if path:
+        web_link_file = path
+    else:
+        web_link_file = REPO_LINK_FILE.format(label=label)
+
     overwrite_file_with_content(json.dumps(links, indent=4), web_link_file)
     return
 

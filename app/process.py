@@ -1,10 +1,14 @@
-from feature_aggregation import aggregate_features
-from preprocess import load_training_data, clean_data
-from tqdm import tqdm
-from utils import load_config
-from constants import TRAINING_DATA_PATH, PROCESSED_DATA_PATH
+import json
+import os
 import Queue
 import threading
+from feature_aggregation import aggregate_features
+from preprocess import load_training_data, clean_data
+from crawl import write_label_links
+from tqdm import tqdm
+import pandas as pd
+from utils import load_config
+from constants import TRAINING_DATA_PATH, PROCESSED_DATA_PATH
 
 
 def load_features_async(data_frame):
@@ -31,15 +35,43 @@ def load_features_async(data_frame):
     return df_q.get()
 
 
-def process_data(training_data_path=TRAINING_DATA_PATH):
+def process_data(training_data_path=TRAINING_DATA_PATH, data_frame=None):
+    """Load data training data from the provided path or take the given data frame and add all features"""
+    if data_frame is None:
+        data_frame = load_training_data(training_data_path)
+
     load_config()
-    data_frame = load_training_data(training_data_path)
     data_frame = clean_data(data_frame)
     data_frame = load_features_async(data_frame)
     data_frame["description"].fillna("", inplace=True)
     data_frame["readme"].fillna("", inplace=True)
     data_frame.fillna(0, inplace=True)
     return data_frame
+
+
+def process_links(file_path="data/docs_links.txt", label=None):
+    """Takes a file of repository links and returns the processed data frame.
+    Only the first 170 links are processed due to API limit rates."""
+    n = 170
+    if os.path.isfile(file_path):
+        with open(file_path, "r") as f:
+            content = f.read()
+    else:
+        print "File does not exist"
+
+    links = list(json.loads(content))
+    if not label:
+        label = file_path.split("data/")[1].split("_links")[0]
+    label = label.upper()
+
+    df = pd.DataFrame([[l, label] for l in links], columns=["repository", "label"])
+    df = df[:n]
+    df = process_data(data_frame=df)
+
+    for link in df["repository"]:
+        links.remove("https://github.com/" + link)
+    write_label_links(links, label=label, path=file_path)
+    return df
 
 
 if __name__ == '__main__':
