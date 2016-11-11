@@ -2,6 +2,7 @@
 
 ## Installation
 - Make sure that you've installed Python 2.7
+- [Install xgboost](http://xgboost.readthedocs.io/en/latest/build.html)
 - Create a virtual environment and install all dependencies  
 `virtualenv -p /usr/bin/python2.7 venv`  
 `source venv/bin/activate`  
