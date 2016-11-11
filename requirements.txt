@@ -10,3 +10,4 @@ seaborn
 matplotlib
 xgboost
 imbalanced-learn
+lxml

@@ -30,7 +30,7 @@ class TestCase(unittest2.TestCase):
         self.assertEqual(data_frame['closed_pull_requests'], 13)
         self.assertEqual(data_frame['merged_pull_requests'], 65)
         self.assertEqual(data_frame['projects'], 0)
-        self.assertEqual(data_frame['watchers'], 32)
+        self.assertEqual(data_frame['watchers'], 31)
         self.assertEqual(data_frame['stargazers'], 7)
         self.assertEqual(data_frame['forks'], 5)
         self.assertEqual(data_frame['mentionableUsers'], 48)
