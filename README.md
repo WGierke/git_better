@@ -12,7 +12,7 @@
 - Accept the [Github Pre-release Program agreement](https://github.com/prerelease/agreement) so your access token can also use GitHub's GraphQL API
 
 ## Usage
-To fetch all features for the repositories specified in the CSV located at `TRAINING_DATA_PATH` and save them in `data/processed_data.csv` run: `python process.py`
+To fetch all features for the repositories specified in the CSV located at `TRAINING_DATA_PATH` and save them in `data/processed_data.csv` run: `python app/process.py`
 
 ##Testing
 To test whether the app works correctly, simply run `python -m unittest discover`
