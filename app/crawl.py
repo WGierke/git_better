@@ -11,18 +11,15 @@ test_str = "WGierke/wgierke.github.io"
 REPO_LINK_FILE = "data/{label}_links.txt"
 
 
-def save_github_search_repos(q='github.io', label='web'):
+def save_github_search_repos(q='github.io', label='web', pages=35):
     load_config()
-    page = 0
     url = "https://api.github.com/search/repositories?q=" + q + " + &page={page}"
     links = get_label_links(label=label)
 
     try:
-        r = None
-        while page == 0 or r.status_code == 200:
-            page += 1
-            print page
-            r = requests.get(url.format(page=page), auth=(get_username(), get_token()))
+        for i in range(pages):
+            print str(i + 1)
+            r = requests.get(url.format(page=i + 1), auth=(get_username(), get_token()))
             repos = json.loads(r.text)["items"]
             for repo in repos:
                 name = repo["full_name"]
