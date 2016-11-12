@@ -68,7 +68,10 @@ def get_graph_features(data_frame, index, repo_owner, repo_name):
     response = json.loads(response)
 
     if "data" in response.keys():
-        data = response["data"]["repositoryOwner"]["repository"]
+        try:
+            data = response["data"]["repositoryOwner"]["repository"]
+        except:
+            print "Couldn't extract graph features data from " + response["data"]
         features = {}
         if data is None:
             return get_graph_features_of_renamed_repo(data_frame, index, repo_owner, repo_name)
