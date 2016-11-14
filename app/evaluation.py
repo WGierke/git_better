@@ -49,6 +49,12 @@ def complete_columns(training_df, valid_df):
     return training_df, valid_df
 
 
+def fill_text_features(df):
+    df["description"].fillna("", inplace=True)
+    df["readme"].fillna("", inplace=True)
+    return df
+
+
 def drop_text_features(df):
     df.drop('readme', axis=1, inplace=True)
     df.drop('description', axis=1, inplace=True)
@@ -75,6 +81,8 @@ def get_training_and_validation_df():
     df, val_df = complete_columns(df, val_df)
     df.fillna(0, inplace=True)
     val_df.fillna(0, inplace=True)
+    df = fill_text_features(df)
+    val_df = fill_text_features(val_df)
 
     df = drop_text_features(df)
     val_df = drop_text_features(val_df)
