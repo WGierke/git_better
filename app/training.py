@@ -1,3 +1,6 @@
+import numpy as np
+import pandas as pd
+from app.evaluation import get_cleaned_processed_df
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
 from sklearn.linear_model import SGDClassifier
@@ -29,3 +32,19 @@ def get_best_text_pipeline(df_values, labels, pipeline=None, params=None):
     best_parameters = grid_search.best_estimator_.get_params()
     pipeline.set_params(**best_parameters)
     return pipeline
+
+
+def get_undersample_df(df):
+    df = get_cleaned_processed_df()
+    samples_df = pd.DataFrame(columns=df.columns)
+    label_counts = df.groupby('label').count().iloc[:, 0]
+    minimum_count = label_counts.min()
+
+    for label in label_counts.index:
+        indices = df[df.label == label].index
+        sampled_indices = np.random.choice(indices, minimum_count, replace=False)
+        samples = df.loc[sampled_indices]
+        samples_df = samples_df.append(samples)
+
+    assert len(samples_df), minimum_count * label_counts
+    return samples_df
