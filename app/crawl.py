@@ -13,7 +13,7 @@ REPO_LINK_FILE = "data/{label}_links.txt"
 
 def save_github_search_repos(q='github.io', label='web', pages=35):
     load_config()
-    url = "https://api.github.com/search/repositories?q=" + q + " + &page={page}"
+    url = "https://api.github.com/search/repositories?q=" + q + " + &page={page}&sort=stars"
     links = get_label_links(label=label)
 
     try:
