@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+  <head>
+    <title>git_better</title>
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap-theme.min.css" rel="stylesheet">
+    <link href="//netdna.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+      h1 { padding: 0 30px; }
+      .col-md-2 { width: 18.6667%; }
+      .buttons { display: block; table-layout: fixed; border-radius: 7px; border: 1px solid #ccc;
+                 margin: 20px; background: #eee; padding: 30px; }
+      .buttons > div .btn { margin: 5px 10px; }
+      .buttons > div:not(:first-child) { margin-top: 10px; border-top: 1px solid #ccc;
+                                         padding-top: 10px; text-align: center; }
+    </style>
+  </head>
+  <body>
+    <h1>git_better</h1>
+
+    <div class="buttons">
+      {% if user.is_authenticated %}
+        <div class="user-details">
+          You are logged in as <code>{{ user.username }}</code>!
+        </div>
+      {% endif %}
+
+      <div class="social">
+        <div class="row">
+          {% if user.is_authenticated %}
+            <a class="btn btn-danger" href ="/logout">Logout</a>
+          {% else %}
+            <a class="col-md-2 btn btn-default" href="{% url 'social:begin' 'github' %}?next={{ request.path }}">
+            <i class="fa fa-github"></i>
+            Login with Github
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    <div class="buttons">
+      {% autoescape off %} {{ repos_html }} {% endautoescape %}
+    </div>
+  </body>
+</html>

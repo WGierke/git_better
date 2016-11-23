@@ -3,3 +3,5 @@ venv
 .idea
 config.ini
 *.pyc
+db.sqlite3
+*.db

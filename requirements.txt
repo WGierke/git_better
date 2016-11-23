@@ -11,3 +11,7 @@ matplotlib
 xgboost
 imbalanced-learn
 lxml
+django>=1.4,<1.8
+python-social-auth
+pygithub
+BeautifulSoup
