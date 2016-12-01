@@ -1,4 +1,6 @@
 import sys
+import os
+import dj_database_url
 from os.path import abspath, dirname, join
 
 
@@ -9,12 +11,19 @@ TEMPLATE_DEBUG = DEBUG
 
 ROOT_PATH = abspath(dirname(__file__))
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'test.db'
+is_production = os.environ.get("DATABASE_URL", None) is not None
+
+if is_production:
+    DATABASES = {
+        'default': dj_database_url.config()
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'database.db'
+        }
+    }
 
 TIME_ZONE = 'America/Montevideo'
 LANGUAGE_CODE = 'en-us'
@@ -35,7 +44,7 @@ STATICFILES_DIRS = (
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-#    'django.contrib.staticfiles.finders.DefaultStorageFinder',
+    #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
 SECRET_KEY = '#$5btppqih8=%ae^#&amp;7en#kyi!vh%he9rg=ed#hm6fnw9^=umc'
@@ -43,7 +52,7 @@ SECRET_KEY = '#$5btppqih8=%ae^#&amp;7en#kyi!vh%he9rg=ed#hm6fnw9^=umc'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-#     'django.template.loaders.eggs.Loader',
+    #     'django.template.loaders.eggs.Loader',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -115,5 +124,11 @@ SOCIAL_AUTH_PIPELINE = (
 
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
 
-SOCIAL_AUTH_GITHUB_KEY = '7cb4fcce563467cdb642'
-SOCIAL_AUTH_GITHUB_SECRET = '6dd36c461dadd7d7c3b8acd7a730d99ecd2908d5'
+if is_production:
+    # Heroku OAuth app
+    SOCIAL_AUTH_GITHUB_KEY = '9d672a436de4468623da'
+    SOCIAL_AUTH_GITHUB_SECRET = '5972884b5cad5b47fda25a38d6de7a20c038a685'
+else:
+    # localhost:8000 OAuth app
+    SOCIAL_AUTH_GITHUB_KEY = '7cb4fcce563467cdb642'
+    SOCIAL_AUTH_GITHUB_SECRET = '6dd36c461dadd7d7c3b8acd7a730d99ecd2908d5'
