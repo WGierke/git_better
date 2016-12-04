@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+from sklearn.externals import joblib
 from app.evaluation import get_cleaned_processed_df
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.feature_extraction.text import TfidfTransformer
@@ -7,6 +8,9 @@ from sklearn.linear_model import SGDClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.pipeline import Pipeline
 from nltk.stem.snowball import EnglishStemmer
+
+JOBLIB_SUFFIX = '.joblib.pkl'
+JOBLIB_DESCRIPTION_PIPELINE_NAME = 'best_description_pipeline'
 
 
 def stemmed_words(doc):
@@ -39,6 +43,14 @@ def get_best_text_pipeline(df_values, labels, pipeline=None, params=None):
     best_parameters = grid_search.best_estimator_.get_params()
     pipeline.set_params(**best_parameters)
     return pipeline
+
+
+def save_pickle(model, filename):
+    joblib.dump(model, filename + JOBLIB_SUFFIX, compress=9)
+
+
+def load_pickle(filename):
+    return joblib.load(filename + JOBLIB_SUFFIX)
 
 
 def get_undersample_df(df):
