@@ -41,6 +41,10 @@ def repo_list_html(repo_infos, model):
         stars = repo_infos[i][3]
         forks = repo_infos[i][4]
         classified = model.predict([descr])[0]
+        classes = ['DATA', 'DEV', 'DOCS', 'EDU', 'HW', 'WEB']
+        classified_probas = dict(zip(classes, model.predict_proba([descr])[0]))
+        classified_proba = classified_probas[classified]
+
         repos_html.append(
             ''' <li class="list-group-item">
                     <div class="row">
@@ -51,7 +55,7 @@ def repo_list_html(repo_infos, model):
                             {description}
                         </div>
                         <div class="col-md-1">
-                            {classified}
+                            {classified} ({classified_proba:0.4f})
                         </div>
                         <div class="col-md-2">
                             {language}
@@ -70,7 +74,7 @@ def repo_list_html(repo_infos, model):
                         </div>
                     </div>
                 </li>
-                    '''.format(name=name, description=descr, classified=classified, language=language, stars=stars, forks=forks))
+                    '''.format(name=name, description=descr, classified=classified, classified_proba=classified_proba, language=language, stars=stars, forks=forks))
     return add_repo_header(repos_html)
 
 
