@@ -14,7 +14,8 @@ pip install -r requirements.txt
 ```bash
 cp example.config.ini config.ini
 ```
-- Accept the [Github Pre-release Program agreement](https://github.com/prerelease/agreement) so your access token can also use GitHub's GraphQL API
+- Accept the [Github Pre-release Program agreement](https://github.com/prerelease/agreement) so your access token can also use GitHub's GraphQL API  
+
 ### Django Server
 #### Manual
 - Psycopg2 needs postgresql-devel
