@@ -6,9 +6,10 @@ pandas
 jupyter
 unittest2
 tqdm
-seaborn
+#seaborn
 matplotlib
-xgboost
+#xgboost
+sklearn
 lxml
 django>=1.4,<1.8
 python-social-auth
@@ -16,3 +17,5 @@ pygithub
 BeautifulSoup
 dj-database-url
 psycopg2
+nltk
+scipy
