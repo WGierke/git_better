@@ -6,9 +6,9 @@ pandas
 jupyter
 unittest2
 tqdm
-#seaborn
+seaborn
 matplotlib
-#xgboost
+xgboost
 sklearn
 lxml
 django>=1.4,<1.8
