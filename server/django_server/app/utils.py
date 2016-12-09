@@ -16,13 +16,10 @@ def add_repo_header(repo_list):
                                     <strong>Description</strong>
                                 </div>
                                 <div class="col-md-2">
-                                    <strong>Class (Description)</strong>
+                                    <strong>Description_Class (Confidence)</strong>
                                 </div>
                                 <div class="col-md-2">
-                                    <strong>Class (Readme)</strong>
-                                </div>
-                                <div class="col-md-2">
-                                    <strong>Language</strong>
+                                    <strong>Readme_Class (Confidence)</strong>
                                 </div>
                             </div>
                         </li>
@@ -37,9 +34,6 @@ def repo_list_html(repo_infos, descr_model, readme_model):
         name = repo_infos[i][0]
         descr = repo_infos[i][1]
         readme = repo_infos[i][2]
-        language = repo_infos[i][3]
-        stars = repo_infos[i][4]
-        forks = repo_infos[i][5]
         classes = ['DATA', 'DEV', 'DOCS', 'EDU', 'HW', 'WEB']
         predicted_descr = descr_model.predict([descr])[0]
         predicted_readme = readme_model.predict([readme])[0]
@@ -63,15 +57,11 @@ def repo_list_html(repo_infos, descr_model, readme_model):
                         <div class="col-md-2">
                             {pred_readme} ({pred_readme_proba:0.4f})
                         </div>
-                        <div class="col-md-2">
-                            {language}
-                        </div>
                     </div>
                 </li>
                     '''.format(name=name, description=descr,
                     pred_descr=predicted_descr, pred_descr_proba=predicted_descr_proba,
-                    pred_readme=predicted_readme, pred_readme_proba=predicted_readme_proba,
-                    language=language, stars=stars, forks=forks))
+                    pred_readme=predicted_readme, pred_readme_proba=predicted_readme_proba))
     return add_repo_header(repos_html)
 
 
@@ -91,10 +81,8 @@ def build_repo_html(token):
                 readme = repo.get_readme().decoded_content
             except:
                 pass
-            print readme[:10]
             info = (repo.full_name, repo.description or '',
-                    readme_regex.sub('', readme),
-                    repo.language, repo.stargazers_count, repo.forks_count)
+                    readme_regex.sub('', readme))
             repo_infos.append(info)
         return repo_list_html(repo_infos, descr_model, readme_model)
     return repo_html
