@@ -11,7 +11,7 @@ from nltk.stem.snowball import EnglishStemmer
 
 JOBLIB_SUFFIX = '.joblib.pkl'
 JOBLIB_DESCRIPTION_PIPELINE_NAME = 'best_description_pipeline_4839'
-JOBLIB_README_PIPELINE_NAME = 'best_readme_pipeline_4516'
+JOBLIB_README_PIPELINE_NAME = 'best_readme_pipeline_5161'
 
 
 def stemmed_words(doc):
@@ -30,13 +30,12 @@ def get_best_text_pipeline(df_values, labels, pipeline=None, params=None):
 
     if not params:
         parameters = {
-            #'vect__max_df': (0.5, 0.75, 1.0),
-            'vect__ngram_range': ((1, 1), (1, 2), (1, 3)),  # unigrams or bigrams
-            #'tfidf__use_idf': (True, False),
-            #'tfidf__norm': ('l1', 'l2'),
-            'clf__alpha': (0.0001, 0.00001, 0.000001),
-            #'clf__penalty': ('l2', 'elasticnet'),
-            #'clf__n_iter': (10, 50, 80),
+            'vect__max_df': (0.5, 0.75, 1.0),
+            'vect__ngram_range': ((1, 1), (1, 2), (1, 3)),
+            'tfidf__norm': ('l1', 'l2'),
+            'clf__alpha': (0.001, 0.0001, 0.00001, 0.000001),
+            'clf__penalty': ('l2', 'elasticnet'),
+            'clf__n_iter': (10, 12, 15)
         }
 
     grid_search = GridSearchCV(pipeline, parameters, n_jobs=-1, verbose=1)
