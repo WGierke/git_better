@@ -10,7 +10,7 @@ from sklearn.pipeline import Pipeline
 from nltk.stem.snowball import EnglishStemmer
 
 JOBLIB_SUFFIX = '.joblib.pkl'
-JOBLIB_DESCRIPTION_PIPELINE_NAME = 'best_description_pipeline'
+JOBLIB_DESCRIPTION_PIPELINE_NAME = 'best_description_pipeline_4839'
 JOBLIB_README_PIPELINE_NAME = 'best_readme_pipeline_4516'
 
 
