@@ -4,3 +4,4 @@ venv
 config.ini
 *.pyc
 *.db
+*.tsv

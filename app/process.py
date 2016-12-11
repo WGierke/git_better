@@ -9,6 +9,8 @@ from tqdm import tqdm
 import pandas as pd
 from utils import load_config
 from constants import TRAINING_DATA_PATH, PROCESSED_DATA_PATH
+from training import find_best_repository_classification
+from app.evaluation import get_cleaned_processed_df, drop_text_features
 
 
 def load_features_async(data_frame):
@@ -75,5 +77,9 @@ def process_links(file_path="data/docs_links.txt", label=None):
 
 
 if __name__ == '__main__':
-    data_frame = process_data()
-    data_frame.to_csv(PROCESSED_DATA_PATH, encoding='utf-8')
+    data_frame = get_cleaned_processed_df()
+    #data_frame.to_csv("tsv.tsv", sep="\t")
+    data_frame = drop_text_features(data_frame)
+    #data_frame.to_csv(PROCESSED_DATA_PATH, encoding='utf-8')
+    y_train = data_frame.pop("label")
+    find_best_repository_classification(data_frame, y_train)

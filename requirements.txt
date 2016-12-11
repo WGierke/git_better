@@ -19,3 +19,4 @@ dj-database-url
 psycopg2
 nltk
 scipy
+theanets
