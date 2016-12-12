@@ -97,7 +97,8 @@ def get_response(url):
 
 def website_exists(url, prefix=''):
     try:
-        return get_response(prefix + url).status_code < 400
+        response = get_response(prefix + url)
+        return response.status_code < 400
     except:
         return False
 
