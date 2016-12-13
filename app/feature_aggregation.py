@@ -34,7 +34,7 @@ def aggregate_features(index, row, bar, df_q, token_q):
     update_columns = [col for col in new_data_frame.columns if col not in ['repository', 'owner', 'name', 'label']]
     for col in update_columns:
         try:
-            shared_data_frame.set_value(index, col, new_data_frame.loc[0, col])
+            shared_data_frame.set_value(index, col, new_data_frame.loc[index, col])
         except Exception, e:
             print "An error occured while fetching {}/{} and setting {}: {}".format(owner, name, col, e)
     df_q.put(shared_data_frame)
