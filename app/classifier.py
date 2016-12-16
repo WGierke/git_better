@@ -1,5 +1,6 @@
 # code partly from our previous project Data Mining Cup, https://github.com/AlexImmer/run-dmc
 import numpy as np, random
+import logging
 from scipy.sparse import csr_matrix
 from scipy.stats import randint as sp_randint
 
@@ -13,8 +14,8 @@ from sklearn.grid_search import RandomizedSearchCV
 
 try:
     import theanets as tn
-except ImportError:
-    print('Theano not installed')
+except Exception, e:
+    logging.error("Can't import Theano: " + str(e))
 
 try:
     import tensorflow.contrib.learn as skflow

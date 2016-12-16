@@ -13,7 +13,6 @@ sklearn
 lxml
 django>=1.4,<1.8
 python-social-auth
-pygithub
 BeautifulSoup
 dj-database-url
 psycopg2
@@ -21,3 +20,4 @@ nltk
 scipy
 theanets
 tensorflow
+nose_parameterized

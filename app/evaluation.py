@@ -1,7 +1,11 @@
 import itertools
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+import logging
+try:
+    import matplotlib.pyplot as plt
+except Exception, e:
+    logging.error("Can't import Matplotlib: " + str(e))
 from constants import PROCESSED_DATA_PATH, VALIDATION_DATA_PATH
 from sklearn.metrics import accuracy_score, confusion_matrix
 
@@ -13,11 +17,11 @@ def eval_classifier(clf, X, y_correct, classes, plot_cm=True):
     return get_accuracy_and_plot_confusion(y_correct, y_pred, classes, plot=plot_cm)
 
 
-def get_accuracy_and_plot_confusion(y_correct, y_pred, classes, plot=True, title='Confusion matrix', cmap=plt.cm.Blues):
+def get_accuracy_and_plot_confusion(y_correct, y_pred, classes, plot=True, title='Confusion matrix'):
     """Return the accuracy of the prediction and plot the corresponding confusion matrix if desired"""
     if plot:
         cm = confusion_matrix(y_correct, y_pred)
-        plt.imshow(cm, interpolation='nearest', cmap=cmap)
+        plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blue)
         plt.title(title)
         plt.colorbar()
         tick_marks = np.arange(len(classes))
