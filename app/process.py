@@ -4,7 +4,7 @@ import Queue
 import threading
 import pandas as pd
 from feature_aggregation import aggregate_features
-from preprocess import load_training_data, clean_data, ColumnSumFilter, ColumnStdFilter
+from preprocess import load_training_data, clean_data, ColumnSumFilter, ColumnStdFilter, PolynomialTransformer
 from crawl import write_label_links
 from tqdm import tqdm
 from utils import load_config
@@ -84,8 +84,8 @@ if __name__ == '__main__':
     ppl = Pipeline([
         ('clmn_std_filter', ColumnStdFilter(min_std=10)),
         ('clmn_sum_filter', ColumnSumFilter(min_sum=10000)),
+        ('poly_transf', PolynomialTransformer(degree=2))
     ])
     preprocessed_df = ppl.transform(data_frame)
-
     y_train = preprocessed_df.pop("label")
     find_best_repository_classification(preprocessed_df, y_train)

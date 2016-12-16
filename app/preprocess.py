@@ -1,5 +1,5 @@
 import pandas as pd
-import numpy as np
+from sklearn.preprocessing import PolynomialFeatures
 from sklearn.base import TransformerMixin
 
 
@@ -64,3 +64,35 @@ class ColumnStdFilter(TransformerMixin):
 
     def fit(self, X, y=None, **fit_params):
         return self
+
+
+class PolynomialTransformer(TransformerMixin):
+    """Generate all polynomial combinations of numerical features"""
+
+    def __init__(self, degree=2):
+        self.degree = degree
+
+    def transform(self, X):
+        before_length = len(X)
+        X, text_features_df = self.save_text_features(X)
+        poly = PolynomialFeatures(self.degree, include_bias=False)
+        poly_nparray = poly.fit_transform(X)
+        transformed_X = self.name_columns_nicely(X, poly, poly_nparray)
+        transformed_X = transformed_X.join(text_features_df)
+        assert before_length == len(transformed_X)
+        return transformed_X
+
+    def fit(self, X, y=None, **fit_params):
+        return self
+
+    def save_text_features(self, X):
+        """Save text features in a separate DataFrame to append them later again"""
+        text_feature_names = get_text_feature_names(X)
+        text_features_df = X[text_feature_names]
+        X = X.drop(text_feature_names, axis=1)
+        return X, text_features_df
+
+    def name_columns_nicely(self, X, poly, poly_nparray):
+        """Assign meaningful column names such as a^1, b^1, a*b, a^2, b^2, ..."""
+        target_feature_names = ['x'.join(['{}^{}'.format(pair[0], pair[1]) for pair in tuple if pair[1] != 0]) for tuple in [zip(X.columns, p) for p in poly.powers_]]
+        return pd.DataFrame(poly_nparray, columns=target_feature_names)
