@@ -2,15 +2,16 @@ import json
 import os
 import Queue
 import threading
+import pandas as pd
 from feature_aggregation import aggregate_features
-from preprocess import load_training_data, clean_data
+from preprocess import load_training_data, clean_data, ColumnSumFilter, ColumnStdFilter, PolynomialTransformer
 from crawl import write_label_links
 from tqdm import tqdm
-import pandas as pd
 from utils import load_config
 from constants import TRAINING_DATA_PATH, PROCESSED_DATA_PATH
 from training import find_best_repository_classification
-from app.evaluation import get_cleaned_processed_df, drop_text_features
+from evaluation import get_cleaned_processed_df, drop_text_features
+from sklearn.pipeline import Pipeline
 
 
 def load_features_async(data_frame):
@@ -78,8 +79,13 @@ def process_links(file_path="data/docs_links.txt", label=None):
 
 if __name__ == '__main__':
     data_frame = get_cleaned_processed_df()
-    #data_frame.to_csv("tsv.tsv", sep="\t")
     data_frame = drop_text_features(data_frame)
-    #data_frame.to_csv(PROCESSED_DATA_PATH, encoding='utf-8')
-    y_train = data_frame.pop("label")
-    find_best_repository_classification(data_frame, y_train)
+
+    ppl = Pipeline([
+        ('clmn_std_filter', ColumnStdFilter(min_std=10)),
+        ('clmn_sum_filter', ColumnSumFilter(min_sum=10000)),
+        ('poly_transf', PolynomialTransformer(degree=2))
+    ])
+    preprocessed_df = ppl.transform(data_frame)
+    y_train = preprocessed_df.pop("label")
+    find_best_repository_classification(preprocessed_df, y_train)
