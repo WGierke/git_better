@@ -51,6 +51,8 @@ docker run -d -p 8000:8000 git_better
 ## Usage
 To fetch all features for the repositories specified in the CSV located at `TRAINING_DATA_PATH` and save them in `data/processed_data.csv` run: `python app/process.py`
 
+To visualize the data with the TensorBoard Embedding Projector, run `python app/embedding_visualization.py` and start tensorboard with `tensorboard --logdir log/`. Tensorboard will display the port on which the server listens, open `localhost:[port]` with your browser (standard port is 6006).
+
 ## Testing
 To test whether the app works correctly, simply run `python -m unittest discover`
 

@@ -1,4 +1,5 @@
 import tensorflow as tf
+from tensorflow.contrib.tensorboard.plugins import projector
 import os
 import numpy as np
 from evaluation import get_cleaned_processed_df, drop_text_features
@@ -8,6 +9,9 @@ LOG_DIR='log'
 def visualize_data(df):
     df = drop_text_features(df)
     df.fillna("", inplace=True)
+
+    # save (metadata) dataframe as tsv
+    # df.to_tsv()
 
     training_labels = df["label"].values
     df = df.drop("label",1)
@@ -22,6 +26,20 @@ def visualize_data(df):
 
     if not os.path.exists(LOG_DIR):
         os.makedirs(LOG_DIR)
+
+    summary_writer = tf.train.SummaryWriter(LOG_DIR)
+
+    # Format: tensorflow/contrib/tensorboard/plugins/projector/projector_config.proto
+    config = projector.ProjectorConfig()
+
+    # You can add multiple embeddings. Here we add only one.
+    embedding = config.embeddings.add()
+    embedding.tensor_name = input_var_data.name
+    # Link this tensor to its metadata file (e.g. labels).
+    embedding.metadata_path = os.path.join(LOG_DIR, 'metadata.tsv')
+
+    # Saves a configuration file that TensorBoard will read during startup.
+    projector.visualize_embeddings(summary_writer, config)
 
     with tf.Session() as sess:
 

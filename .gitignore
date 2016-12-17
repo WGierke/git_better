@@ -5,4 +5,10 @@ config.ini
 *.pyc
 *.db
 *.tsv
-log/
+
+#tensorflow
+checkpoint
+*.index
+*.meta
+*.pbtxt
+model*
