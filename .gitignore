@@ -7,8 +7,9 @@ config.ini
 *.tsv
 
 #tensorflow
-checkpoint
-*.index
-*.meta
-*.pbtxt
-model*
+log
+#checkpoint
+#*.index
+#*.meta
+#*.pbtxt
+#model*

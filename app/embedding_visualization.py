@@ -10,8 +10,7 @@ def visualize_data(df):
     df = drop_text_features(df)
     df.fillna("", inplace=True)
 
-    # save (metadata) dataframe as tsv
-    # df.to_tsv()
+    df.to_csv(os.path.join(LOG_DIR, 'metadata.tsv'), sep='\t', mode='w+')
 
     training_labels = df["label"].values
     df = df.drop("label",1)
