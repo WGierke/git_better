@@ -4,6 +4,8 @@ import logging
 from scipy.sparse import csr_matrix
 from scipy.stats import randint as sp_randint
 
+import pandas as pd
+
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.naive_bayes import BernoulliNB
 from sklearn.svm import SVC
@@ -18,7 +20,8 @@ except Exception, e:
     logging.error("Can't import Theano: " + str(e))
 
 try:
-    import tensorflow.contrib.learn as skflow
+    import tensorflow as tf
+    import tensorflow.contrib.learn as sklearn
 except ImportError:
     print('Tensorflow not installed')
 
@@ -243,23 +246,29 @@ class TheanoNeuralNetwork(GIClassifier):
 
 class TensorFlowNeuralNetwork(GIClassifier):
     steps = 20000
-    learning_rate = 0.05
+    # Deprecated with new DNNClassifier-API
+    # learning_rate = 0.05
     hidden_units = [100, 100]
     optimizer = 'SGD'
 
     def __init__(self, X, Y, tune_parameters=False):
         super(TensorFlowNeuralNetwork, self).__init__(X, Y, tune_parameters=False)
-        self.X = X.todense()  # TensorFlow/Skflow doesn't support sparse matrices
+        self.X = X #.todense()  # TensorFlow/Skflow doesn't support sparse matrices
+        # convert string labels into numerical labels
+        self.Y = pd.factorize(Y)[0]
         output_layer = len(np.unique(Y))
         if tune_parameters:
             self.param_dist_random = {'learning_rate': random.random(100),
                                       'optimizer': ['Adam'],
                                       'hidden_units': [sp_randint(50, 500), sp_randint(50, 500)]}
 
-        self.clf = skflow.TensorFlowDNNClassifier(hidden_units=self.hidden_units,
-                                                  n_classes=output_layer, steps=self.steps,
-                                                  learning_rate=self.learning_rate, verbose=0,
-                                                  optimizer=self.optimizer)
+        feature_columns = [tf.contrib.layers.real_valued_column("", dimension=self.X.shape[1])]
+        self.clf = sklearn.DNNClassifier(hidden_units=self.hidden_units, feature_columns=feature_columns,
+                                          n_classes=output_layer, optimizer='Adam', model_dir="log/dnn/")
+                                                  #optimizer=self.optimizer) model_dir="",
+    def fit(self):
+       self.clf.fit(x=self.X, y=self.Y, steps=self.steps)
+       return self
 
     def predict(self, X):
         X = X.todense()  # TensorFlow/Skflow doesn't support sparse matrices
