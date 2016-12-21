@@ -9,4 +9,4 @@ dependencies:
     - openssl aes-256-cbc -d -in config.ini.enc -k $KEY >> config.ini
     - sudo apt-get update; sudo apt-get install python-tk
   override:
-    - pip install -r requirements.txt
+    - pip install -r requirements_circleci.txt

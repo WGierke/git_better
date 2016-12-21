@@ -1,0 +1,7 @@
+configparser
+PyGithub
+requests
+numpy
+pandas
+jupyter
+unittest2
