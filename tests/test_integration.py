@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest2
-from app.process import process_data
+from app.load_data import process_data
 from server.django_server.utils import get_trending_links
 
 TEST_DATA_PATH = 'tests/test_data.csv'
