@@ -1,0 +1,11 @@
+configparser
+PyGithub
+requests
+numpy
+pandas
+jupyter
+unittest2
+scipy
+lxml
+tqdm
+BeautifulSoup

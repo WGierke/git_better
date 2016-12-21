@@ -1,16 +1,19 @@
-# documentation InformatiCup2017
-headlines inspired by KDD process
+# InformatiCup2017 Documentation
+## Challenge Description
+This years InformatiCup challenge was to classify GitHub repositories automatically based on given class descriptions and sample data. In this work we present how we explored the given data, detected relevant features and built an application that predicts repository labels using different machine learning algorithms.
 
-## data exploration
-_In einem ersten Schritt analysieren und dokumentieren Sie die für die Klassifizierung eines Repositories relevanten Mermale (sog.  Features)._
-_Erläutern Sie in Ihrer Dokumentation, warum Sie welche Merkmale für die Klassifizierung verwenden und wie Sie Ihr Vorhersagemodell entwickelt haben._
 
-### data retrieval
+## Data Exploration
+* (visualization)
+* analyze and document relevant features
+* (explain data cleaning and preprocessing)
+
+### Data Retrieval
 We used the data provided in the competition desciption and collected more data with different methods:
 * Github API for actual data
 * github.io pages for WEB
 
-### data analysis
+### Data Analysis
 [t-SNE visualisation of data] 
 class "DOCS" is clustered, other classes are mixed
 validation data does not form a separate cluster to training data, but hard to judge; ~30 vs ~1200 samples
@@ -19,10 +22,16 @@ compare with data from other team (4000 samples)
 
 --> conclude about further approach
 
-### data selection
+## Prediction Model
+* document how to avoid overfitting
+* explain why we've decided to use the features
+* explain how we've developed the prediction model (splitting methods, ensembling etc.)
+* reference GitHub REST/GraphQL API, GitHub Search, Google Search, ...
+
+### Data Selection
 _Creating a target data set: selecting a data set, or focusing on a subset of variables, or data samples, on which discovery is to be performed._
 
-### creation of training and test data set
+### Creation of Training and Test Data Set
 * Split data set into a training set, to train our different classifier, 
 a test set, to test the accuracy of our simple classifier, 
 a development set, to tune our hyperparameter without overfitting on this level, 
@@ -30,14 +39,14 @@ and a evaluation set, to calculate our final accuracy. [Is this conceptual right
 * Why no k-fold cross validation?
 * [we used simple python spliting methods (train_test_split)] 
 
-### classification using numeric metadata of repositories
+### Classification using numeric Metadata of Repositories
 We used this features:
 ...
 
-#### data cleaning and preprocessing
+#### Data Cleaning and Preprocessing
 ...
 
-#### feature generation from existing data
+#### Feature Generation from existing Data
 In our previous projects we invested much effort in the manual feature generation with SQL queries etc. or used deep learning techniques to enhance the given data.
 
 This time we do not have the resources/man power to build the features with SQL. So we tried an approach which includes more computing but less human effort.
@@ -47,25 +56,25 @@ We used polynomial feature generation which takes the input variables and builds
 To use deep learning techniques you need many training samples because of their higher learning complexity. Our ~4000 samples aren't enough for this.
 Small feed-forward neural networks are applicable to our problem, deep neural networks are not.
 
-### prediction model and automatic classification
+#### Numeric Metadata Prediction Model
 We tried the following classifiers:
 ...
 
 [accuracy from single models]
 [accuracy from ensembled models]
 
-#### validation of prediction model
+##### Validation of Prediction Model
 [accuracy+confusion matrix]
 
-### classification using text data (description and readme)
+### Classification using Text Data (Description and Readme)
 
 #### data cleaning and preprocessing
 
 #### feature generation from existing data
 
-### prediction model and automatic classification
+#### prediction model and automatic classification
 
-#### validation of prediction model
+##### validation of prediction model
 [accuracy+confusion matrix]
 
 ### classification using source code
@@ -75,14 +84,25 @@ We tried the following classifiers:
 
 #### feature generation from existing data
 
+#### prediction model and automatic classification
 
-### prediction model and automatic classification
-
-#### validation of prediction model
+##### validation of prediction model
 [accuracy+confusion matrix]
 
-## visualization
+## Automated Classification
+* implement the app that takes the input format and creates the output format
+* either 1) prompt for the training data to use or 2) directly include the learned model
+* explain the arguments of the main application here while referencing to the manual for setup
 
-## general validation of approach
-_Berechnen Sie die erzielte  Ausbeute [... und] Präzision_
-_Erstellen Sie eine Wahrheitsmatrix in der Sie für diese Repositories sowohl Ihre intuitive Klassifikation, um was für eine Kategorie es sich handelt, als auch die Ergebnisse Ihres automatischen Klassifikators eintragen._
+
+## Validation
+* boolean(!) matrix on validation data
+* compute recall and precision
+* discuss quality of results and whether higher yield or higher precision is more important
+* (elaborate on the additional dataset given by another team?)
+
+
+## Extensions
+* explain Django app
+* reference production instance
+* maybe add pictures as fall-back
