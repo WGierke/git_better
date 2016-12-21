@@ -271,8 +271,9 @@ class TensorFlowNeuralNetwork(GIClassifier):
        return self
 
     def predict(self, X):
-        X = X.todense()  # TensorFlow/Skflow doesn't support sparse matrices
+        #X = X.todense()  # TensorFlow/Skflow doesn't support sparse matrices
         return self.clf.predict(X)
 
     def predict_proba(self, X):
-        return self.clf.predict_proba(X.todense())
+        return self.clf.predict_proba(X)
+        #.todense())
