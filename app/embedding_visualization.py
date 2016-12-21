@@ -7,13 +7,14 @@ from evaluation import get_cleaned_processed_df, drop_text_features
 LOG_DIR='log'
 
 def visualize_data(df):
-    df = drop_text_features(df)
     df.fillna("", inplace=True)
 
     if not os.path.exists(LOG_DIR):
         os.makedirs(LOG_DIR)
 
     df.to_csv(os.path.join(LOG_DIR, 'metadata.tsv'), sep='\t', mode='w+')
+
+    df = drop_text_features(df)
 
     training_labels = df["label"].values
     df = df.drop("label",1)
