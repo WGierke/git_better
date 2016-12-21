@@ -3,11 +3,12 @@
 This years InformatiCup challenge was to classify GitHub repositories automatically based on given class descriptions and sample data. In this work we present how we explored the given data, detected relevant features and built an application that predicts repository labels using different machine learning algorithms.
 
 
-## Data Exploration and Prediction Model
-(can still be splitted)
+## Data Exploration
 * (visualization)
 * analyze and document relevant features
 * (explain data cleaning and preprocessing)
+
+## Prediction Model
 * document how to avoid overfitting
 * explain why we've decided to use the features
 * explain how we've developed the prediction model (splitting methods, ensembling etc.)
