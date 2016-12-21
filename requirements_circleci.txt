@@ -7,3 +7,4 @@ jupyter
 unittest2
 sklearn
 scipy
+lxml
