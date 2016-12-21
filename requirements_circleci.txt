@@ -5,3 +5,4 @@ numpy
 pandas
 jupyter
 unittest2
+sklearn
