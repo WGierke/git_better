@@ -10,6 +10,9 @@ def visualize_data(df):
     df = drop_text_features(df)
     df.fillna("", inplace=True)
 
+    if not os.path.exists(LOG_DIR):
+        os.makedirs(LOG_DIR)
+
     df.to_csv(os.path.join(LOG_DIR, 'metadata.tsv'), sep='\t', mode='w+')
 
     training_labels = df["label"].values
@@ -22,9 +25,6 @@ def visualize_data(df):
     init_op = tf.global_variables_initializer()
 
     saver = tf.train.Saver()
-
-    if not os.path.exists(LOG_DIR):
-        os.makedirs(LOG_DIR)
 
     summary_writer = tf.train.SummaryWriter(LOG_DIR)
 
