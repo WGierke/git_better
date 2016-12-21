@@ -39,14 +39,14 @@ and a evaluation set, to calculate our final accuracy. [Is this conceptual right
 * Why no k-fold cross validation?
 * [we used simple python spliting methods (train_test_split)] 
 
-### Classification using numeric Metadata of Repositories
+### Classification Using Numeric Metadata of Repositories
 We used this features:
 ...
 
 #### Data Cleaning and Preprocessing
 ...
 
-#### Feature Generation from existing Data
+#### Feature Generation from Existing Data
 In our previous projects we invested much effort in the manual feature generation with SQL queries etc. or used deep learning techniques to enhance the given data.
 
 This time we do not have the resources/man power to build the features with SQL. So we tried an approach which includes more computing but less human effort.
@@ -66,27 +66,27 @@ We tried the following classifiers:
 ##### Validation of Prediction Model
 [accuracy+confusion matrix]
 
-### Classification using Text Data (Description and Readme)
+### Classification Using Text Data (Description and Readme)
 
-#### data cleaning and preprocessing
+#### Data Cleaning and Preprocessing
 
-#### feature generation from existing data
+#### Feature Generation from Existing Data
 
-#### prediction model and automatic classification
+#### Prediction Model
 
-##### validation of prediction model
+##### Validation of Prediction Model
 [accuracy+confusion matrix]
 
-### classification using source code
+### Classification Using Source Code
 
-#### data cleaning and preprocessing
+#### Data Cleaning and Preprocessing
 ...
 
-#### feature generation from existing data
+#### Feature Generation from Existing Data
 
-#### prediction model and automatic classification
+#### Prediction Model
 
-##### validation of prediction model
+##### Validation of Prediction Model
 [accuracy+confusion matrix]
 
 ## Automated Classification
