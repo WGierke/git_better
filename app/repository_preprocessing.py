@@ -49,6 +49,7 @@ def merge_files(repo_dir, override=False):
                             outfile.write(infile.read())
     return open(os.path.join(repo_dir,"merged_source.txt"), "r").read()
 
+# TODO: Is the folder name also interesting?
 def merge_file_names(repo_dir, override=False):
     # check if file names are already merged
     if override or not os.path.exists(os.path.join(repo_dir,"merged_file_names.txt")):
