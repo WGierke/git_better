@@ -66,6 +66,11 @@ def find_best_repository_classification(df_values, labels, drop_languages=False)
     y_val = val_df.pop("label")
     val_df.fillna(0, inplace=True)
 
+    le = LabelEncoder().fit(np.concatenate((y_train.as_matrix(),y_test.as_matrix(),y_val.as_matrix()), axis=0))
+    y_train = le.transform(y_train)
+    y_test = le.transform(y_test)
+    y_val = le.transform(y_val)
+
     X_train, val_df = equalize_feature_numbers(X_train, val_df)
     X_test, val_df = equalize_feature_numbers(X_test, val_df)
 
@@ -83,9 +88,8 @@ def find_best_repository_classification(df_values, labels, drop_languages=False)
         print classifier.__name__
         clas = classifier(X_train, y_train)
         clas = clas.fit()
-        y_predicted = clas.predict(X_test)
+        y_predicted = list(clas.predict(X_test))
         score = accuracy_score(y_test, y_predicted)
-        le = LabelEncoder().fit(y_train)
         print "score on test data: ", score
         print "score on evaluation data: ", eval_classifier(clas, X_val, y_val, le.classes_, plot_cm=False)
     #return results
