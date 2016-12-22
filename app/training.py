@@ -98,11 +98,17 @@ def find_best_repository_classification(df_values, labels, drop_languages=False)
 
         clas = classifier(X_train, y_train)
         clas = clas.fit()
-        y_predicted = list(clas.predict(X_test))
-        score = accuracy_score(y_test, y_predicted)
-        print "score on test data: ", score
-        print "score on evaluation data: ", eval_classifier(clas, X_val, y_val, le.classes_, plot_cm=False)
 
+        y_predicted = list(clas.predict(X_test))
+        test_score = accuracy_score(y_test, y_predicted)
+
+        y_val_predicted = list(clas.predict(X_val))
+        eval_score = accuracy_score(y_val, y_val_predicted)
+
+        print "score on test data: ", test_score
+        print "score on evaluation data: ", eval_score
+        # could add confusion matrix
+        
         # Theano needs float64 X data
         if(classifier==TensorFlowNeuralNetwork):
             X_val = X_val_buf
