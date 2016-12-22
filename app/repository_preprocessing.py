@@ -20,7 +20,20 @@ def clone_repo(repository_name, clone_url, pull=True):
         repo.pull()
     return repo_dir
 
-def merge_files(repo_dir):
+def merge_commit_messages(repo_dir, override=False):
+    if not os.path.exists(os.path.join(repo_dir,"merged_commit_messages.txt")):
+        with open(os.path.join(repo_dir,"merged_commit_messages.txt"), "w") as outfile:
+            repo = Gittle(repo_dir)
+            commits = repo.commit_info()
+            for commit in commits:
+                commit_message = commit.get('message')
+                if os.linesep not in commit_message[-4:]:
+                    commit_message = commit_message + os.linesep
+                outfile.write(commit_message)
+    return open(os.path.join(repo_dir,"merged_commit_messages.txt"), "r").read()
+
+
+def merge_files(repo_dir, override=False):
     # check if source code files are already merged
     if not os.path.exists(os.path.join(repo_dir,"merged_source.txt")):
         with open(os.path.join(repo_dir,"merged_source.txt"), "w") as outfile:
@@ -50,6 +63,7 @@ if __name__ == '__main__':
     for cloneUrl, label, full_name in zip(cloneUrls, labels, full_names):
         repo_dir = clone_repo(full_name, cloneUrl)
         merged_text = merge_files(repo_dir)
+        merge_commit_messages(repo_dir)
         df_merged_text = df_merged_text.append(
             pd.DataFrame([[full_name,merged_text,label]],columns=['full_name','source code','label']))
 
