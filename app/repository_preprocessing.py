@@ -21,12 +21,14 @@ def clone_repo(repository_name, clone_url, pull=True):
     return repo_dir
 
 def merge_commit_messages(repo_dir, override=False):
-    if not os.path.exists(os.path.join(repo_dir,"merged_commit_messages.txt")):
+    # check if commit messages are already merged
+    if override or not os.path.exists(os.path.join(repo_dir,"merged_commit_messages.txt")):
         with open(os.path.join(repo_dir,"merged_commit_messages.txt"), "w") as outfile:
             repo = Gittle(repo_dir)
             commits = repo.commit_info()
             for commit in commits:
                 commit_message = commit.get('message')
+                # add \n if necessary
                 if os.linesep not in commit_message[-4:]:
                     commit_message = commit_message + os.linesep
                 outfile.write(commit_message)
@@ -35,7 +37,7 @@ def merge_commit_messages(repo_dir, override=False):
 
 def merge_files(repo_dir, override=False):
     # check if source code files are already merged
-    if not os.path.exists(os.path.join(repo_dir,"merged_source.txt")):
+    if override or not os.path.exists(os.path.join(repo_dir,"merged_source.txt")):
         with open(os.path.join(repo_dir,"merged_source.txt"), "w") as outfile:
             for subdir, dirs, files in os.walk(repo_dir):
                 for file in files:
