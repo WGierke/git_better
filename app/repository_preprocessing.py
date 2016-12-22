@@ -43,11 +43,25 @@ def merge_files(repo_dir, override=False):
                 for file in files:
                     filepath = os.path.join(subdir, file)
 
-                    # is_binary is sth. like a heuristic
+                    # is_binary() is sth. like a heuristic
                     if(not is_binary(filepath)):
                         with open(filepath, "rb") as infile:
                             outfile.write(infile.read())
     return open(os.path.join(repo_dir,"merged_source.txt"), "r").read()
+
+def merge_file_names(repo_dir, override=False):
+    # check if file names are already merged
+    if override or not os.path.exists(os.path.join(repo_dir,"merged_file_names.txt")):
+        with open(os.path.join(repo_dir,"merged_file_names.txt"), "w") as outfile:
+            for subdir, dirs, files in os.walk(repo_dir):
+                for file in files:
+                    # exclude git specific and repository mining files, they don't add extra knowledge
+                    if ".git" not in subdir \
+                            and "merged_commit_messages.txt" not in file \
+                            and "merged_file_names.txt" not in file \
+                            and "merged_source.txt" not in file:
+                        outfile.write(file+os.linesep)
+    return open(os.path.join(repo_dir,"merged_file_names.txt"), "r").read()
 
 
 if __name__ == '__main__':
@@ -66,6 +80,7 @@ if __name__ == '__main__':
         repo_dir = clone_repo(full_name, cloneUrl)
         merged_text = merge_files(repo_dir)
         merge_commit_messages(repo_dir)
+        merge_file_names(repo_dir)
         df_merged_text = df_merged_text.append(
             pd.DataFrame([[full_name,merged_text,label]],columns=['full_name','source code','label']))
 
