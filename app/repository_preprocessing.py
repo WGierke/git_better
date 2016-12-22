@@ -7,7 +7,7 @@ import pandas as pd
 
 REPOS_DIR = "repo/"
 
-def clone_repo(repository_name, clone_url):
+def clone_repo(repository_name, clone_url, pull=True):
     repo_dir = os.path.join(REPOS_DIR,repository_name)
 
     # check if repository is already cloned
@@ -15,6 +15,9 @@ def clone_repo(repository_name, clone_url):
         os.makedirs(repo_dir)
 
         repo = Gittle.clone(clone_url, repo_dir)
+    elif pull==True:
+        repo = Gittle(repo_dir, origin_uri=clone_url)
+        repo.pull()
     return repo_dir
 
 def merge_files(repo_dir):
