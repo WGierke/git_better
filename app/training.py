@@ -96,6 +96,23 @@ def find_best_repository_classification(df_values, labels, drop_languages=False)
             X_train = X_train.astype(np.float32)
             X_test = X_test.astype(np.float32)
 
+        if(classifier==TheanoNeuralNetwork):
+            # Theano needs int32 y data
+            y_train_buf = y_train
+            y_test_buf = y_test
+            y_val_buf = y_val
+            y_train = y_train.astype(np.int32)
+            y_test = y_test.astype(np.int32)
+            y_val = y_val.astype(np.int32)
+
+            # Theano isn't able to cast from int to float64 automatically
+            X_val_buf = X_val
+            X_train_buf = X_train
+            X_test_buf = X_test
+            X_val = val_df.astype(np.float64)
+            X_train = X_train.astype(np.float64)
+            X_test = X_test.astype(np.float64)
+
         clas = classifier(X_train, y_train)
         clas = clas.fit()
 
@@ -114,6 +131,15 @@ def find_best_repository_classification(df_values, labels, drop_languages=False)
             X_val = X_val_buf
             X_train = X_train_buf
             X_test = X_test_buf
+
+        if(classifier==TheanoNeuralNetwork):
+             y_train = y_train_buf
+             y_test = y_test_buf
+             y_val = y_val_buf
+
+             X_val = X_val_buf
+             X_train = X_train_buf
+             X_test = X_test_buf
     #return results
 
 
