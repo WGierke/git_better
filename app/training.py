@@ -81,8 +81,8 @@ def find_best_repository_classification(df_values, labels, drop_languages=False)
     #results = []
     for classifier in (basic + bag + ada):
         print classifier.__name__
-        clas = classifier(X_train, y_train)
-        clas = clas.fit()
+        clas = classifier(X_train, y_train, tune_parameters=True, random_search=True)
+        clas = clas()
         y_predicted = clas.predict(X_test)
         score = accuracy_score(y_test, y_predicted)
         le = LabelEncoder().fit(y_train)

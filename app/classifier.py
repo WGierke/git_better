@@ -10,7 +10,7 @@ from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier, \
     BaggingClassifier, AdaBoostClassifier, GradientBoostingClassifier
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.grid_search import RandomizedSearchCV
+from sklearn.model_selection import RandomizedSearchCV, GridSearchCV
 
 try:
     import theanets as tn
@@ -29,22 +29,32 @@ from operator import itemgetter
 class GIClassifier(object):
     clf = None
 
-    def __init__(self, X, Y, tune_parameters=False):
+    def __init__(self, X, Y, tune_parameters=False, random_search=False):
         assert len(Y) == X.shape[0]
         self.X = X
         self.Y = Y
         self.tune_parameters = tune_parameters
+        self.random_search = random_search
 
-    def __call__(self, X):
+    def __call__(self):
         if self.tune_parameters:
-            print(self.clf.get_params().keys())
-            try:
-                self.estimate_parameters_with_random_search()
-            except Exception as e:
-                print(e)
-                pass
-        self.fit()
-        return self.predict(X)
+            if self.random_search:
+                print(self.clf.get_params().keys())
+                try:
+                    return self.estimate_parameters_with_random_search()
+                except Exception as e:
+                    print(e)
+                    pass
+
+            else:
+                print(self.clf.get_params().keys())
+                try:
+                    return self.estimate_parameters_with_grid_search()
+                except Exception as e:
+                    print(e)
+                    pass
+        else:
+            return self.fit()
 
     def report(self, grid_scores, n_top=3):
         top_scores = sorted(
@@ -61,7 +71,26 @@ class GIClassifier(object):
                                            n_iter=30)
         random_search.fit(self.X, self.Y)
         print("Random Search")
-        self.report(random_search.grid_scores_)
+        #self.report(random_search.grid_scores_)
+        print("best estimator, params and score: ")
+        print(random_search.best_estimator_)
+        print(random_search.best_params_)
+        print(random_search.best_score_)
+        return random_search
+
+    def estimate_parameters_with_grid_search(self):
+        grid_search = GridSearchCV(self.clf, param_grid=self.param_grid,n_jobs=-1)
+        grid_search.fit(self.X, self.Y)
+        print("Grid Search")
+        #print("cv_results_: ")
+        #print(grid_search.cv_results_)
+        #print("report: ")
+        #self.report(grid_search.cv_results_)
+        print("best estimator, params and score: ")
+        print(grid_search.best_estimator_)
+        print(grid_search.best_params_)
+        print(grid_search.best_score_)
+        return grid_search
 
     def fit(self):
         self.clf.fit(self.X, self.Y)
@@ -75,19 +104,21 @@ class GIClassifier(object):
 
 
 class DecisionTree(GIClassifier):
-    def __init__(self, X, Y, tune_parameters=False):
-        super(DecisionTree, self).__init__(X, Y, tune_parameters)
+    def __init__(self, X, Y, tune_parameters=False, random_search=False):
+        super(DecisionTree, self).__init__(X, Y, tune_parameters, random_search)
         if tune_parameters:
             self.param_dist_random = {'max_depth': sp_randint(1, 100),
                                       'min_samples_leaf': sp_randint(1, 150),
                                       'max_features': sp_randint(1, self.X.shape[1] - 1),
                                       'criterion': ['entropy', 'gini']}
+            self.param_grid = {'max_depth': (1,3,10,30,50,100),
+                               'criterion': ('entropy', 'gini')}
         self.clf = DecisionTreeClassifier()
 
 
 class Forest(GIClassifier):
-    def __init__(self, X, Y, tune_parameters=False):
-        super(Forest, self).__init__(X, Y, tune_parameters)
+    def __init__(self, X, Y, tune_parameters=False, random_search=False):
+        super(Forest, self).__init__(X, Y, tune_parameters, random_search)
         if tune_parameters:
             self.param_dist_random = {'max_depth': sp_randint(1, 100),
                                       'min_samples_leaf': sp_randint(1, 100),
@@ -97,8 +128,8 @@ class Forest(GIClassifier):
 
 
 class KNeighbors(GIClassifier):
-    def __init__(self, X, Y, tune_parameters=False):
-        super(KNeighbors, self).__init__(X, Y, tune_parameters)
+    def __init__(self, X, Y, tune_parameters=False, random_search=False):
+        super(KNeighbors, self).__init__(X, Y, tune_parameters, random_search)
         if tune_parameters:
             self.param_dist_random = {'leaf_size':sp_randint(20, 50),
                                     'n_neighbors': sp_randint(4, 30)}
