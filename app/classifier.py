@@ -37,7 +37,7 @@ class GIClassifier(object):
         self.random_search = random_search
 
     def __call__(self):
-        if self.tune_parameters:
+        if self.tune_parameters and self.is_searchable():
             if self.random_search:
                 print(self.clf.get_params().keys())
                 try:
@@ -68,7 +68,7 @@ class GIClassifier(object):
 
     def estimate_parameters_with_random_search(self):
         random_search = RandomizedSearchCV(self.clf, param_distributions=self.param_dist_random,
-                                           n_iter=30)
+                                           n_iter=30, n_jobs=-1)
         random_search.fit(self.X, self.Y)
         print("Random Search")
         #self.report(random_search.grid_scores_)
@@ -101,6 +101,9 @@ class GIClassifier(object):
 
     def predict_proba(self, X):
         return self.clf.predict_proba(X)
+
+    def is_searchable(self):
+        return True
 
 
 class DecisionTree(GIClassifier):
@@ -137,12 +140,16 @@ class KNeighbors(GIClassifier):
 
 
 class NaiveBayes(GIClassifier):
-    clf = BernoulliNB(binarize=True)
+    def __init__(self, X, Y, tune_parameters=False, random_search=False):
+        super(NaiveBayes, self).__init__(X, Y, tune_parameters, random_search)
+        if tune_parameters:
+            self.param_dist_random = {'alpha':sp_randint(0, 1)}
+        self.clf = BernoulliNB(binarize=True)
 
 
 class SVM(GIClassifier):
-    def __init__(self, X, Y, tune_parameters=False):
-        super(SVM, self).__init__(X, Y, tune_parameters)
+    def __init__(self, X, Y, tune_parameters=False, random_search=False):
+        super(SVM, self).__init__(X, Y, tune_parameters, random_search)
         if tune_parameters:
             self.param_dist_random = {'shrinking': [True, False],
                                       'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
@@ -159,8 +166,8 @@ class BagEnsemble(GIClassifier):
     max_features = .5
     max_samples = .5
 
-    def __init__(self, X, Y, tune_parameters=False):
-        super(BagEnsemble, self).__init__(X, Y, tune_parameters)
+    def __init__(self, X, Y, tune_parameters=False, random_search=False):
+        super(BagEnsemble, self).__init__(X, Y, tune_parameters, random_search)
         if tune_parameters:
             self.param_dist_random = {'max_features': sp_randint(1, self.X.shape[1]),
                                       'n_estimators': sp_randint(1, 100)}
@@ -171,6 +178,9 @@ class BagEnsemble(GIClassifier):
 class TreeBag(BagEnsemble):
     classifier = DecisionTreeClassifier()
 
+    def is_searchable(self):
+        return False
+
 
 class SVMBag(GIClassifier):
     classifier = None
@@ -178,12 +188,14 @@ class SVMBag(GIClassifier):
     max_features = .5
     max_samples = .5
 
-    def __init__(self, X, Y, tune_parameters=False):
-        super(SVMBag, self).__init__(X, Y, tune_parameters)
+    def __init__(self, X, Y, tune_parameters=False, random_search=False):
+        super(SVMBag, self).__init__(X, Y, tune_parameters, random_search)
         self.X, self.Y = X, Y
         self.classifier = SVC(decision_function_shape='ovo')
         self.clf = BaggingClassifier(self.classifier, n_estimators=self.estimators, n_jobs=8,
                                      max_samples=self.max_samples, max_features=self.max_features)
+    def is_searchable(self):
+        return False
 
     def predict(self, X):
         X = X
@@ -196,8 +208,8 @@ class AdaBoostEnsemble(GIClassifier):
     learning_rate = .25
     algorithm = 'SAMME.R'
 
-    def __init__(self, X, Y, tune_parameters=False):
-        super(AdaBoostEnsemble, self).__init__(X, Y, tune_parameters)
+    def __init__(self, X, Y, tune_parameters=False, random_search=False):
+        super(AdaBoostEnsemble, self).__init__(X, Y, tune_parameters, random_search)
         if tune_parameters:
             self.param_dist_random = {'n_estimators': sp_randint(1, 1000),
                                       'algorithm': ['SAMME', 'SAMME.R'],
@@ -223,8 +235,8 @@ class AdaBayes(AdaBoostEnsemble):
 class AdaSVM(AdaBoostEnsemble):
     algorithm = 'SAMME'
 
-    def __init__(self, X, Y, tune_parameters=False):
-        super(AdaSVM, self).__init__(X, Y, tune_parameters)
+    def __init__(self, X, Y, tune_parameters=False, random_search=False):
+        super(AdaSVM, self).__init__(X, Y, tune_parameters, random_search)
         self.classifier = SVC(decision_function_shape='ovo')
 
 
@@ -234,12 +246,15 @@ class GradBoost(GIClassifier):
     max_depth = 1
     max_features = 0.97
 
-    def __init__(self, X, Y, tune_parameters=False):
-        super(GradBoost, self).__init__(X, Y)
+    def __init__(self, X, Y, tune_parameters=False, random_search=False):
+        super(GradBoost, self).__init__(X, Y, tune_parameters, random_search)
         self.clf = GradientBoostingClassifier(n_estimators=self.estimators,
                                               learning_rate=self.learning_rate,
                                               max_depth=self.max_depth,
                                               max_features=self.max_features)
+
+    def is_searchable(self):
+        return False
 
     def predict(self, X):
         return self.clf.predict(X)
@@ -249,8 +264,8 @@ class GradBoost(GIClassifier):
 
 
 class XGBoost(GIClassifier):
-    def __init__(self, X, Y, tune_parameters=False):
-        super(XGBoost, self).__init__(X, Y, tune_parameters)
+    def __init__(self, X, Y, tune_parameters=False, random_search=False):
+        super(XGBoost, self).__init__(X, Y, tune_parameters, random_search)
         if tune_parameters:
             self.param_dist_random = {'max_depth': sp_randint(1, 20),
                                       'n_estimators' : sp_randint(50, 200)}
@@ -259,13 +274,16 @@ class XGBoost(GIClassifier):
 
 
 class TheanoNeuralNetwork(GIClassifier):
-   def __init__(self, X, Y, tune_parameters=False):
-       super(TheanoNeuralNetwork, self).__init__(X, Y, tune_parameters=False)
+   def __init__(self, X, Y, tune_parameters=False, random_search=False):
+       super(TheanoNeuralNetwork, self).__init__(X, Y, tune_parameters, random_search)
        input_layer, output_layer = self.X.shape[1], len(np.unique(Y))
        inp = tn.layers.base.Input(size=input_layer, sparse='csr')
        self.clf = tn.Classifier(layers=[inp,
                                         (100, 'linear'), (50, 'norm:mean+relu'),
                                         output_layer])
+
+   def is_searchable(self):
+       return False
 
    def fit(self):
        self.clf.train((self.X, self.Y), algo='sgd', learning_rate=.05, momentum=0.9)
@@ -278,8 +296,8 @@ class TensorFlowNeuralNetwork(GIClassifier):
     hidden_units = [100, 100]
     optimizer = 'SGD'
 
-    def __init__(self, X, Y, tune_parameters=False):
-        super(TensorFlowNeuralNetwork, self).__init__(X, Y, tune_parameters=False)
+    def __init__(self, X, Y, tune_parameters=False, random_search=False):
+        super(TensorFlowNeuralNetwork, self).__init__(X, Y, tune_parameters, random_search)
         self.X = X.todense()  # TensorFlow/Skflow doesn't support sparse matrices
         output_layer = len(np.unique(Y))
         if tune_parameters:
