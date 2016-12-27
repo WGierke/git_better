@@ -81,6 +81,16 @@ def find_best_repository_classification(df_values, labels, drop_languages=False)
     #results = []
     for classifier in (basic + bag + ada):
         print classifier.__name__
+
+        # Tensorflow needs float32 X data
+        if(classifier==TensorFlowNeuralNetwork):
+            X_val_buf = X_val
+            X_train_buf = X_train
+            X_test_buf = X_test
+            X_val = val_df.astype(np.float32)
+            X_train = X_train.astype(np.float32)
+            X_test = X_test.astype(np.float32)
+
         clas = classifier(X_train, y_train)
         clas = clas.fit()
         y_predicted = clas.predict(X_test)
@@ -88,6 +98,12 @@ def find_best_repository_classification(df_values, labels, drop_languages=False)
         le = LabelEncoder().fit(y_train)
         print "score on test data: ", score
         print "score on evaluation data: ", eval_classifier(clas, X_val, y_val, le.classes_, plot_cm=False)
+
+        # Theano needs float64 X data
+        if(classifier==TensorFlowNeuralNetwork):
+            X_val = X_val_buf
+            X_train = X_train_buf
+            X_test = X_test_buf
     #return results
 
 
