@@ -14,7 +14,7 @@ def eval_classifier(clf, X, y_correct, classes, plot_cm=True):
     """Given a classifier, the unlabeled data, the labels and the existing classes predict the corresponsing labels
        and return the accuracy"""
     y_pred = clf.predict(X)
-    return get_accuracy_and_plot_confusion(y_correct, y_pred, classes, plot=plot_cm)
+    return get_accuracy_and_plot_confusion(y_correct, list(y_pred), classes, plot=plot_cm)
 
 
 def get_accuracy_and_plot_confusion(y_correct, y_pred, classes, plot=True, title='Confusion matrix'):
