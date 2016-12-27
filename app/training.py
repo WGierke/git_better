@@ -66,6 +66,11 @@ def find_best_repository_classification(df_values, labels, drop_languages=False)
     y_val = val_df.pop("label")
     val_df.fillna(0, inplace=True)
 
+    le = LabelEncoder().fit(np.concatenate((y_train.as_matrix(),y_test.as_matrix(),y_val.as_matrix()), axis=0))
+    y_train = le.transform(y_train)
+    y_test = le.transform(y_test)
+    y_val = le.transform(y_val)
+
     X_train, val_df = equalize_feature_numbers(X_train, val_df)
     X_test, val_df = equalize_feature_numbers(X_test, val_df)
 
@@ -81,13 +86,42 @@ def find_best_repository_classification(df_values, labels, drop_languages=False)
     #results = []
     for classifier in (basic + bag + ada):
         print classifier.__name__
+
+        # Tensorflow needs float32 X data
+        if(classifier==TensorFlowNeuralNetwork):
+            X_val_buf, X_train_buf, X_test_buf = X_val, X_train, X_test
+            X_val, X_train, X_test = val_df.astype(np.float32), X_train.astype(np.float32), X_test.astype(np.float32)
+
+        if(classifier==TheanoNeuralNetwork):
+            # Theano needs int32 y data
+            y_train_buf, y_test_buf, y_val_buf = y_train, y_test, y_val
+            y_train, y_test, y_val = y_train.astype(np.int32), y_test.astype(np.int32), y_val.astype(np.int32)
+
+            # Theano isn't able to cast from int to float64 automatically
+            X_val_buf,X_train_buf, X_test_buf = X_val, X_train, X_test
+            X_val, X_train, X_test = val_df.astype(np.float64), X_train.astype(np.float64), X_test.astype(np.float64)
+
         clas = classifier(X_train, y_train)
         clas = clas.fit()
-        y_predicted = clas.predict(X_test)
-        score = accuracy_score(y_test, y_predicted)
-        le = LabelEncoder().fit(y_train)
-        print "score on test data: ", score
-        print "score on evaluation data: ", eval_classifier(clas, X_val, y_val, le.classes_, plot_cm=False)
+
+        y_predicted = list(clas.predict(X_test))
+        test_score = accuracy_score(y_test, y_predicted)
+
+        y_val_predicted = list(clas.predict(X_val))
+        eval_score = accuracy_score(y_val, y_val_predicted)
+
+        print "score on test data: ", test_score
+        print "score on evaluation data: ", eval_score
+        # could add confusion matrix
+        
+        # Theano needs float64 X data
+        if(classifier==TensorFlowNeuralNetwork):
+            X_val, X_train, X_test = X_val_buf, X_train_buf, X_test_buf
+
+        if(classifier==TheanoNeuralNetwork):
+             y_train, y_test, y_val = y_train_buf, y_test_buf, y_val_buf
+
+             X_val, X_train, X_test = X_val_buf, X_train_buf, X_test_buf
     #return results
 
 
