@@ -6,24 +6,26 @@ from scipy.stats import randint as sp_randint
 
 import pandas as pd
 
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.naive_bayes import BernoulliNB
-from sklearn.svm import SVC
-from sklearn.ensemble import RandomForestClassifier, \
+from tflearn.tree import DecisionTreeClassifier
+from tflearn.naive_bayes import BernoulliNB
+from tflearn.svm import SVC
+from tflearn.ensemble import RandomForestClassifier, \
     BaggingClassifier, AdaBoostClassifier, GradientBoostingClassifier
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.model_selection import RandomizedSearchCV, GridSearchCV
+from tflearn.neighbors import KNeighborsClassifier
+from tflearn.model_selection import RandomizedSearchCV, GridSearchCV
 
 try:
     import theanets as tn
+except ImportError, e:
+    print('Theano not installed: ' + str(e))
 except Exception, e:
-    logging.error("Can't import Theano: " + str(e))
+    logging.error("Error while importing Theano: " + str(e))
 
 try:
     import tensorflow as tf
-    import tensorflow.contrib.learn as sklearn
-except ImportError:
-    print('Tensorflow not installed')
+    import tensorflow.contrib.learn as tflearn
+except ImportError, e:
+    print('Tensorflow not installed: ' + str(e))
 
 from xgboost import XGBClassifier
 from operator import itemgetter
@@ -312,7 +314,7 @@ class TensorFlowNeuralNetwork(GIClassifier):
                                       'hidden_units': [sp_randint(50, 500), sp_randint(50, 500)]}
 
         feature_columns = [tf.contrib.layers.real_valued_column("", dimension=self.X.shape[1])]
-        self.clf = sklearn.DNNClassifier(hidden_units=self.hidden_units, feature_columns=feature_columns,
+        self.clf = tflearn.DNNClassifier(hidden_units=self.hidden_units, feature_columns=feature_columns,
                                           n_classes=output_layer, optimizer='Adam', model_dir="log/dnn/")
                                                   #optimizer=self.optimizer) model_dir="",
     def fit(self):
