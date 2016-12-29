@@ -4,20 +4,43 @@ from gittle import Gittle
 import os
 from binaryornot.check import is_binary
 import pandas as pd
+import traceback
 
 REPOS_DIR = "repo/"
 
-def clone_repo(repository_name, clone_url, pull=True):
-    repo_dir = os.path.join(REPOS_DIR,repository_name)
+def clone_repo(owner, name, clone_url, pull=True):
+    owner_dir = os.path.join(REPOS_DIR,owner)
+    repo_dir = os.path.join(owner_dir,name)
+    print owner
+    print name
+    print clone_url
 
     # check if repository is already cloned
     if not os.path.exists(repo_dir):
         os.makedirs(repo_dir)
+        print 'Cloning repository ' + owner + '/' + name + '...'
+        try:
+            repo = Gittle.clone(clone_url, repo_dir)
+        except KeyError, e:
+            print 'KeyError while cloning... '
+            traceback.print_exc()
+            pass
+        except Exception:
+            traceback.print_exc()
+            pass
 
-        repo = Gittle.clone(clone_url, repo_dir)
     elif pull==True:
         repo = Gittle(repo_dir, origin_uri=clone_url)
-        repo.pull()
+        print 'Pulling repository ' + owner + '/' + name + '...'
+        try:
+            repo.pull()
+        except KeyError, e:
+            print 'KeyError while pulling... '
+            traceback.print_exc()
+            pass
+        except Exception:
+            traceback.print_exc()
+            pass
     return repo_dir
 
 def merge_commit_messages(repo_dir, override=False):
