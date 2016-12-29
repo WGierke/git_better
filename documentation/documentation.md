@@ -79,12 +79,22 @@ We tried the following classifiers:
 
 ### Classification Using Source Code
 
+We test different approaches to use the source code and connected data of a repository to classify it. For this task we use only data included in the git repository, no github specific data like projects, the wiki pages... Data from the repositories are including source code files with comments and git workflow specific data (branches, commits...).
+We are using in this chapter mainly the source code, file names and commit messages.
+
 #### Data Cleaning and Preprocessing
-...
+
+We clone each repository locally to retrieve the data we need. After this step we can merge all non-binary source code files, all filenames and all git commit messages into three different files. We don't filter based on languages, all UTF-8 files are included. This could be a additional preprocessing step to improve and simplify the stemming and classification.
 
 #### Feature Generation from Existing Data
 
+**HINT: Text could be used in other chapters as well**
+
+We use a count vectorizer which converts a text into a n-dimensional vector representing the vocabulary, where n is the number of unique words. After this text to vector conversion we transform the vector into a term frequency–inverse document frequency (tf-idf) vector which is a normalized representation of the original vector.
+
 #### Prediction Model
+
+Based on our tf-idf vector we can classify the different repositories using the n-dimensional vector as features and normal classification algorithms.
 
 ##### Validation of Prediction Model
 [accuracy+confusion matrix]
