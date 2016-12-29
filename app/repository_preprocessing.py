@@ -5,6 +5,7 @@ import os
 from binaryornot.check import is_binary
 import pandas as pd
 import traceback
+import codecs
 
 REPOS_DIR = "repo/"
 
@@ -67,9 +68,21 @@ def merge_files(repo_dir, override=False):
                     filepath = os.path.join(subdir, file)
 
                     # is_binary() is sth. like a heuristic
-                    if(not is_binary(filepath)):
-                        with open(filepath, "rb") as infile:
-                            outfile.write(infile.read())
+                    try:
+                        if(not is_binary(filepath)):
+                            with open(filepath, "rb") as infile:
+                                try:
+                                    f = codecs.open(filepath, encoding='utf-8', errors='strict')
+                                    for line in f:
+                                        pass
+                                    outfile.write(infile.read())
+                                except UnicodeDecodeError:
+                                    print "invalid utf-8"
+                                except Exception, e:
+                                    print "Something went wrong while reading file" + str(e)
+                    except IOError, e:
+                        print "File does not exist" + str(e)
+                        pass
     return open(os.path.join(repo_dir,"merged_source.txt"), "r").read()
 
 # TODO: Is the folder name also interesting?
