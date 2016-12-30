@@ -9,7 +9,7 @@ This section explains how we extended the training data set and how we explored 
 
 ### Data Retrieval
 The corresponding repository of the challenge includes 30 labeled repositories and 31 repositories that can be used as validation data.
-It wouldn't be possible to train convincing prediction models using only these provided data sets .
+It wouldn't be possible to train convincing prediction models using only these provided data sets.
 To extend the amount of available training data (and as a first step to reduce overfitting), we used the GitHub Search API, GitHub Showcases and automated as well as manual Google searches to retrieve more data.
 One can find the amount of retrieved, labeled repositories and their origin in the following table.
 
@@ -50,7 +50,7 @@ One can notice that the "DOCS" repositories build a cluster while it seems to be
 When we trained the classifiers on the collected training data and validated them on the given validation data, we noticed very early that all classifiers overfit heavily.
 On average, they yielded an accuracy of 80% on the training data but only 20% on the validation data.
 To overcome this big overfitting problem, we used several approaches.
-- Firstly, we tried to collect as much labeled ata automatically as possible.
+- Firstly, we tried to automatically collect as much labeled data as possible.
 - Secondly, we use model ensembling so multiple models can learn distinct from each other how to separate the classes.
 In the end, the models weighted predictions are aggregated to one prediction.
 - As a last approach, we're using hyperparameter tuning using Grid search to find the best parameter set for each classifier such that each one generalizes as much as possible.
