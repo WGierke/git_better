@@ -46,16 +46,8 @@ Though, it's still possible that the collected training data is biased as we act
 To get a better idea of how the relationship between the data entries looks like in higher dimensional space, we used PCA and t-SNE to reduce the  complexity of the data to 2D while retaining the principal components respectively the distances between the data points.
 The following figure visualizes the distribution of the labeled data entries using t-SNE
 ![](https://cloud.githubusercontent.com/assets/6676439/21290072/ad44ed02-c4ad-11e6-8314-a078c3b1c853.png)
-[t-SNE visualisation of data]
-You can find the complete code to generate the figure in the [t-SNE Visualization Notebook](https://github.com/WGierke/git_better/blob/master/t-SNE%20Visualization.ipynb).
+You can find the complete code to generate the figure in the [t-SNE Visualization Notebook](https://github.com/WGierke/git_better/blob/master/t-SNE%20Visualization.ipynb). [maybe add footnote]
 One can notice that the "DOCS" repositories build a cluster while it seems to be more complicated to separate the other classes.  
-When we trained the classifiers on the collected training data and validated them on the given validation data, we noticed very early that all classifiers overfit heavily.
-On average, they yielded an accuracy of 80% on the training data but only 20% on the validation data.
-To overcome this big overfitting problem, we used several approaches.
-- Firstly, we tried to automatically collect as much labeled data as possible.
-- Secondly, we use model ensembling so multiple models can learn distinct from each other how to separate the classes.
-In the end, the models weighted predictions are aggregated to one prediction.
-- As a last approach, we're using hyperparameter tuning using Grid search to find the best parameter set for each classifier such that each one generalizes as much as possible.
 
 validation data does not form a separate cluster to training data, but hard to judge; ~30 vs ~1200 samples
 compare with data from other team (4000 samples)
@@ -139,6 +131,20 @@ Based on our tf-idf vector we can classify the different repositories using the 
 
 ##### Validation of Prediction Model
 [accuracy+confusion matrix]
+
+### How to Overcome Overfitting
+
+When we trained the classifiers on the collected training data and validated them on the given validation data, we noticed very early that all classifiers overfit heavily.
+On average, they yielded an accuracy of 80% on the training data but only 20% on the validation data.
+To overcome this big overfitting problem, we used several approaches.
+- Firstly, we tried to automatically collect as much labeled data as possible.
+- Secondly, we use model ensembling so multiple models can learn distinct from each other how to separate the classes.
+In the end, the models weighted predictions are aggregated to one prediction.
+- As a last approach, we're using hyperparameter tuning using Grid search to find the best parameter set for each classifier such that each one generalizes as much as possible.
+
+### Overall Prediction Model
+
+Describe our ensembled model
 
 ## Automated Classification
 * implement the app that takes the input format and creates the output format
