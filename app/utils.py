@@ -157,7 +157,7 @@ def request_graph_features(repo_owner, repo_name):
 
 
 def get_response(url):
-    headers = {'Authorization': 'token %s' % PERSONAL_ACCESS_TOKEN}
+    headers = {'Authorization': 'token %s' % get_token()}
     try:
         return requests.get(url, headers=headers)
     except Exception, e:
