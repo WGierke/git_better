@@ -1,21 +1,60 @@
 # InformatiCup2017 Documentation
 ## Challenge Description
-This years InformatiCup challenge was to classify GitHub repositories automatically based on given class descriptions and sample data. In this work we present how we explored the given data, detected relevant features and built an application that predicts repository labels using different machine learning algorithms.
+This years InformatiCup challenge was to classify GitHub repositories automatically based on given class descriptions and sample data.
+In this work we present how we explored the given data, detected relevant features and built an application that predicts repository labels using different machine learning algorithms.
 
 
 ## Data Exploration
-* (visualization)
-* analyze and document relevant features
-* (explain data cleaning and preprocessing)
+This section explains how we extended the training data set and how we explored it using different dimension reduction algorithms and visualization tools.
 
 ### Data Retrieval
-We used the data provided in the competition desciption and collected more data with different methods:
-* Github API for actual data
-* github.io pages for WEB
+The corresponding repository of the challenge includes 30 labeled repositories and 31 repositories that can be used as validation data.
+It wouldn't be possible to train convincing prediction models using only these provided data sets .
+To extend the amount of available training data (and as a first step to reduce overfitting), we used the GitHub Search API, GitHub Showcases and automated as well as manual Google searches to retrieve more data.
+One can find the amount of retrieved, labeled repositories and their origin in the following table.
+
+| Amount | Label         | Origin  |
+| ------:|:-------------:| -------|
+| 9 | DATA | Manual Google search for Open Data repositories |
+| 82  | DATA | Repositories of Github user 'datasets' |
+| 17  | EDU | Github Search for "course, material" |
+| 17  | DOCS | Github Search for "documentation" |
+| 423 | WEB | Google Search for "site:.github.io" |
+| 58  | HW | GitHub Search for "homework, assignments, solution" |
+| 13  | DEV | Showcases "Virtual Reality" |
+| 12  | DEV | Showcases "Software Development Tools" |
+| 14  | DEV | Showcases "Front-end JavaScript frameworks" |
+| 20  | DEV | Showcases "DevOps tools" |
+| 16  | DEV | Showcases "Text editors" |
+| 24  | DEV | Showcases "Game Engines" |
+| 27  | DEV | Showcases "Web Application Frameworks" |
+| 42  | DEV | Showcases "Programming Languages" |
+| 180 | DOCS | GitHub Repo Content: Awesome Repos |
+| 6 | DATA | Showcases "Open Data" |
+| 86  | HW | Github Search for "homework, solution" |
+
+Overall, we were able to collect 1412 labeled repositories.  
+**Training Data Distribution**  
+
+![Training Data Distribution](https://cloud.githubusercontent.com/assets/6676439/20865343/ae126750-ba17-11e6-9a85-e55c9fb7224f.png)
+As one can see, we tried to use key words for automated searching that are as close to the words that were used to describe the different classes as possible.
+Though, it's still possible that the collected training data is biased as we actively selected repositories by searching for them. As an extension, an approach that could minimize this bias would be to randomly select repositories (e.g. from the GHTorrent project) and label them manually. For the beginning, however, we neither had the time nor the manpower to label a large amount of repositories manually.
 
 ### Data Analysis
-[t-SNE visualisation of data] 
-class "DOCS" is clustered, other classes are mixed
+To get a better idea of how the relationship between the data entries looks like in higher dimensional space, we used PCA and t-SNE to reduce the  complexity of the data to 2D while retaining the principal components respectively the distances between the data points.
+The following figure visualizes the distribution of the labeled data entries using t-SNE
+![](https://cloud.githubusercontent.com/assets/6676439/21290072/ad44ed02-c4ad-11e6-8314-a078c3b1c853.png)
+[t-SNE visualisation of data]
+You can find the complete code to generate the figure in the [t-SNE Visualization Notebook](https://github.com/WGierke/git_better/blob/master/t-SNE%20Visualization.ipynb).
+One can notice that the "DOCS" repositories build a cluster while it seems to be more complicated to separate the other classes.  
+When we trained the classifiers on the collected training data and validated them on the given validation data, we noticed very early that all classifiers overfit heavily.
+On average, they yielded an accuracy of 80% on the training data but only 20% on the validation data.
+To overcome this big overfitting problem, we used several approaches.
+- Firstly, we tried to collect as much labeled ata automatically as possible.
+- Secondly, we use model ensembling so multiple models can learn distinct from each other how to separate the classes.
+In the end, the models weighted predictions are aggregated to one prediction.
+- As a last approach, we're using hyperparameter tuning using Grid search to find the best parameter set for each classifier such that each one generalizes as much as possible.
+
 validation data does not form a separate cluster to training data, but hard to judge; ~30 vs ~1200 samples
 compare with data from other team (4000 samples)
 --> all samples (val, our train, other team train) are not bias free [some more thoughts], we should sample randomly from all github repos
@@ -32,12 +71,12 @@ compare with data from other team (4000 samples)
 _Creating a target data set: selecting a data set, or focusing on a subset of variables, or data samples, on which discovery is to be performed._
 
 ### Creation of Training and Test Data Set
-* Split data set into a training set, to train our different classifier, 
-a test set, to test the accuracy of our simple classifier, 
-a development set, to tune our hyperparameter without overfitting on this level, 
+* Split data set into a training set, to train our different classifier,
+a test set, to test the accuracy of our simple classifier,
+a development set, to tune our hyperparameter without overfitting on this level,
 and a evaluation set, to calculate our final accuracy. [Is this conceptual right?]
 * Why no k-fold cross validation?
-* [we used simple python spliting methods (train_test_split)] 
+* [we used simple python spliting methods (train_test_split)]
 
 ### Classification Using Numeric Metadata of Repositories
 We used this features:
@@ -52,7 +91,7 @@ In our previous projects we invested much effort in the manual feature generatio
 This time we do not have the resources/man power to build the features with SQL. So we tried an approach which includes more computing but less human effort.
 We used polynomial feature generation which takes the input variables and builds all possible polynomial combination of this features up to a given degree.
 [Maybe a simple example]
- 
+
 To use deep learning techniques you need many training samples because of their higher learning complexity. Our ~4000 samples aren't enough for this.
 Small feed-forward neural networks are applicable to our problem, deep neural networks are not.
 
