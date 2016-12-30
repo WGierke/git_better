@@ -34,9 +34,11 @@ One can find the amount of retrieved, labeled repositories and their origin in t
 | 86  | HW | Github Search for "homework, solution" |
 
 Overall, we were able to collect 1412 labeled repositories.  
+
 **Training Data Distribution**  
 
-![Training Data Distribution](https://cloud.githubusercontent.com/assets/6676439/20865343/ae126750-ba17-11e6-9a85-e55c9fb7224f.png)
+![Training Data Distribution](https://cloud.githubusercontent.com/assets/6676439/20865343/ae126750-ba17-11e6-9a85-e55c9fb7224f.png)  
+
 As one can see, we tried to use key words for automated searching that are as close to the words that were used to describe the different classes as possible.
 Though, it's still possible that the collected training data is biased as we actively selected repositories by searching for them. As an extension, an approach that could minimize this bias would be to randomly select repositories (e.g. from the GHTorrent project) and label them manually. For the beginning, however, we neither had the time nor the manpower to label a large amount of repositories manually.
 
