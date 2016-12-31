@@ -44,9 +44,9 @@ Though, it's still possible that the collected training data is biased as we act
 
 ### Data Analysis
 To get a better idea of how the relationship between the data entries looks like in higher dimensional space, we used PCA and t-SNE to reduce the  complexity of the data to 2D while retaining the principal components respectively the distances between the data points.
-The following figure visualizes the distribution of the labeled data entries using t-SNE
+The following figure visualizes the distribution of the labeled data entries using t-SNE.
 ![](https://cloud.githubusercontent.com/assets/6676439/21290072/ad44ed02-c4ad-11e6-8314-a078c3b1c853.png)
-You can find the complete code to generate the figure in the [t-SNE Visualization Notebook](https://github.com/WGierke/git_better/blob/master/t-SNE%20Visualization.ipynb). [maybe add footnote]
+You can find the complete code to generate the figure in the [t-SNE Visualization Notebook](https://github.com/WGierke/git_better/blob/master/t-SNE%20Visualization.ipynb). To explore the data interactively and in a three dimensional reduction you can use the [tensorflow embedding projector setup](https://github.com/WGierke/git_better#usage). [maybe add footnotes]
 One can notice that the "DOCS" repositories build a cluster while it seems to be more complicated to separate the other classes.  
 
 validation data does not form a separate cluster to training data, but hard to judge; ~30 vs ~1200 samples
@@ -68,7 +68,7 @@ _Creating a target data set: selecting a data set, or focusing on a subset of va
 * Split data set into a training set, to train our different classifier,
 a test set, to test the accuracy of our simple classifier,
 a development set, to tune our hyperparameter without overfitting on this level,
-and a evaluation set, to calculate our final accuracy. [Is this conceptual right?]
+and a evaluation set, to calculate our final accuracy. [Is this conceptually right?]
 * Why no k-fold cross validation?
 * [we used simple python spliting methods (train_test_split)]
 
@@ -105,7 +105,11 @@ We tried the following classifiers:
 
 #### Feature Generation from Existing Data
 
+We use a count vectorizer which converts a text into a n-dimensional vector representing the vocabulary, where n is the number of unique words. After this text to vector conversion we transform the vector into a term frequency–inverse document frequency (tf-idf) vector which is a normalized representation of the original vector.
+
 #### Prediction Model
+
+Based on our tf-idf vector we can classify the different repositories using the n-dimensional vector as features and normal classification algorithms.
 
 ##### Validation of Prediction Model
 [accuracy+confusion matrix]
@@ -121,13 +125,12 @@ We clone each repository locally to retrieve the data we need. After this step w
 
 #### Feature Generation from Existing Data
 
-**HINT: Text could be used in other chapters as well**
-
-We use a count vectorizer which converts a text into a n-dimensional vector representing the vocabulary, where n is the number of unique words. After this text to vector conversion we transform the vector into a term frequency–inverse document frequency (tf-idf) vector which is a normalized representation of the original vector.
+We can use the same feature generation approach based on the count vectorizer and tf-idf vector used in the text data classification. [Ugurel et al.](https://clgiles.ist.psu.edu/papers/KDD-2002-whatsthecode.pdf) showed a similar approach succesfully.
 
 #### Prediction Model
 
-Based on our tf-idf vector we can classify the different repositories using the n-dimensional vector as features and normal classification algorithms.
+Same as text data
+
 
 ##### Validation of Prediction Model
 [accuracy+confusion matrix]
