@@ -73,10 +73,11 @@ and a evaluation set, to calculate our final accuracy. [Is this conceptually rig
 * [we used simple python spliting methods (train_test_split)]
 
 ### Classification Using Numeric Metadata of Repositories
-We used this features:
-...
+We used the following features: watchers, mentionableUsers, closed_pull_requests, closed_issues, open_issues, forks, merged_pull_requests, stargazers, open_pull_requests, projects, size, isOwnerHomepage, hasHomepage, hasLicense, hasTravisConfig, hasCircleConfig, hasCiConfig, commitsCount, branchesCount, tagsCount, releasesCount and the language features.
+[...]
 
 #### Data Cleaning and Preprocessing
+[- language feature normalization?]
 ...
 
 #### Feature Generation from Existing Data
@@ -86,12 +87,14 @@ This time we do not have the resources/man power to build the features with SQL.
 We used polynomial feature generation which takes the input variables and builds all possible polynomial combination of this features up to a given degree.
 [Maybe a simple example]
 
-To use deep learning techniques you need many training samples because of their higher learning complexity. Our ~4000 samples aren't enough for this.
+To use deep learning techniques you need many training samples because of their higher learning complexity. Our ~1500 samples aren't enough for this.
 Small feed-forward neural networks are applicable to our problem, deep neural networks are not.
 
 #### Numeric Metadata Prediction Model
 We tried the following classifiers:
 ...
+
+[Better without language features]
 
 [accuracy from single models]
 [accuracy from ensembled models]
