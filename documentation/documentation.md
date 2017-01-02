@@ -47,11 +47,17 @@ To get a better idea of how the relationship between the data entries looks like
 The following figure visualizes the distribution of the labeled data entries using t-SNE.
 ![](https://cloud.githubusercontent.com/assets/6676439/21290072/ad44ed02-c4ad-11e6-8314-a078c3b1c853.png)
 You can find the complete code to generate the figure in the [t-SNE Visualization Notebook](https://github.com/WGierke/git_better/blob/master/t-SNE%20Visualization.ipynb). To explore the data interactively and in a three dimensional reduction you can use the [tensorflow embedding projector setup](https://github.com/WGierke/git_better#usage). [maybe add footnotes]
-One can notice that the "DOCS" repositories build a cluster while it seems to be more complicated to separate the other classes.  
+One can notice that the "DOCS" repositories build a cluster while it seems to be more complicated to separate the other classes.
 
-validation data does not form a separate cluster to training data, but hard to judge; ~30 vs ~1200 samples
-compare with data from other team (4000 samples)
---> all samples (val, our train, other team train) are not bias free [some more thoughts], we should sample randomly from all github repos
+We also used t-SNE to visualize the similarity between our retrieved training data and the given validation data.
+![](https://cloud.githubusercontent.com/assets/6676439/21290073/ad4817c0-c4ad-11e6-92e2-0d983ed39677.png)
+
+Since the validation data does not form separate clusters or outliers, we could assume that testing the learned models on the validation data is a good way to verify how well the models generalize.
+On the other side, the validation data only contains roughly 30 data entries which is not enough to give reliable statements about the model performances.  
+The [additional data sets](https://github.com/InformatiCup/InformatiCup2017/tree/master/additional_data_sets) from another team could allow us to validate our models better even if they are also biased.
+As already mentioned, a perfect training and validation set would only contain repositories that have been sampled randomly and labeled manually.
+
+all samples (val, our train, other team train) are not bias free [some more thoughts], we should sample randomly from all github repos
 
 --> conclude about further approach
 
@@ -70,15 +76,47 @@ a test set, to test the accuracy of our simple classifier,
 a development set, to tune our hyperparameter without overfitting on this level,
 and a evaluation set, to calculate our final accuracy. [Is this conceptually right?]
 * Why no k-fold cross validation?
-* [we used simple python spliting methods (train_test_split)]
+* [we used simple python splitting methods (train_test_split)]
 
 ### Classification Using Numeric Metadata of Repositories
-We used the following features: watchers, mentionableUsers, closed_pull_requests, closed_issues, open_issues, forks, merged_pull_requests, stargazers, open_pull_requests, projects, size, isOwnerHomepage, hasHomepage, hasLicense, hasTravisConfig, hasCircleConfig, hasCiConfig, commitsCount, branchesCount, tagsCount, releasesCount and the language features.
-[...]
+To develop classifiers based on numeric metadata of repositories, we used the following features:
+
+|Feature Name|Description|
+|------------|-----------|
+|watchers | Number of users who watch the repo |
+|mentionableUsers | Number of users who contributed to the repo |
+|open_pull_requests | Number of open pull requests |
+|closed_pull_requests | Number os closed pull requests |
+|merged_pull_requests | Number of merged pull requests |
+|open_issues | Number of open issues |
+|closed_issues | Number of closed issues |
+|forks | Number of forks |
+|stargazers | Number of users who "starred" the repo |
+|projects | Number of projects |
+|size | Size of the source code in KB |
+|isOwnerHomepage | Is the name of the repo REPO_OWNER.github.io or REPO_OWNER.github.com? |
+|hasHomepage | Does the website REPO_OWNER.github.io/REPO_NAME exist? |
+|hasLicense | Does the repo has a license file? |
+|hasTravisConfig | Does the repo have a Travis configuration file? |
+|hasCircleConfig | Does the repo have a CircleCI configuration file? |
+|hasCiConfig | hasTravisConfig OR hasCircleConfig |
+|commitsCount | Number of commits |
+|branchesCount | Number of branches |
+|tagsCount | Number of tags |
+|releasesCount | Number of releases |
+|LANGUAGE_*| How much code was written in the language in percent (e.g. LANGUAGE_Python, ...)?|
+
+Most of the features were available using the GitHub API.
+We added the *isOwnerHomepage* and *hasHomepage* features to detect whether a repository serves its source code using GitHub pages. This could allow us to identify WEB repositories easier.
+We furthermore hoped that using *hasCiConfig*, so whether a repo contains a configuration file for a Continuous Integration service, would improve the accuracy of detecting DEV repositories.
 
 #### Data Cleaning and Preprocessing
-[- language feature normalization?]
-...
+GitHub detects [over 300 used programming languages](https://github.com/github/linguist/blob/master/lib/linguist/languages.yml) in repositories.
+The problem is that a lot of them are used only in a few repositories such that there are a lot of features that only hold very little variance and information.
+As an example, among our collected 1400 repositories there are 46 programming languages, like Pony or KiCad, that were only used in one repository at all.
+Since such features do not hold any additional information, tempt the models to overfit and increase the computation time, we have to remove such features.
+To do so, we drop features with low standard deviation and a low overall sum.
+As an example, we can already drop 135 language features if we require that the sum of a language feature over all 1400 training data entries is supposed to be bigger than 5.
 
 #### Feature Generation from Existing Data
 In our previous projects we invested much effort in the manual feature generation with SQL queries etc. or used deep learning techniques to enhance the given data.
