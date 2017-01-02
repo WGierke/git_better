@@ -204,6 +204,13 @@ Describe our ensembled model
 
 
 ## Extensions
-* explain Django app
-* reference production instance
+To bring our research work to production, we built a [service](https://git-better.herokuapp.com/) that classifies your public GitHub repositories using models that were trained on our training data.
+The server uses GitHub OAuth to authenticate GitHub users and uses their OAuth tokens to request their public repositories and their necessary features.
+We're planning to improve the design with visualizations of the repository distribution using D3.  
+Another extension would be to recommend [trending GitHub projects](https://github.com/trending) based on the public repositories of the user.
+Since there is no official GitHub API for the trending repositories, we would crawl all websites that are available at https://github.com/trending/{language}?since={since} once a day, where *language* is a supported programming language like Python or Ruby, and *since* is one of 'daily', 'weekly' or 'monthly'.
+We would then recommend repositories to the user based on their classified labels, on the preferred language of the user, on the text or even code similarity between the trending projects and those of the user.
+To implement the latter one, we could use TF-IDF matrices like we already used for the text classifiers.
+[This](http://blog.untrod.com/2016/06/simple-similar-products-recommendation-engine-in-python.html) blog article describes how to easily implement a recommendation engine using text with TF-IDF matrices in Python.
+
 * maybe add pictures as fall-back
