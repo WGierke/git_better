@@ -43,7 +43,7 @@ As one can see, we tried to use key words for automated searching that are as cl
 Though, it's still possible that the collected training data is biased as we actively selected repositories by searching for them. As an extension, an approach that could minimize this bias would be to randomly select repositories (e.g. from the GHTorrent project) and label them manually. For the beginning, however, we neither had the time nor the manpower to label a large amount of repositories manually.
 
 ### Data Analysis
-To get a better idea of how the relationship between the data entries looks like in higher dimensional space, we used PCA and t-SNE to reduce the  complexity of the data to 2D while retaining the principal components respectively the distances between the data points.
+To get a better idea of how the relationship between the data entries looks like in a higher dimensional space, we used PCA and t-SNE to reduce the  complexity of the data to 2D while retaining the principal components respectively the distances between the data points.
 The following figure visualizes the distribution of the labeled data entries using t-SNE.
 ![](https://cloud.githubusercontent.com/assets/6676439/21290072/ad44ed02-c4ad-11e6-8314-a078c3b1c853.png)
 You can find the complete code to generate the figure in the [t-SNE Visualization Notebook](https://github.com/WGierke/git_better/blob/master/t-SNE%20Visualization.ipynb). To explore the data interactively and in a three dimensional reduction you can use the [tensorflow embedding projector setup](https://github.com/WGierke/git_better#usage). [maybe add footnotes]
@@ -86,17 +86,17 @@ To develop classifiers based on numeric metadata of repositories, we used the fo
 |watchers | Number of users who watch the repo |
 |mentionableUsers | Number of users who contributed to the repo |
 |open_pull_requests | Number of open pull requests |
-|closed_pull_requests | Number os closed pull requests |
+|closed_pull_requests | Number of closed pull requests |
 |merged_pull_requests | Number of merged pull requests |
 |open_issues | Number of open issues |
 |closed_issues | Number of closed issues |
 |forks | Number of forks |
 |stargazers | Number of users who "starred" the repo |
-|projects | Number of projects |
+|projects | Number of projects (integrated project management tool)|
 |size | Size of the source code in KB |
 |isOwnerHomepage | Is the name of the repo REPO_OWNER.github.io or REPO_OWNER.github.com? |
 |hasHomepage | Does the website REPO_OWNER.github.io/REPO_NAME exist? |
-|hasLicense | Does the repo has a license file? |
+|hasLicense | Does the repo have a license file? |
 |hasTravisConfig | Does the repo have a Travis configuration file? |
 |hasCircleConfig | Does the repo have a CircleCI configuration file? |
 |hasCiConfig | hasTravisConfig OR hasCircleConfig |
@@ -114,9 +114,9 @@ We furthermore hoped that using *hasCiConfig*, so whether a repo contains a conf
 GitHub detects [over 300 used programming languages](https://github.com/github/linguist/blob/master/lib/linguist/languages.yml) in repositories.
 The problem is that a lot of them are used only in a few repositories such that there are a lot of features that only hold very little variance and information.
 As an example, among our collected 1400 repositories there are 46 programming languages, like Pony or KiCad, that were only used in one repository at all.
-Since such features do not hold any additional information, tempt the models to overfit and increase the computation time, we have to remove such features.
+Since such features do not hold any additional information, tempt the models to overfit and increase the computation time, we have to remove them.
 To do so, we drop features with low standard deviation and a low overall sum.
-As an example, we can already drop 135 language features if we require that the sum of a language feature over all 1400 training data entries is supposed to be bigger than 5.
+As an example, we can already drop 135 language features if we require that the sum of a language feature over all 1400 training data entries is supposed to be bigger than 5. Which means that at least 5 repositories with this language must exist.
 
 #### Feature Generation from Existing Data
 In our previous projects we invested much effort in the manual feature generation with SQL queries etc. or used deep learning techniques to enhance the given data.
