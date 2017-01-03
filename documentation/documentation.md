@@ -53,7 +53,9 @@ We also used t-SNE to visualize the similarity between our retrieved training da
 ![](https://cloud.githubusercontent.com/assets/6676439/21290073/ad4817c0-c4ad-11e6-92e2-0d983ed39677.png)
 
 Since the validation data does not form separate clusters or outliers, we could assume that testing the learned models on the validation data is a good way to verify how well the models generalize.
-On the other side, the validation data only contains roughly 30 data entries which is not enough to give reliable statements about the model performances.  
+On the other side, the validation data only contains roughly 30 data entries which is not enough to give reliable statements about the model performances.
+Furthermore, the fact that the validation data seems to be selected manually implies that it's also biased.
+Thus, perfect validation data would be a lot of randomly selected repositories that have been labeled manually.
 The [additional data sets](https://github.com/InformatiCup/InformatiCup2017/tree/master/additional_data_sets) from another team could allow us to validate our models better even if they are also biased.
 As already mentioned, a perfect training and validation set would only contain repositories that have been sampled randomly and labeled manually.
 
@@ -111,22 +113,40 @@ We added the *isOwnerHomepage* and *hasHomepage* features to detect whether a re
 We furthermore hoped that using *hasCiConfig*, so whether a repo contains a configuration file for a Continuous Integration service, would improve the accuracy of detecting DEV repositories.
 
 #### Data Cleaning and Preprocessing
+Using the GitHub REST API and the GitHub GraphQL API, we were able to receive all features without extensive cleaning or preprocessing of the data.
+
+#### Feature Selection
+Feature Selection describes the process of dropping features that yield no or very little additional information in order to decrease overfitting and accelerate model fitting.
+Especially the programming language features needed to be reduced using Feature Selection.  
 GitHub detects [over 300 used programming languages](https://github.com/github/linguist/blob/master/lib/linguist/languages.yml) in repositories.
 The problem is that a lot of them are used only in a few repositories such that there are a lot of features that only hold very little variance and information.
-As an example, among our collected 1400 repositories there are 46 programming languages, like Pony or KiCad, that were only used in one repository at all.
-Since such features do not hold any additional information, tempt the models to overfit and increase the computation time, we have to remove them.
-To do so, we drop features with low standard deviation and a low overall sum.
-As an example, we can already drop 135 language features if we require that the sum of a language feature over all 1400 training data entries is supposed to be bigger than 5. Which means that at least 5 repositories with this language must exist.
+As an example, among the collected 1400 repositories there were 46 programming languages, like Pony or KiCad, that were only used in one repository at all.
+To remove those, we dropped features with low standard deviation and a low overall sum.
+As an example, we are already able to drop 135 language features if we require that the sum of a language feature over all 1400 training data entries is supposed to be bigger than 5.
 
-#### Feature Generation from Existing Data
-In our previous projects we invested much effort in the manual feature generation with SQL queries etc. or used deep learning techniques to enhance the given data.
 
-This time we do not have the resources/man power to build the features with SQL. So we tried an approach which includes more computing but less human effort.
+#### Feature Engineering
+In a next step, we derived further features from the features we already collected.
 We used polynomial feature generation which takes the input variables and builds all possible polynomial combination of this features up to a given degree.
-[Maybe a simple example]
+The idea of taking input features and applying a non-linear method on it to map the original values in another space is called "kernel trick" and is used by Support Vector Machines to learn non-linear models as well.  
+As an example, suppose a dataset is given with the two features *size* and *watchers*:  
+
+|size|watchers|
+|:--:|:------:|
+|2|5|
+|10|8|
+
+The transformed dataset using polynomial features with a degree of 2 would look like this:  
+
+|size¹|watchers¹|size¹xwatchers¹|size²|watchers²|
+|:---:|:-------:|:-------------:|:---:|:-------:|
+|2    |        5|             10|    4|       25|
+|10   |        8|             80|  100|       64|
+
+As one can see, the number of generated features increases polynomially in the number of input features. That's why the previous Feature Selection step was very important.
 
 To use deep learning techniques you need many training samples because of their higher learning complexity. Our ~1500 samples aren't enough for this.
-Small feed-forward neural networks are applicable to our problem, deep neural networks are not.
+Small feed-forward neural networks are applicable to our problem while deep neural networks are not.
 
 #### Numeric Metadata Prediction Model
 We tried the following classifiers:
@@ -211,6 +231,5 @@ Another extension would be to recommend [trending GitHub projects](https://githu
 Since there is no official GitHub API for the trending repositories, we would crawl all websites that are available at https://github.com/trending/{language}?since={since} once a day, where *language* is a supported programming language like Python or Ruby, and *since* is one of 'daily', 'weekly' or 'monthly'.
 We would then recommend repositories to the user based on their classified labels, on the preferred language of the user, on the text or even code similarity between the trending projects and those of the user.
 To implement the latter one, we could use TF-IDF matrices like we already used for the text classifiers.
-[This](http://blog.untrod.com/2016/06/simple-similar-products-recommendation-engine-in-python.html) blog article describes how to easily implement a recommendation engine using text with TF-IDF matrices in Python.
 
 * maybe add pictures as fall-back
