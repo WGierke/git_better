@@ -59,25 +59,21 @@ Thus, perfect validation data would be a lot of randomly selected repositories t
 The [additional data sets](https://github.com/InformatiCup/InformatiCup2017/tree/master/additional_data_sets) from another team could allow us to validate our models better even if they are also biased.
 As already mentioned, a perfect training and validation set would only contain repositories that have been sampled randomly and labeled manually.
 
-all samples (val, our train, other team train) are not bias free [some more thoughts], we should sample randomly from all github repos
-
---> conclude about further approach
-
 ## Prediction Model
-* document how to avoid overfitting
-* explain why we've decided to use the features
-* explain how we've developed the prediction model (splitting methods, ensembling etc.)
-* reference GitHub REST/GraphQL API, GitHub Search, Google Search, ...
+* [document how to avoid overfitting]
+* [explain why we've decided to use the features]
+* [explain how we've developed the prediction model (splitting methods, ensembling etc.)]
+* [reference GitHub REST/GraphQL API, GitHub Search, Google Search, ...]
 
 ### Data Selection
-_Creating a target data set: selecting a data set, or focusing on a subset of variables, or data samples, on which discovery is to be performed._
+[_Creating a target data set: selecting a data set, or focusing on a subset of variables, or data samples, on which discovery is to be performed._]
 
 ### Creation of Training and Test Data Set
-* Split data set into a training set, to train our different classifier,
+* [Split data set into a training set, to train our different classifier,
 a test set, to test the accuracy of our simple classifier,
 a development set, to tune our hyperparameter without overfitting on this level,
-and a evaluation set, to calculate our final accuracy. [Is this conceptually right?]
-* Why no k-fold cross validation?
+and a evaluation set, to calculate our final accuracy. [Is this conceptually right?]]
+* [Why no k-fold cross validation?]
 * [we used simple python splitting methods (train_test_split)]
 
 ### Classification Using Numeric Metadata of Repositories
@@ -190,7 +186,7 @@ We were able to use the same feature generation approach based on the count vect
 
 #### Prediction Model
 
-Same as text data
+[Same as text data]
 
 
 ##### Validation of Prediction Model
@@ -208,19 +204,19 @@ In the end, the models weighted predictions are aggregated to one prediction.
 
 ### Overall Prediction Model
 
-Describe our ensembled model
+[Describe our ensembled model]
 
 ## Automated Classification
-* implement the app that takes the input format and creates the output format
-* either 1) prompt for the training data to use or 2) directly include the learned model
-* explain the arguments of the main application here while referencing to the manual for setup
+* [implement the app that takes the input format and creates the output format]
+* [either 1) prompt for the training data to use or 2) directly include the learned model]
+* [explain the arguments of the main application here while referencing to the manual for setup]
 
 
 ## Validation
-* boolean(!) matrix on validation data
-* compute recall and precision
-* discuss quality of results and whether higher yield or higher precision is more important
-* (elaborate on the additional dataset given by another team?)
+* [boolean(!) matrix on validation data]
+* [compute recall and precision]
+* [discuss quality of results and whether higher yield or higher precision is more important]
+* [(elaborate on the additional dataset given by another team?)]
 
 
 ## Extensions
@@ -232,4 +228,4 @@ Since there is no official GitHub API for the trending repositories, we would cr
 We would then recommend repositories to the user based on their classified labels, on the preferred language of the user, on the text or even code similarity between the trending projects and those of the user.
 To implement the latter one, we could use tf-idf matrices like we already used for the text classifiers.
 
-* maybe add pictures as fall-back
+* [maybe add pictures as fall-back]
