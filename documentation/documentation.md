@@ -136,7 +136,7 @@ As an example, suppose a dataset is given with the two features *size* and *watc
 |2|5|
 |10|8|
 
-The transformed dataset using polynomial features with a degree of 2 would look like this:  
+The transformed dataset using polynomial features with a degree up to 2 would look like this:  
 
 |size¹|watchers¹|size¹xwatchers¹|size²|watchers²|
 |:---:|:-------:|:-------------:|:---:|:-------:|
@@ -230,6 +230,6 @@ We're planning to improve the design with visualizations of the repository distr
 Another extension would be to recommend [trending GitHub projects](https://github.com/trending) based on the public repositories of the user.
 Since there is no official GitHub API for the trending repositories, we would crawl all websites that are available at https://github.com/trending/{language}?since={since} once a day, where *language* is a supported programming language like Python or Ruby, and *since* is one of 'daily', 'weekly' or 'monthly'.
 We would then recommend repositories to the user based on their classified labels, on the preferred language of the user, on the text or even code similarity between the trending projects and those of the user.
-To implement the latter one, we could use TF-IDF matrices like we already used for the text classifiers.
+To implement the latter one, we could use tf-idf matrices like we already used for the text classifiers.
 
 * maybe add pictures as fall-back
