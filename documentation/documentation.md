@@ -166,7 +166,7 @@ We tried the following classifiers:
 
 #### Feature Generation from Existing Data
 
-We use a count vectorizer which converts a text into a n-dimensional vector representing the vocabulary, where n is the number of unique words. After this text to vector conversion we transform the vector into a term frequency–inverse document frequency (tf-idf) vector which is a normalized representation of the original vector.
+We used a count vectorizer which converts a text into a n-dimensional vector representing the vocabulary, where n is the number of unique words. After this text-to-vector conversion we transformed the vector into a term frequency–inverse document frequency (tf-idf) vector which is a normalized representation of the original vector.
 
 #### Prediction Model
 
@@ -177,16 +177,16 @@ Based on our tf-idf vector we can classify the different repositories using the 
 
 ### Classification Using Source Code
 
-We test different approaches to use the source code and connected data of a repository to classify it. For this task we use only data included in the git repository, no github specific data like projects, the wiki pages... Data from the repositories are including source code files with comments and git workflow specific data (branches, commits...).
-We are using in this chapter mainly the source code, file names and commit messages.
+We tested different approaches to use the source code and connected data of a repository to classify it. For this task we used only data included in the git repository, no github specific data like projects, the wiki pages... Data from the repositories are including source code files with comments and git workflow specific data (branches, commits...).
+We used in this chapter mainly the source code, file names and commit messages.
 
 #### Data Cleaning and Preprocessing
 
-We clone each repository locally to retrieve the data we need. After this step we can merge all non-binary source code files, all filenames and all git commit messages into three different files. We don't filter based on languages, all UTF-8 files are included. This could be a additional preprocessing step to improve and simplify the stemming and classification.
+We cloned each repository locally to retrieve the data we need. After this step we were able to merge all non-binary source code files, all filenames and all git commit messages into three different files. We didn't filter based on languages, all UTF-8 files are included. This could be a additional preprocessing step to improve and simplify the stemming and classification.
 
 #### Feature Generation from Existing Data
 
-We can use the same feature generation approach based on the count vectorizer and tf-idf vector used in the text data classification. [Ugurel et al.](https://clgiles.ist.psu.edu/papers/KDD-2002-whatsthecode.pdf) showed a similar approach succesfully.
+We were able to use the same feature generation approach based on the count vectorizer and tf-idf vector used in the text data classification. [Ugurel et al.](https://clgiles.ist.psu.edu/papers/KDD-2002-whatsthecode.pdf) showed a similar approach succesfully.
 
 #### Prediction Model
 
