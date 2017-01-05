@@ -41,6 +41,8 @@ Overall, we were able to collect 1412 labeled repositories.
 
 As one can see, we tried to use key words for automated searching that are as close to the words that were used to describe the different classes as possible.
 Though, it's still possible that the collected training data is biased as we actively selected repositories by searching for them. As an extension, an approach that could minimize this bias would be to randomly select repositories (e.g. from the GHTorrent project) and label them manually. For the beginning, however, we neither had the time nor the manpower to label a large amount of repositories manually.
+Since the difficulty to collect data entries of a certain label differed, we ended up with unbalanced training data.
+As the class label distribution affects some classifiers heavily, we trained the models on randomly undersampled training data.
 
 ### Data Analysis
 To get a better idea of how the relationship between the data entries looks like in a higher dimensional space, we used PCA and t-SNE to reduce the  complexity of the data to 2D while retaining the principal components respectively the distances between the data points.
@@ -60,9 +62,22 @@ The [additional data sets](https://github.com/InformatiCup/InformatiCup2017/tree
 As already mentioned, a perfect training and validation set would only contain repositories that have been sampled randomly and labeled manually.
 
 ## Prediction Model
-* [document how to avoid overfitting]
+When a model fits its training data too well and doesn't learn to generalize, it's considered to "overfit".
+This can occur if the model is too complex so it learns the training data by heart instead of understanding how to solve the given problem in general.
+To prevent this, we collected more training data than we already received by the challenge, we applied regularization to hinder the model becoming too complex and we used ensemble learning.
+By collecting more data than already given we created a bigger problem domain that needs to be understood by the model.
+Regularization adds a measure of the models complexity to the cost function that needs to be optimized.
+Thus, the model does not only try to solve the given problem but it also tries to do that keeping itself as simple as possible.
+Ensemble learning uses multiple trained models to calculate one final prediction.
+These models are trained using distinct features so they're not related to each other.
+The assumption is that when one model makes a mistake predicting a label, the other models don't make a mistake in this situation so the (correct predicted) label of the other models is returned.
+To decide which model prediction is the correct one we used the Majority Rule algorithm.
+One model was trained on the numerical features of a repository, one on the description, one on the content of the readme and one on the source code of each repository.
+The following chapters will explain how we retrieved and cleaned the data for each model, how we selected relevant features  and how we developed the prediction model.
 * [explain why we've decided to use the features]
+Will be explained in each of the subsequent chapters
 * [explain how we've developed the prediction model (splitting methods, ensembling etc.)]
+
 * [reference GitHub REST/GraphQL API, GitHub Search, Google Search, ...]
 
 ### Data Selection
