@@ -74,11 +74,8 @@ The assumption is that when one model makes a mistake predicting a label, the ot
 To decide which model prediction is the correct one we used the Majority Rule algorithm.
 One model was trained on the numerical features of a repository, one on the description, one on the content of the readme and one on the source code of each repository.
 The following chapters will explain how we retrieved and cleaned the data for each model, how we selected relevant features  and how we developed the prediction model.
-* [explain why we've decided to use the features]
-Will be explained in each of the subsequent chapters
-* [explain how we've developed the prediction model (splitting methods, ensembling etc.)]
 
-* [reference GitHub REST/GraphQL API, GitHub Search, Google Search, ...]
+* [explain how we've developed the prediction model (splitting methods, ensembling etc.)]
 
 ### Data Selection
 [_Creating a target data set: selecting a data set, or focusing on a subset of variables, or data samples, on which discovery is to be performed._]
@@ -219,7 +216,8 @@ In the end, the models weighted predictions are aggregated to one prediction.
 
 ### Overall Prediction Model
 
-[Describe our ensembled model]
+* [Describe our ensembled model]
+* [Document three repositories which work well]
 
 ## Automated Classification
 * [implement the app that takes the input format and creates the output format]
