@@ -169,8 +169,15 @@ We tried the following classifiers:
 [accuracy+confusion matrix]
 
 ### Classification Using Text Data (Description and Readme)
+Intuitively, one wouldn't use the numeric features like the number of branches etc. to decide what label fits the repository best.
+Instead, one would use the description or the content of the readme to determine it.
+For this reason we used TF-IDF matrices to develop two NLP models that predict the label based on them.
+Since there's a semantic difference between the description and the readme of a repository, we discarded the idea of concatenating the text features and training one model on it.
+Instead, we trained two seperate models on the description respectively readme of the repositories.
 
 #### Data Cleaning and Preprocessing
+To remove words like 'the', 'a', 'and' etc. that occur very often and yield little meaning, we used the NLTK to drop English stopwords.
+Since it's also not important whether the singular or the plural of words are used, we also used this toolkit to stem English words.
 
 #### Feature Generation from Existing Data
 
