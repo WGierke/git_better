@@ -188,7 +188,11 @@ We used a count vectorizer which converts a text into a n-dimensional vector rep
 Based on our tf-idf vector we can classify the different repositories using the n-dimensional vector as features and normal classification algorithms.
 
 ##### Validation of Prediction Model
-[accuracy+confusion matrix]
+Readme Classifier: 51.6% Accuracy on Validation Data  
+![](https://cloud.githubusercontent.com/assets/6676439/21713365/f01abb7e-d3f9-11e6-9a85-6322c7634f1e.png)
+
+Description Classifier: 48.4% Accuracy on Validation Data  
+![](https://cloud.githubusercontent.com/assets/6676439/21713307/92e32c2a-d3f9-11e6-91a5-e33192dc58e7.png)
 
 ### Classification Using Source Code
 
