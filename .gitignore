@@ -1,6 +1,15 @@
-venv
+venv*
 .ipynb_checkpoints
 .idea
 config.ini
 *.pyc
 *.db
+*.tsv
+
+#tensorflow
+log
+#checkpoint
+#*.index
+#*.meta
+#*.pbtxt
+#model*

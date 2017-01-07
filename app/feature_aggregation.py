@@ -20,10 +20,10 @@ def aggregate_features(index, row, bar, df_q, token_q):
     token = token_q.get()
     try:
         new_data_frame = pd.DataFrame.from_dict(row).T
-        new_data_frame = add_graph_features(new_data_frame, 0, owner, name)
-        new_data_frame = add_rest_features(new_data_frame, 0, repo)
-        new_data_frame = add_custom_features(new_data_frame, 0, owner, name)
-        new_data_frame = fix_closed_issues(new_data_frame, 0)
+        new_data_frame = add_graph_features(new_data_frame, index, owner, name)
+        new_data_frame = add_rest_features(new_data_frame, index, repo)
+        new_data_frame = add_custom_features(new_data_frame, index, owner, name)
+        new_data_frame = fix_closed_issues(new_data_frame, index)
     except Exception, e:
         print "Exception in aggregate_features: " + str(e)
         token_q.put(token)
@@ -34,7 +34,7 @@ def aggregate_features(index, row, bar, df_q, token_q):
     update_columns = [col for col in new_data_frame.columns if col not in ['repository', 'owner', 'name', 'label']]
     for col in update_columns:
         try:
-            shared_data_frame.set_value(index, col, new_data_frame.loc[0, col])
+            shared_data_frame.set_value(index, col, new_data_frame.loc[index, col])
         except Exception, e:
             print "An error occured while fetching {}/{} and setting {}: {}".format(owner, name, col, e)
     df_q.put(shared_data_frame)
@@ -112,13 +112,13 @@ def add_rest_features(data_frame, index, repo):
 
 
 def add_custom_features(data_frame, index, owner, name):
-    """isOwnerHomepage, hasHomepage, hasLicense, hasCiConfig,
-    commitsCount, branchesCount, tagsCount, releasesCount"""
+    """isOwnerHomepage, hasHomepage, hasLicense, hasTravisConfig, hasCircleConfig,
+    hasCiConfig, commitsCount, branchesCount, tagsCount, releasesCount"""
     is_owner_homepage = name.lower() == "{}.github.io".format(owner.lower()) or name.lower() == "{}.github.com".format(owner.lower())
     has_homepage = website_exists("http://{}.github.io/{}".format(owner, name))
-    has_license = website_exists("{}/{}/license".format(owner, name), prefix=REPO_API_URL)
-    has_travis_config = website_exists("{}/{}/contents/.travis.yml".format(owner, name), prefix=REPO_API_URL)
-    has_circle_config = website_exists("{}/{}/contents/circle.yml".format(owner, name), prefix=REPO_API_URL)
+    has_license = "octicon octicon-law" in requests.get("https://github.com/{}/{}".format(owner, name)).text
+    has_travis_config = website_exists("https://github.com/{}/{}/blob/master/.travis.yml".format(owner, name), only_headers=True)
+    has_circle_config = website_exists("https://github.com/{}/{}/blob/master/circle.yml".format(owner, name), only_headers=True)
     has_ci_config = has_travis_config or has_circle_config
     commits_count = get_last_repos_pagination_page("{}/{}/commits?per_page=1".format(owner, name))
     branches_count = get_last_repos_pagination_page("{}/{}/branches?per_page=1".format(owner, name))
@@ -128,6 +128,8 @@ def add_custom_features(data_frame, index, owner, name):
     data_frame.set_value(index, "isOwnerHomepage", is_owner_homepage)
     data_frame.set_value(index, "hasHomepage", has_homepage)
     data_frame.set_value(index, "hasLicense", has_license)
+    data_frame.set_value(index, "hasTravisConfig", has_travis_config)
+    data_frame.set_value(index, "hasCircleConfig", has_circle_config)
     data_frame.set_value(index, "hasCiConfig", has_ci_config)
     data_frame.set_value(index, "commitsCount", commits_count)
     data_frame.set_value(index, "branchesCount", branches_count)

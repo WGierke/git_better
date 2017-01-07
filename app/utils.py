@@ -3,6 +3,7 @@ import os
 import sys
 import ConfigParser
 import json
+import logging
 from github import Github
 
 GITHUB_USERNAME = "Username"
@@ -91,13 +92,18 @@ def get_response(url):
     headers = {'Authorization': 'token %s' % PERSONAL_ACCESS_TOKEN}
     try:
         return requests.get(url, headers=headers)
-    except:
+    except Exception, e:
+        logging.error(e)
         return None
 
 
-def website_exists(url, prefix=''):
+def website_exists(url, prefix='', only_headers=False):
     try:
-        return get_response(prefix + url).status_code < 400
+        if only_headers:
+            response = requests.head(prefix + url)
+        else:
+            response = get_response(prefix + url)
+        return response.status_code < 400
     except:
         return False
 

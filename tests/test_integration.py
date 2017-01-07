@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import unittest2
-from app.process import process_data
+from app.load_data import process_data
 from server.django_server.utils import get_trending_links
 
 TEST_DATA_PATH = 'tests/test_data.csv'
@@ -37,6 +37,9 @@ class TestCase(unittest2.TestCase):
         self.assertEqual(data_frame['mentionableUsers'], 48)
         self.assertEqual(data_frame['size'], 119701)
         self.assertEqual(data_frame['hasHomepage'], False)
+        self.assertEqual(data_frame['hasLicense'], True)
+        self.assertEqual(data_frame['hasCiConfig'], True)
+        self.assertEqual(data_frame['hasHomepage'], False)
         self.assertEqual(data_frame['isOwnerHomepage'], False)
         self.assertEqual(data_frame['commitsCount'], 1752)
         self.assertEqual(data_frame['branchesCount'], 116)
@@ -59,6 +62,9 @@ class TestCase(unittest2.TestCase):
         self.assertEqual(data_frame['forks'], 0)
         self.assertEqual(data_frame['mentionableUsers'], 1)
         self.assertEqual(data_frame['size'], 0)
+        self.assertEqual(data_frame['hasHomepage'], True)
+        self.assertEqual(data_frame['hasLicense'], False)
+        self.assertEqual(data_frame['hasCiConfig'], False)
         self.assertEqual(data_frame['hasHomepage'], True)
         self.assertEqual(data_frame['isOwnerHomepage'], True)
         self.assertEqual(data_frame['commitsCount'], 1)
