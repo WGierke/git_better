@@ -1,3 +1,5 @@
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 import numpy as np
 import pandas as pd
 from sklearn.externals import joblib
@@ -113,7 +115,7 @@ def find_best_repository_classification(df_values, labels, drop_languages=False)
         print "score on test data: ", test_score
         print "score on evaluation data: ", eval_score
         # could add confusion matrix
-        
+
         # Theano needs float64 X data
         if(classifier==TensorFlowNeuralNetwork):
             X_val, X_train, X_test = X_val_buf, X_train_buf, X_test_buf
