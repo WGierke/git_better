@@ -78,7 +78,7 @@ The following chapters will explain how we retrieved and cleaned the data for ea
 ### 3.1 Training and Test Data Set
 To train and evaluate the classifiers, we used a train/test/validation split.  
 First, the collected training data was splitted in a train and a test split in a stratified manner.
-This ensured that the percentage of the class labels was balanced in both splits.  
+This ensured that the distribution of class labels was balanced in both splits.  
 The classifiers were then trained on the train split and their accuracy was evaluated on the test split.
 To calculate their final quality, we evaluated them on the validation data.
 
