@@ -45,7 +45,7 @@ Since the difficulty to collect data entries of a certain label differed, we end
 As the class label distribution affects some classifiers heavily, we trained the models on randomly undersampled training data.
 
 ### Data Analysis
-To get a better idea of how the relationship between the data entries looks like in a higher dimensional space, we used PCA and t-SNE to reduce the  complexity of the data to 2D while retaining the principal components respectively the distances between the data points.
+To get a better idea of how the relationship between the data entries looks like in a higher dimensional space, we used principal component analysis (PCA) and t-distributed stochastic neighbor embedding (t-SNE) to reduce the  complexity of the data to 2D while retaining the principal components respectively the distances between the data points.
 The following figure visualizes the distribution of the labeled data entries using t-SNE.
 ![](https://cloud.githubusercontent.com/assets/6676439/21290072/ad44ed02-c4ad-11e6-8314-a078c3b1c853.png)
 You can find the complete code to generate the figure in the [t-SNE Visualization Notebook](https://github.com/WGierke/git_better/blob/master/t-SNE%20Visualization.ipynb). To explore the data interactively and in a three dimensional reduction you can use the [tensorflow embedding projector setup](https://github.com/WGierke/git_better#usage). [maybe add footnotes]
@@ -136,7 +136,7 @@ As an example, we are already able to drop 135 language features if we require t
 #### Feature Engineering
 In a next step, we derived further features from the features we already collected.
 We used polynomial feature generation which takes the input variables and builds all possible polynomial combination of this features up to a given degree.
-The idea of taking input features and applying a non-linear method on it to map the original values in another space is called "kernel trick" and is used by Support Vector Machines to learn non-linear models as well.  
+The idea of taking input features and applying a non-linear method on it to map the original values in another space is called "kernel trick" and is used by Support Vector Machines (SVM) to learn non-linear models as well.  
 As an example, suppose a dataset is given with the two features *size* and *watchers*:  
 
 |size|watchers|
@@ -171,17 +171,17 @@ We tried the following classifiers:
 ### Classification Using Text Data (Description and Readme)
 Intuitively, one wouldn't use the numeric features like the number of branches etc. to decide what label fits the repository best.
 Instead, one would use the description or the content of the readme to determine it.
-For this reason we used TF-IDF matrices to develop two NLP models that predict the label based on them.
+For this reason we used term frequency–inverse document frequency (tf-idf) matrices to develop two natural language processing (NLP) models that predict the label based on them.
 Since there's a semantic difference between the description and the readme of a repository, we discarded the idea of concatenating the text features and training one model on it.
 Instead, we trained two seperate models on the description respectively readme of the repositories.
 
 #### Data Cleaning and Preprocessing
-To remove words like 'the', 'a', 'and' etc. that occur very often and yield little meaning, we used the NLTK to drop English stopwords.
+To remove words like 'the', 'a', 'and' etc. that occur very often and yield little meaning, we used the Natural Language Toolkit (NLTK) to drop English stopwords.
 Since it's also not important whether the singular or the plural of words are used, we also used this toolkit to stem English words.
 
 #### Feature Generation from Existing Data
 
-We used a count vectorizer which converts a text into a n-dimensional vector representing the vocabulary, where n is the number of unique words. After this text-to-vector conversion we transformed the vector into a term frequency–inverse document frequency (tf-idf) vector which is a normalized representation of the original vector.
+We used a count vectorizer which converts a text into a n-dimensional vector representing the vocabulary, where n is the number of unique words. After this text-to-vector conversion we transformed the vector into a tf-idf vector which is a normalized representation of the original vector.
 
 #### Feature Selection
 [removal of rare/frequent words and stopwords]
