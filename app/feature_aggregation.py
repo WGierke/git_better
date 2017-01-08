@@ -4,6 +4,7 @@ TODO:       check folder names
 """
 from utils import get_client, get_last_repos_pagination_page
 from utils import request_graph_features, website_exists
+import traceback
 import json
 import re
 import requests
@@ -23,7 +24,8 @@ def aggregate_features(index, row, bar, df_q, token_q):
         new_data_frame = add_graph_features(new_data_frame, index, owner, name)
         new_data_frame = add_rest_features(new_data_frame, index, repo)
         new_data_frame = add_custom_features(new_data_frame, index, owner, name)
-        new_data_frame = fix_closed_issues(new_data_frame, index)
+        if "closed_issues" in new_data_frame.columns:
+            new_data_frame = fix_closed_issues(new_data_frame, index)
     except Exception, e:
         print "Exception in aggregate_features: " + str(e)
         token_q.put(token)
@@ -51,8 +53,11 @@ def add_graph_features(data_frame, index, owner, name):
 
 
 def get_graph_features_of_renamed_repo(data_frame, index, repo_owner, repo_name):
+    new_repo_name = "new_repo_name"
     try:
         r = requests.get("https://github.com/{}/{}".format(repo_owner, repo_name))
+        if len(r.history) < 1:
+            return {} # repo doesn't exist at all
         new_repo_link = r.history[0].headers['location']
         new_repo_link = new_repo_link.replace('https://github.com/', '')
         new_repo_owner = new_repo_link.split("/")[0]
@@ -68,10 +73,11 @@ def get_graph_features(data_frame, index, repo_owner, repo_name):
     response = json.loads(response)
 
     if "data" in response.keys():
+        data = None
         try:
             data = response["data"]["repositoryOwner"]["repository"]
         except:
-            print "Couldn't extract graph features data from " + response["data"]
+            print "Couldn't extract graph features data from " + str(response["data"])
         features = {}
         if data is None:
             return get_graph_features_of_renamed_repo(data_frame, index, repo_owner, repo_name)
