@@ -47,7 +47,7 @@ def clone_repo(owner, name, clone_url, pull=True):
 def merge_commit_messages(repo_dir, override=False):
     # check if commit messages are already merged
     if override or not os.path.exists(os.path.join(repo_dir,"merged_commit_messages.txt")):
-        with open(os.path.join(repo_dir,"merged_commit_messages.txt"), "w") as outfile:
+        with codecs.open(os.path.join(repo_dir,"merged_commit_messages.txt"), "w", "utf-8") as outfile:
             repo = Gittle(repo_dir)
             commits = repo.commit_info()
             for commit in commits:
@@ -62,7 +62,7 @@ def merge_commit_messages(repo_dir, override=False):
 def merge_files(repo_dir, override=False):
     # check if source code files are already merged
     if override or not os.path.exists(os.path.join(repo_dir,"merged_source.txt")):
-        with open(os.path.join(repo_dir,"merged_source.txt"), "w") as outfile:
+        with codecs.open(os.path.join(repo_dir,"merged_source.txt"), "w", "utf-8") as outfile:
             for subdir, dirs, files in os.walk(repo_dir):
                 for file in files:
                     filepath = os.path.join(subdir, file)
@@ -89,7 +89,7 @@ def merge_files(repo_dir, override=False):
 def merge_file_names(repo_dir, override=False):
     # check if file names are already merged
     if override or not os.path.exists(os.path.join(repo_dir,"merged_file_names.txt")):
-        with open(os.path.join(repo_dir,"merged_file_names.txt"), "w") as outfile:
+        with codecs.open(os.path.join(repo_dir,"merged_file_names.txt"), "w", "utf-8") as outfile:
             for subdir, dirs, files in os.walk(repo_dir):
                 for file in files:
                     # exclude git specific and repository mining files, they don't add extra knowledge
