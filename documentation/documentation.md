@@ -75,18 +75,14 @@ To decide which model prediction is the correct one we used the Majority Rule al
 One model was trained on the numerical features of a repository, one on the description, one on the content of the readme and one on the source code of each repository.  
 The following chapters will explain how we retrieved and cleaned the data for each model, how we selected relevant features  and how we developed the prediction model.
 
-### 3.1 Data Selection
-[_Creating a target data set: selecting a data set, or focusing on a subset of variables, or data samples, on which discovery is to be performed._]
+### 3.1 Training and Test Data Set
+To train and evaluate the classifiers, we used a train/test/validation split.  
+First, the collected training data was splitted in a train and a test split in a stratified manner.
+This ensured that the percentage of the class labels was balanced in both splits.  
+The classifiers were then trained on the train split and their accuracy was evaluated on the test split.
+To calculate their final quality, we evaluated them on the validation data.
 
-### 3.2 Creation of Training and Test Data Set
-* [Split data set into a training set, to train our different classifier,
-a test set, to test the accuracy of our simple classifier,
-a development set, to tune our hyperparameter without overfitting on this level,
-and a evaluation set, to calculate our final accuracy. [Is this conceptually right?]]
-* [Why no k-fold cross validation?]
-* [we used simple python splitting methods (train_test_split)]
-
-### 3.3 Classification Using Numeric Metadata of Repositories
+### 3.2 Classification Using Numeric Metadata of Repositories
 To develop classifiers based on numeric metadata of repositories, we used the following features:
 
 |Feature Name|Description|
@@ -118,10 +114,10 @@ Most of the features were available using the GitHub API.
 We added the *isOwnerHomepage* and *hasHomepage* features to detect whether a repository serves its source code using GitHub pages. This could allow us to identify WEB repositories easier.
 We furthermore hoped that using *hasCiConfig*, so whether a repo contains a configuration file for a Continuous Integration service, would improve the accuracy of detecting DEV repositories.
 
-#### 3.3.1 Data Cleaning and Preprocessing
+#### 3.2.1 Data Cleaning and Preprocessing
 Using the GitHub REST API and the GitHub GraphQL API, we were able to receive all features without extensive cleaning or preprocessing of the data.
 
-#### 3.3.2 Feature Selection
+#### 3.2.2 Feature Selection
 Feature Selection describes the process of dropping features that yield no or very little additional information in order to decrease overfitting and accelerate model fitting.
 Especially the programming language features needed to be reduced using Feature Selection.  
 GitHub detects [over 300 used programming languages](https://github.com/github/linguist/blob/master/lib/linguist/languages.yml) in repositories.
@@ -131,7 +127,7 @@ To remove those, we dropped features with low standard deviation and a low overa
 As an example, we are already able to drop 135 language features if we require that the sum of a language feature over all 1400 training data entries is supposed to be bigger than 5.
 
 
-#### 3.3.3 Feature Engineering
+#### 3.2.3 Feature Engineering
 In a next step, we derived further features from the features we already collected.
 We used polynomial feature generation which takes the input variables and builds all possible polynomial combination of this features up to a given degree.
 The idea of taking input features and applying a non-linear method on it to map the original values in another space is called "kernel trick" and is used by Support Vector Machines (SVM) to learn non-linear models as well.  
@@ -154,7 +150,7 @@ As one can see, the number of generated features increases polynomially in the n
 To use deep learning techniques you need many training samples because of their higher learning complexity. Our ~1500 samples aren't enough for this.
 Small feed-forward neural networks are applicable to our problem while deep neural networks are not.
 
-#### 3.3.4 Numeric Metadata Prediction Model
+#### 3.2.4 Numeric Metadata Prediction Model
 We tried the following classifiers:
 ...
 
@@ -163,63 +159,63 @@ We tried the following classifiers:
 [accuracy from single models]
 [accuracy from ensembled models]
 
-#### 3.3.5 Validation of Prediction Model
+#### 3.2.5 Validation of Prediction Model
 [accuracy+confusion matrix]
 
-### 3.4 Classification Using Text Data (Description and Readme)
+### 3.3 Classification Using Text Data (Description and Readme)
 Intuitively, one wouldn't use the numeric features like the number of branches etc. to decide what label fits the repository best.
 Instead, one would use the description or the content of the readme to determine it.
 For this reason we used term frequency–inverse document frequency (tf-idf) matrices to develop two natural language processing (NLP) models that predict the label based on them.
 Since there's a semantic difference between the description and the readme of a repository, we discarded the idea of concatenating the text features and training one model on it.
 Instead, we trained two seperate models on the description respectively readme of the repositories.
 
-#### 3.4.1 Data Cleaning and Preprocessing
+#### 3.3.1 Data Cleaning and Preprocessing
 To remove words like 'the', 'a', 'and' etc. that occur very often and yield little meaning, we used the Natural Language Toolkit (NLTK) to drop English stopwords.
 Since it's also not important whether the singular or the plural of words are used, we also used this toolkit to stem English words.
 
-#### 3.4.2 Feature Generation from Existing Data
+#### 3.3.2 Feature Generation from Existing Data
 
 We used a count vectorizer which converts a text into a n-dimensional vector representing the vocabulary, where n is the number of unique words. After this text-to-vector conversion we transformed the vector into a tf-idf vector which is a normalized representation of the original vector.
 
-#### 3.4.3 Feature Selection
+#### 3.3.3 Feature Selection
 [removal of rare/frequent words and stopwords]
 
-#### 3.4.4 Prediction Model
+#### 3.3.4 Prediction Model
 
 Based on our tf-idf vector we can classify the different repositories using the n-dimensional vector as features and normal classification algorithms.
 
-#### 3.4.5 Validation of Prediction Model
+#### 3.3.5 Validation of Prediction Model
 Readme Classifier: 51.6% Accuracy on Validation Data  
 ![](https://cloud.githubusercontent.com/assets/6676439/21713365/f01abb7e-d3f9-11e6-9a85-6322c7634f1e.png)
 
 Description Classifier: 48.4% Accuracy on Validation Data  
 ![](https://cloud.githubusercontent.com/assets/6676439/21713307/92e32c2a-d3f9-11e6-91a5-e33192dc58e7.png)
 
-### 3.5 Classification Using Source Code
+### 3.4 Classification Using Source Code
 
 We tested different approaches to use the source code and connected data of a repository to classify it. For this task we used only data included in the git repository, no github specific data like projects, the wiki pages... Data from the repositories are including source code files with comments and git workflow specific data (branches, commits...).
 We used in this chapter mainly the source code, file names and commit messages.
 
-#### 3.5.1 Data Cleaning and Preprocessing
+#### 3.4.1 Data Cleaning and Preprocessing
 
 We cloned each repository locally to retrieve the data we need. After this step we were able to merge all non-binary source code files, all filenames and all git commit messages into three different files. We didn't filter based on languages and all UTF-8 files are included. This could be an additional preprocessing step to improve and simplify the stemming and classification.
 
-#### 3.5.2 Feature Generation from Existing Data
+#### 3.4.2 Feature Generation from Existing Data
 
 We were able to use the same feature generation approach based on the count vectorizer and tf-idf vector as used in the text data classification. [Ugurel et al.](https://clgiles.ist.psu.edu/papers/KDD-2002-whatsthecode.pdf) showed a similar approach successfully.
 
-#### 3.5.3 Feature Selection
+#### 3.4.3 Feature Selection
 [removal of rare/frequent words and stopwords]
 
-#### 3.5.4 Prediction Model
+#### 3.4.4 Prediction Model
 
 [Same as text data]
 
 
-#### 3.5.6 Validation of Prediction Model
+#### 3.4.6 Validation of Prediction Model
 [accuracy+confusion matrix]
 
-### 3.6 Overall Prediction Model
+### 3.5 Overall Prediction Model
 
 * [Describe our ensembled model]
 * [Document three repositories which work well]
