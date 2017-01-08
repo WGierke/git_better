@@ -88,7 +88,7 @@ To develop classifiers based on numeric metadata of repositories, we used the fo
 |Feature Name|Description|
 |------------|-----------|
 |watchers | Number of users who watch the repo |
-|mentionableUsers | Number of users that can be mentioned (collaborators, contributors...) |
+|mentionableUsers | Number of mentionable users (collaborators, contributors, ...) |
 |open_pull_requests | Number of open pull requests |
 |closed_pull_requests | Number of closed pull requests |
 |merged_pull_requests | Number of merged pull requests |
@@ -223,10 +223,16 @@ We were able to use the same feature generation approach based on the count vect
 * [Document three repositories which work well]
 
 ## 4. Implemented Application
-* [implement the app that takes the input format and creates the output format]
-* [either 1) prompt for the training data to use or 2) directly include the learned model]
-* [explain the arguments of the main application here while referencing to the manual for setup]
+Our implemented application takes a file containing GitHub repository URLs, classifies them using an ensemble model that's trained on passed training data and saves the URLs and their computed labels on the disk.
+If no training data is given, the input data will be classified using our pre-trained model.
+It's possible to pass the input data, which is supposed to have the format of the [challenge example](https://github.com/InformatiCup/InformatiCup2017/blob/master/example-input), using the `-i` argument.
+Optional training data can be passed using the `-t` argument.  
+As an example, to classify the example data given by the challenge using the training data given by the challenge one would run:  
 
+`python app/main.py -i data/example-input.txt -t data/training_data_small.csv`  
+
+The saved output file `predictions.txt` will have the format of the [challenge example](https://github.com/InformatiCup/InformatiCup2017/blob/master/example-output).  
+For setup instructions please refer to the README.md file.
 
 ## 5. Validation
 * [boolean(!) matrix on validation data]
