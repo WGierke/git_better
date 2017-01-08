@@ -169,8 +169,15 @@ We tried the following classifiers:
 [accuracy+confusion matrix]
 
 ### Classification Using Text Data (Description and Readme)
+Intuitively, one wouldn't use the numeric features like the number of branches etc. to decide what label fits the repository best.
+Instead, one would use the description or the content of the readme to determine it.
+For this reason we used TF-IDF matrices to develop two NLP models that predict the label based on them.
+Since there's a semantic difference between the description and the readme of a repository, we discarded the idea of concatenating the text features and training one model on it.
+Instead, we trained two seperate models on the description respectively readme of the repositories.
 
 #### Data Cleaning and Preprocessing
+To remove words like 'the', 'a', 'and' etc. that occur very often and yield little meaning, we used the NLTK to drop English stopwords.
+Since it's also not important whether the singular or the plural of words are used, we also used this toolkit to stem English words.
 
 #### Feature Generation from Existing Data
 
@@ -184,7 +191,11 @@ We used a count vectorizer which converts a text into a n-dimensional vector rep
 Based on our tf-idf vector we can classify the different repositories using the n-dimensional vector as features and normal classification algorithms.
 
 ##### Validation of Prediction Model
-[accuracy+confusion matrix]
+Readme Classifier: 51.6% Accuracy on Validation Data  
+![](https://cloud.githubusercontent.com/assets/6676439/21713365/f01abb7e-d3f9-11e6-9a85-6322c7634f1e.png)
+
+Description Classifier: 48.4% Accuracy on Validation Data  
+![](https://cloud.githubusercontent.com/assets/6676439/21713307/92e32c2a-d3f9-11e6-91a5-e33192dc58e7.png)
 
 ### Classification Using Source Code
 
