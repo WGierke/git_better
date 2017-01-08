@@ -1,9 +1,11 @@
+from __future__ import division
 import argparse
 import os
 import sys
 import pandas as pd
 from load_data import process_data
-from training import load_pickle, JOBLIB_DESCRIPTION_PIPELINE_NAME
+from training import load_pickle, JOBLIB_DESCRIPTION_PIPELINE_NAME, JOBLIB_README_PIPELINE_NAME
+from sklearn.ensemble import VotingClassifier
 
 
 def main():
@@ -40,9 +42,14 @@ def train_and_predict(df_train, df_input):
 
 
 def predict(df_input):
-    # TODO
-    model = load_pickle(JOBLIB_DESCRIPTION_PIPELINE_NAME)
-    labels = model.predict(df_input["description"])
+    model_description = load_pickle(JOBLIB_DESCRIPTION_PIPELINE_NAME)
+    model_readme = load_pickle(JOBLIB_README_PIPELINE_NAME)
+    assert list(model_readme.classes_) == list(model_description.classes_)
+    probabilities = [model_description.predict_proba(df_input["description"])]
+    probabilities.append(model_readme.predict_proba(df_input["readme"]))
+    probabilities = [sum(e)/len(e) for e in zip(*probabilities)]
+    predictions = [model_readme.classes_[list(prob).index(max(prob))] for prob in probabilities]
+    labels = predictions
     df_input["label"] = labels
     df_input.repository = df_input.repository.apply(lambda x: "https://github.com/" + x)
     df_input[["repository", "label"]].to_csv("predictions.txt", sep=' ', header=False, index=False, encoding='utf-8')
