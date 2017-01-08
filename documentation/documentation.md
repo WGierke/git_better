@@ -92,7 +92,7 @@ To develop classifiers based on numeric metadata of repositories, we used the fo
 |Feature Name|Description|
 |------------|-----------|
 |watchers | Number of users who watch the repo |
-|mentionableUsers | Number of users who contributed to the repo |
+|mentionableUsers | Number of users that can be mentioned (collaborators, contributors...) |
 |open_pull_requests | Number of open pull requests |
 |closed_pull_requests | Number of closed pull requests |
 |merged_pull_requests | Number of merged pull requests |
@@ -169,7 +169,7 @@ We tried the following classifiers:
 ### 3.4 Classification Using Text Data (Description and Readme)
 Intuitively, one wouldn't use the numeric features like the number of branches etc. to decide what label fits the repository best.
 Instead, one would use the description or the content of the readme to determine it.
-For this reason we used term frequency–inverse document frequency (tf-idf) matrices to develop two natural language processing (NLP) models that predict the label based on them.
+For this reason we used term frequency–inverse document frequency (tf-idf) matrices to develop natural language processing (NLP) models that predict the label based on them.
 Since there's a semantic difference between the description and the readme of a repository, we discarded the idea of concatenating the text features and training one model on it.
 Instead, we trained two seperate models on the description respectively readme of the repositories.
 
