@@ -45,7 +45,7 @@ Since the difficulty to collect data entries of a certain label differed, we end
 As the class label distribution affects some classifiers heavily, we trained the models on randomly undersampled training data.
 
 ### 2.2 Data Analysis
-To get a better idea of how the relationship between the data entries looks like in a higher dimensional space, we used principal component analysis (PCA) and t-distributed stochastic neighbor embedding (t-SNE) to reduce the  complexity of the data to 2D while retaining the principal components respectively the distances between the data points.
+To get a better idea of how the relationships between the data entries look like in a higher dimensional space, we used principal component analysis (PCA) and t-distributed stochastic neighbor embedding (t-SNE) to reduce the  complexity of the data to 2D while retaining the principal components respectively the distances between the data points.
 The following figure visualizes the distribution of the labeled data entries using t-SNE.
 ![](https://cloud.githubusercontent.com/assets/6676439/21290072/ad44ed02-c4ad-11e6-8314-a078c3b1c853.png)
 You can find the complete code to generate the figure in the [t-SNE Visualization Notebook](https://github.com/WGierke/git_better/blob/master/t-SNE%20Visualization.ipynb). To explore the data interactively and in a three dimensional reduction you can use the [tensorflow embedding projector setup](https://github.com/WGierke/git_better#usage). [maybe add footnotes]
@@ -147,7 +147,7 @@ The transformed dataset using polynomial features with a degree up to 2 would lo
 
 As one can see, the number of generated features increases polynomially in the number of input features. That's why the previous Feature Selection step was very important.
 
-To use deep learning techniques you need many training samples because of their higher learning complexity. Our ~1500 samples aren't enough for this.
+As alternative we could have used deep learning techniques but you need many training samples because of their higher learning complexity. Our ~1500 samples aren't enough for this.
 Small feed-forward neural networks are applicable to our problem while deep neural networks are not.
 
 #### 3.2.4 Numeric Metadata Prediction Model
