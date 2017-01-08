@@ -176,6 +176,9 @@ We tried the following classifiers:
 
 We used a count vectorizer which converts a text into a n-dimensional vector representing the vocabulary, where n is the number of unique words. After this text-to-vector conversion we transformed the vector into a term frequency–inverse document frequency (tf-idf) vector which is a normalized representation of the original vector.
 
+#### Feature Selection
+[removal of rare/frequent words and stopwords]
+
 #### Prediction Model
 
 Based on our tf-idf vector we can classify the different repositories using the n-dimensional vector as features and normal classification algorithms.
@@ -195,6 +198,9 @@ We cloned each repository locally to retrieve the data we need. After this step 
 #### Feature Generation from Existing Data
 
 We were able to use the same feature generation approach based on the count vectorizer and tf-idf vector used in the text data classification. [Ugurel et al.](https://clgiles.ist.psu.edu/papers/KDD-2002-whatsthecode.pdf) showed a similar approach succesfully.
+
+#### Feature Selection
+[removal of rare/frequent words and stopwords]
 
 #### Prediction Model
 
