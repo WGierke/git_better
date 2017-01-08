@@ -191,6 +191,8 @@ Readme Classifier: 51.6% Accuracy on Validation Data
 Description Classifier: 48.4% Accuracy on Validation Data  
 ![](https://cloud.githubusercontent.com/assets/6676439/21713307/92e32c2a-d3f9-11e6-91a5-e33192dc58e7.png)
 
+[Include images with additional validation data]
+
 ### 3.4 Classification Using Source Code
 
 We tested different approaches to use the source code and connected data of a repository to classify it. For this task we used only data included in the git repository, no github specific data like projects, the wiki pages... Data from the repositories are including source code files with comments and git workflow specific data (branches, commits...).
