@@ -54,7 +54,7 @@ def find_best_text_pipeline(df_values, labels, pipeline=None, params=None):
 
 
 def find_best_repository_classification(df_values, labels, drop_languages=False):
-    X_train, X_test, y_train, y_test = train_test_split(df_values, labels, test_size=0.3, random_state=23)
+    X_train, X_test, y_train, y_test = train_test_split(df_values, labels, test_size=0.3, random_state=23, stratify=labels)
 
     # Remove classifiers which you don't want to run and add new ones here
     basic = [DecisionTree, Forest, NaiveBayes, SVM]#], TheanoNeuralNetwork, TensorFlowNeuralNetwork]
@@ -113,7 +113,7 @@ def find_best_repository_classification(df_values, labels, drop_languages=False)
         print "score on test data: ", test_score
         print "score on evaluation data: ", eval_score
         # could add confusion matrix
-        
+
         # Theano needs float64 X data
         if(classifier==TensorFlowNeuralNetwork):
             X_val, X_train, X_test = X_val_buf, X_train_buf, X_test_buf
