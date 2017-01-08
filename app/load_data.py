@@ -43,8 +43,9 @@ def process_data(training_data_path=TRAINING_DATA_PATH, data_frame=None):
     load_config()
     data_frame = clean_data(data_frame)
     data_frame = load_features_async(data_frame)
-    data_frame["description"].fillna("", inplace=True)
-    data_frame["readme"].fillna("", inplace=True)
+    for text_feature in ["description", "readme"]:
+        if text_feature in data_frame.columns:
+            data_frame[text_feature].fillna("", inplace=True)
     data_frame.fillna(0, inplace=True)
     return data_frame
 
