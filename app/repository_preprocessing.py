@@ -6,6 +6,7 @@ from binaryornot.check import is_binary
 import pandas as pd
 import traceback
 import codecs
+from sklearn.externals import joblib
 
 REPOS_DIR = "repo/"
 
@@ -135,4 +136,6 @@ if __name__ == '__main__':
     else:
         df_merged_text = pd.read_pickle(os.path.join(REPOS_DIR,'merged_text.pickle'))
 
-    find_best_text_pipeline(df_merged_text['source code'], df_merged_text['label'])
+    pipeline = find_best_text_pipeline(df_merged_text['source code'], df_merged_text['label'])
+
+    joblib.dump(pipeline, 'source-code-pipeline.pkl')
