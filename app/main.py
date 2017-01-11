@@ -4,8 +4,12 @@ import os
 import sys
 import pandas as pd
 from load_data import process_data
-from training import load_pickle, JOBLIB_DESCRIPTION_PIPELINE_NAME, JOBLIB_README_PIPELINE_NAME
-from sklearn.ensemble import VotingClassifier
+from classifier import get_numeric_ensemble
+from training import load_pickle, get_text_pipeline, \
+    get_undersample_df, drop_defect_rows, \
+    JOBLIB_DESCRIPTION_PIPELINE_NAME, JOBLIB_README_PIPELINE_NAME
+from evaluation import complete_columns
+from sklearn.ensemble import RandomForestClassifier, VotingClassifier
 
 
 def main():
@@ -16,6 +20,8 @@ def main():
     parser.add_argument('-t', '--training-file',
                         help='Path to the training file that should be used to train the classifier e.g. "data/example-output.txt". ' +
                         'Repository URL and label should be separated by a comma or a whitespace character.')
+    parser.add_argument('-p', '--processed', action='store_true',
+                            help='Specifies that training file already contains fetched features.')
     args = parser.parse_args()
 
     if os.path.isfile(args.input_file):
@@ -30,15 +36,23 @@ def classify(args):
     df_input = get_input_data(input_path)
     df_input = process_data(data_frame=df_input)
     if args.training_file:
-        df_train = get_training_data(args.training_file)
+        if args.processed:
+            df_train = pd.read_csv(args.training_file)
+        else:
+            df_train = pd.read_csv(args.training_file, sep=' ', names=["repository", "label"])
+            df_train = process_data(data_frame=df_train)
+        df_train = drop_defect_rows(df_train)
+        df_train = get_undersample_df(df_train)
         train_and_predict(df_train, df_input)
     else:
         predict(df_input)
 
 
-def train_and_predict(df_train, df_input):
-    # TODO
-    return
+def train_and_predict(df_train, df_X):
+    y_train = df_train.pop("label")
+    df_train, df_X = complete_columns(df_train, df_X)
+    ensemble_numeric = get_numeric_ensemble().fit(df_train, y_train)
+    print ensemble_numeric.predict(df_X)
 
 
 def predict(df_input):

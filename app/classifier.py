@@ -10,7 +10,8 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.naive_bayes import BernoulliNB
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier, \
-    BaggingClassifier, AdaBoostClassifier, GradientBoostingClassifier
+    BaggingClassifier, AdaBoostClassifier, GradientBoostingClassifier, \
+    VotingClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.grid_search import RandomizedSearchCV
 
@@ -27,16 +28,11 @@ except ImportError:
 
 from xgboost import XGBClassifier
 from operator import itemgetter
+from app.evaluation import drop_text_features
 
 
 class GIClassifier(object):
     clf = None
-
-    def __init__(self, X, Y, tune_parameters=False):
-        assert len(Y) == X.shape[0]
-        self.X = X
-        self.Y = Y
-        self.tune_parameters = tune_parameters
 
     def __call__(self, X):
         if self.tune_parameters:
@@ -66,167 +62,134 @@ class GIClassifier(object):
         print("Random Search")
         self.report(random_search.grid_scores_)
 
-    def fit(self):
+    def fit(self, df, Y, tune_parameters=False):
+        assert len(Y) == len(df)
+        df = drop_text_features(df)
+        self.X = df.values
+        self.Y = Y
+        self.tune_parameters = tune_parameters
         self.clf.fit(self.X, self.Y)
         return self
 
-    def predict(self, X):
+    def predict(self, df):
+        df = df.fillna(0)
+        df = drop_text_features(df)
+        X = df.values
         return self.clf.predict(X)
 
-    def predict_proba(self, X):
+    def predict_proba(self, df):
+        df = df.fillna(0)
+        df = drop_text_features(df)
+        X = df.values
         return self.clf.predict_proba(X)
 
 
-class DecisionTree(GIClassifier):
-    def __init__(self, X, Y, tune_parameters=False):
-        super(DecisionTree, self).__init__(X, Y, tune_parameters)
-        if tune_parameters:
-            self.param_dist_random = {'max_depth': sp_randint(1, 100),
-                                      'min_samples_leaf': sp_randint(1, 150),
-                                      'max_features': sp_randint(1, self.X.shape[1] - 1),
-                                      'criterion': ['entropy', 'gini']}
-        self.clf = DecisionTreeClassifier()
+    def get_params(self, **args):
+        return self.clf.get_params(**args)
 
+
+class DecisionTree(GIClassifier):
+    def __init__(self, **args):
+        self.param_dist_random = {'max_depth': sp_randint(1, 100),
+                                      'min_samples_leaf': sp_randint(1, 150),
+                                      'criterion': ['entropy', 'gini']}
+        self.clf = DecisionTreeClassifier(**args)
 
 class Forest(GIClassifier):
-    def __init__(self, X, Y, tune_parameters=False):
-        super(Forest, self).__init__(X, Y, tune_parameters)
-        if tune_parameters:
-            self.param_dist_random = {'max_depth': sp_randint(1, 100),
+    def __init__(self, **args):
+        self.param_dist_random = {'max_depth': sp_randint(1, 100),
                                       'min_samples_leaf': sp_randint(1, 100),
-                                      'max_features': sp_randint(1, self.X.shape[1] - 1),
                                       'criterion': ['entropy', 'gini']}
-        self.clf = RandomForestClassifier(n_estimators=100, n_jobs=8)
+        self.clf = RandomForestClassifier(**args)
 
 
 class KNeighbors(GIClassifier):
-    def __init__(self, X, Y, tune_parameters=False):
-        super(KNeighbors, self).__init__(X, Y, tune_parameters)
-        if tune_parameters:
-            self.param_dist_random = {'leaf_size':sp_randint(20, 50),
+    def __init__(self, **args):
+        self.param_dist_random = {'leaf_size':sp_randint(20, 50),
                                     'n_neighbors': sp_randint(4, 30)}
-        self.clf = KNeighborsClassifier()
+        self.clf = KNeighborsClassifier(**args)
 
 
 class NaiveBayes(GIClassifier):
-    clf = BernoulliNB(binarize=True)
+    def __init__(self, **args):
+        self.clf = BernoulliNB(**args)
 
 
 class SVM(GIClassifier):
-    def __init__(self, X, Y, tune_parameters=False):
-        super(SVM, self).__init__(X, Y, tune_parameters)
-        if tune_parameters:
-            self.param_dist_random = {'shrinking': [True, False],
+    def __init__(self, **args):
+        self.param_dist_random = {'shrinking': [True, False],
                                       'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
                                       'degree': sp_randint(2, 5)}
-        self.clf = SVC(kernel='rbf', shrinking=True)
+        self.clf = SVC(**args)
 
-    def predict_proba(self, X):
-        return self.clf.decision_function(X)
 
 
 class BagEnsemble(GIClassifier):
-    classifier = None
+    base_estimator = None
     estimators = 20
     max_features = .5
     max_samples = .5
 
-    def __init__(self, X, Y, tune_parameters=False):
-        super(BagEnsemble, self).__init__(X, Y, tune_parameters)
-        if tune_parameters:
-            self.param_dist_random = {'max_features': sp_randint(1, self.X.shape[1]),
+    def __init__(self, **args):
+        self.param_dist_random = {'max_features': sp_randint(1, self.X.shape[1]),
                                       'n_estimators': sp_randint(1, 100)}
-        self.clf = BaggingClassifier(self.classifier, n_estimators=self.estimators, n_jobs=8,
+        self.clf = BaggingClassifier(base_estimator=self.base_estimator, n_estimators=self.estimators, n_jobs=-1,
                                      max_samples=self.max_samples, max_features=self.max_features)
 
 
 class TreeBag(BagEnsemble):
-    classifier = DecisionTreeClassifier()
+    def __init__(self, **args):
+        self.base_estimator = DecisionTreeClassifier(**args)
 
 
 class SVMBag(GIClassifier):
-    classifier = None
-    estimators = 10
-    max_features = .5
-    max_samples = .5
 
-    def __init__(self, X, Y, tune_parameters=False):
-        super(SVMBag, self).__init__(X, Y, tune_parameters)
-        self.X, self.Y = X, Y
+    def __init__(self, **args):
         self.classifier = SVC(decision_function_shape='ovo')
-        self.clf = BaggingClassifier(self.classifier, n_estimators=self.estimators, n_jobs=8,
-                                     max_samples=self.max_samples, max_features=self.max_features)
-
-    def predict(self, X):
-        X = X
-        return self.clf.predict(X)
-
+        self.clf = BaggingClassifier(**args)
 
 class AdaBoostEnsemble(GIClassifier):
-    classifier = None
-    estimators = 800
-    learning_rate = .25
-    algorithm = 'SAMME.R'
 
-    def __init__(self, X, Y, tune_parameters=False):
-        super(AdaBoostEnsemble, self).__init__(X, Y, tune_parameters)
-        if tune_parameters:
-            self.param_dist_random = {'n_estimators': sp_randint(1, 1000),
+    def __init__(self, **args):
+        self.param_dist_random = {'n_estimators': sp_randint(1, 1000),
                                       'algorithm': ['SAMME', 'SAMME.R'],
-                                      'learning_rate': random.random(100)}
-            self.param_dist_grid = {'n_estimators': [100, 200, 400, 900, 1000],
+                                      'learning_rate': 100* random.random()}
+        self.param_dist_grid = {'n_estimators': [100, 200, 400, 900, 1000],
                                     'algorithm': ['SAMME', 'SAMME.R'],
                                     'learning_rate': [.1, .2, 0.25, .3,
                                                       .4, .5, .6]}
-        self.clf = AdaBoostClassifier(self.classifier,
-                                      n_estimators=self.estimators,
-                                      learning_rate=self.learning_rate,
-                                      algorithm=self.algorithm)
+        self.clf = AdaBoostClassifier(**args)
 
 
 class AdaTree(AdaBoostEnsemble):
-    classifier = DecisionTreeClassifier()
+
+    def __init__(self, **args):
+        self.clf = AdaBoostClassifier(base_estimator=DecisionTreeClassifier())
 
 
 class AdaBayes(AdaBoostEnsemble):
-    classifier = BernoulliNB()
+
+    def __init__(self, **args):
+        self.clf = AdaBoostClassifier(base_estimator=BernoulliNB)
 
 
 class AdaSVM(AdaBoostEnsemble):
-    algorithm = 'SAMME'
 
-    def __init__(self, X, Y, tune_parameters=False):
-        super(AdaSVM, self).__init__(X, Y, tune_parameters)
-        self.classifier = SVC(decision_function_shape='ovo')
+    def __init__(self, **args):
+        self.clf = AdaBoostClassifier(base_estimator=SVC)
 
 
 class GradBoost(GIClassifier):
-    estimators = 2000
-    learning_rate = 1
-    max_depth = 1
-    max_features = 0.97
 
-    def __init__(self, X, Y, tune_parameters=False):
-        super(GradBoost, self).__init__(X, Y)
-        self.clf = GradientBoostingClassifier(n_estimators=self.estimators,
-                                              learning_rate=self.learning_rate,
-                                              max_depth=self.max_depth,
-                                              max_features=self.max_features)
-
-    def predict(self, X):
-        return self.clf.predict(X)
-
-    def predict_proba(self, X):
-        return self.clf.predict(X)
+    def __init__(self, **args):
+        self.clf = GradientBoostingClassifier(**args)
 
 
 class XGBoost(GIClassifier):
-    def __init__(self, X, Y, tune_parameters=False):
-        super(XGBoost, self).__init__(X, Y, tune_parameters)
-        if tune_parameters:
-            self.param_dist_random = {'max_depth': sp_randint(1, 20),
+    def __init__(self, **args):
+        self.param_dist_random = {'max_depth': sp_randint(1, 20),
                                       'n_estimators' : sp_randint(50, 200)}
-        self.clf = XGBClassifier()
+        self.clf = XGBClassifier(**args)
 
 
 
@@ -277,3 +240,20 @@ class TensorFlowNeuralNetwork(GIClassifier):
     def predict_proba(self, X):
         return self.clf.predict_proba(X)
         #.todense())
+
+def get_numeric_ensemble():
+    return VotingClassifier(voting='soft', estimators=[
+        ('clf_bayes', NaiveBayes(binarize=True)),
+        ('clf_tree', DecisionTree()),
+        ('clf_forest', Forest()),
+        ('clf_kneighbors', KNeighbors()),
+        ('clf_svm', SVM(kernel='rbf', shrinking=True, probability=True)),
+        ('clf_grad_boost', GradBoost()),
+        ('clf_xgboost', XGBoost())])
+        # ('clf_bag_ensemble', BagEnsemble()),
+        #('clf_treebag', TreeBag())])
+        # ('clf_svm_bag', SVMBag(base_estimator=SVC)),
+        # ('clf_adaboost', AdaBoostEnsemble()),
+        # ('clf_adatree', AdaTree(base_estimator=DecisionTreeClassifier)),
+        # ('clf_adabayes', AdaBayes()),
+        # ('clf_adasvm', AdaSVM())])
