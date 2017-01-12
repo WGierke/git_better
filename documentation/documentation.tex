@@ -23,10 +23,9 @@
  \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
 
 \begin{document}
-\section{InformatiCup2017
-Documentation}\label{informaticup2017-documentation}
+InformatiCup2017 Documentation %\label{informaticup2017-documentation}
 
-\subsection{1. Challenge Description}\label{challenge-description}
+\section{Challenge Description}\label{challenge-description}
 
 This years InformatiCup challenge was to classify GitHub repositories
 automatically based on given class descriptions and sample data. In this
@@ -34,13 +33,13 @@ work we present how we explored the given data, detected relevant
 features and built an application that predicts repository labels using
 different machine learning algorithms.
 
-\subsection{2. Data Exploration}\label{data-exploration}
+\section{Data Exploration}\label{data-exploration}
 
 This section explains how we extended the training data set and how we
 explored it using different dimension reduction algorithms and
 visualization tools.
 
-\subsubsection{2.1 Data Retrieval}\label{data-retrieval}
+\subsection{Data Retrieval}\label{data-retrieval}
 
 The corresponding repository of the challenge includes 30 labeled
 repositories and 31 repositories that can be used as validation data. It
@@ -101,7 +100,7 @@ certain label differed, we ended up with unbalanced training data. As
 the class label distribution affects some classifiers heavily, we
 trained the models on randomly undersampled training data.
 
-\subsubsection{2.2 Data Analysis}\label{data-analysis}
+\subsection{Data Analysis}\label{data-analysis}
 
 To get a better idea of how the relationships between the data entries
 look like in a higher dimensional space, we used principal component
@@ -139,7 +138,7 @@ better even if they are also biased. As already mentioned, a perfect
 training and validation set would only contain repositories that have
 been sampled randomly and labeled manually.
 
-\subsection{3. Prediction Model}\label{prediction-model}
+\section{Prediction Model}\label{prediction-model}
 
 When a model fits its training data too well and doesn't learn to
 generalize, it's considered to ``overfit''. This can occur if the model
@@ -167,7 +166,7 @@ The following chapters will explain how we retrieved and cleaned the
 data for each model, how we selected relevant features and how we
 developed the prediction model.
 
-\subsubsection{3.1 Training and Test Data
+\subsection{Training and Test Data
 Set}\label{training-and-test-data-set}
 
 To train and evaluate the classifiers, we used a train/test/validation
@@ -179,7 +178,7 @@ The classifiers were then trained on the train split and their accuracy
 was evaluated on the test split. To calculate their final quality, we
 evaluated them on the validation data.
 
-\subsubsection{3.2 Classification Using Numeric Metadata of
+\subsection{Classification Using Numeric Metadata of
 Repositories}\label{classification-using-numeric-metadata-of-repositories}
 
 To develop classifiers based on numeric metadata of repositories, we
@@ -225,14 +224,14 @@ us to identify WEB repositories easier. We furthermore hoped that using
 a Continuous Integration service, would improve the accuracy of
 detecting DEV repositories.
 
-\paragraph{3.2.1 Data Cleaning and
+\subsubsection{Data Cleaning and
 Preprocessing}\label{data-cleaning-and-preprocessing}
 
 Using the GitHub REST API and the GitHub GraphQL API, we were able to
 receive all features without extensive cleaning or preprocessing of the
 data.
 
-\paragraph{3.2.2 Feature Selection}\label{feature-selection}
+\subsubsection{Feature Selection}\label{feature-selection}
 
 Feature Selection describes the process of dropping features that yield
 no or very little additional information in order to decrease
@@ -251,7 +250,7 @@ able to drop 135 language features if we require that the sum of a
 language feature over all 1400 training data entries is supposed to be
 bigger than 5.
 
-\paragraph{3.2.3 Feature Engineering}\label{feature-engineering}
+\subsubsection{Feature Engineering}\label{feature-engineering}
 
 In a next step, we derived further features from the features we already
 collected. We used polynomial feature generation which takes the input
@@ -296,7 +295,7 @@ many training samples because of their higher learning complexity. Our
 neural networks are applicable to our problem while deep neural networks
 are not.
 
-\paragraph{3.2.4 Numeric Metadata Prediction
+\subsubsection{Numeric Metadata Prediction
 Model}\label{numeric-metadata-prediction-model}
 
 We tried the following classifiers: \ldots{}
@@ -305,12 +304,12 @@ We tried the following classifiers: \ldots{}
 
 {[}accuracy from single models{]}{[}accuracy from ensembled models{]}
 
-\paragraph{3.2.5 Validation of Prediction
+\subsubsection{Validation of Prediction
 Model}\label{validation-of-prediction-model}
 
 {[}accuracy+confusion matrix{]}
 
-\subsubsection{3.3 Classification Using Text Data (Description and
+\subsection{Classification Using Text Data (Description and
 Readme)}\label{classification-using-text-data-description-and-readme}
 
 Intuitively, one wouldn't use the numeric features like the number of
@@ -324,7 +323,7 @@ discarded the idea of concatenating the text features and training one
 model on it. Instead, we trained two seperate models on the description
 respectively readme of the repositories.
 
-\paragraph{3.3.1 Data Cleaning and
+\subsubsection{Data Cleaning and
 Preprocessing}\label{data-cleaning-and-preprocessing-1}
 
 To remove words like `the', `a', `and' etc. that occur very often and
@@ -333,7 +332,7 @@ drop English stopwords. Since it's also not important whether the
 singular or the plural of words are used, we also used this toolkit to
 stem English words.
 
-\paragraph{3.3.2 Feature Generation from Existing
+\subsubsection{Feature Generation from Existing
 Data}\label{feature-generation-from-existing-data}
 
 We used a count vectorizer which converts a text into a n-dimensional
@@ -342,17 +341,17 @@ words. After this text-to-vector conversion we transformed the vector
 into a tf-idf vector which is a normalized representation of the
 original vector.
 
-\paragraph{3.3.3 Feature Selection}\label{feature-selection-1}
+\subsubsection{Feature Selection}\label{feature-selection-1}
 
 {[}removal of rare/frequent words and stopwords{]}
 
-\paragraph{3.3.4 Prediction Model}\label{prediction-model-1}
+\subsubsection{Prediction Model}\label{prediction-model-1}
 
 Based on our tf-idf vector we can classify the different repositories
 using the n-dimensional vector as features and normal classification
 algorithms.
 
-\paragraph{3.3.5 Validation of Prediction
+\subsubsection{Validation of Prediction
 Model}\label{validation-of-prediction-model-1}
 
 Readme Classifier: 51.6\% Accuracy on Validation Data\\
@@ -363,7 +362,7 @@ Description Classifier: 48.4\% Accuracy on Validation Data\\
 
 {[}Include images with additional validation data{]}
 
-\subsubsection{3.4 Classification Using Source
+\subsection{Classification Using Source
 Code}\label{classification-using-source-code}
 
 We tested different approaches to use the source code and connected data
@@ -374,7 +373,7 @@ with comments and git workflow specific data (branches,
 commits\ldots{}). We used in this chapter mainly the source code, file
 names and commit messages.
 
-\paragraph{3.4.1 Data Cleaning and
+\subsubsection{Data Cleaning and
 Preprocessing}\label{data-cleaning-and-preprocessing-2}
 
 We cloned each repository locally to retrieve the data we need. After
@@ -384,7 +383,7 @@ didn't filter based on languages and all UTF-8 files are included. This
 could be an additional preprocessing step to improve and simplify the
 stemming and classification.
 
-\paragraph{3.4.2 Feature Generation from Existing
+\subsubsection{Feature Generation from Existing
 Data}\label{feature-generation-from-existing-data-1}
 
 We were able to use the same feature generation approach based on the
@@ -393,20 +392,20 @@ classification.
 \href{https://clgiles.ist.psu.edu/papers/KDD-2002-whatsthecode.pdf}{Ugurel
 et al.} showed a similar approach successfully.
 
-\paragraph{3.4.3 Feature Selection}\label{feature-selection-2}
+\subsubsection{Feature Selection}\label{feature-selection-2}
 
 {[}removal of rare/frequent words and stopwords{]}
 
-\paragraph{3.4.4 Prediction Model}\label{prediction-model-2}
+\subsubsection{Prediction Model}\label{prediction-model-2}
 
 {[}Same as text data{]}
 
-\paragraph{3.4.6 Validation of Prediction
+\subsubsection{Validation of Prediction
 Model}\label{validation-of-prediction-model-2}
 
 {[}accuracy+confusion matrix{]}
 
-\subsubsection{3.5 Overall Prediction
+\subsection{Overall Prediction
 Model}\label{overall-prediction-model}
 
 \begin{itemize}
@@ -417,7 +416,7 @@ Model}\label{overall-prediction-model}
   {[}Document three repositories which work well{]}
 \end{itemize}
 
-\subsection{4. Implemented Application}\label{implemented-application}
+\section{Implemented Application}\label{implemented-application}
 
 Our implemented application takes a file containing GitHub repository
 URLs, classifies them using an ensemble model that's trained on passed
@@ -439,7 +438,7 @@ the
 example}.\\
 For setup instructions please refer to the README.md file.
 
-\subsection{5. Validation}\label{validation}
+\section{Validation}\label{validation}
 
 \begin{itemize}
 \tightlist
@@ -454,7 +453,7 @@ For setup instructions please refer to the README.md file.
   {[}(elaborate on the additional dataset given by another team?){]}
 \end{itemize}
 
-\subsection{6. Extensions}\label{extensions}
+\section{Extensions}\label{extensions}
 
 To bring our research work to production, we built a
 \href{https://git-better.herokuapp.com/}{service} that classifies your
