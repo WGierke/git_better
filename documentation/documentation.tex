@@ -14,9 +14,13 @@
 \usepackage{grffile}
 \usepackage{hyperref}
 \usepackage{ulem}
+\usepackage{tabularx}
 
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+  
+\newcommand{\specialcell}[2][c]{%
+ \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
 
 \begin{document}
 \section{InformatiCup2017
@@ -181,130 +185,37 @@ Repositories}\label{classification-using-numeric-metadata-of-repositories}
 To develop classifiers based on numeric metadata of repositories, we
 used the following features:
 
-\begin{longtable}[]{@{}ll@{}}
-\toprule
-\begin{minipage}[b]{0.17\columnwidth}\raggedright\strut
-Feature Name\strut
-\end{minipage} & \begin{minipage}[b]{0.16\columnwidth}\raggedright\strut
-Description\strut
-\end{minipage}\tabularnewline
-\midrule
-\endhead
-\begin{minipage}[t]{0.17\columnwidth}\raggedright\strut
-watchers\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
-Number of users who watch the repo\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.17\columnwidth}\raggedright\strut
-mentionableUsers\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
-Number of mentionable users (collaborators, contributors,
-\ldots{})\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.17\columnwidth}\raggedright\strut
-open\_pull\_requests\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
-Number of open pull requests\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.17\columnwidth}\raggedright\strut
-closed\_pull\_requests\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
-Number of closed pull requests\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.17\columnwidth}\raggedright\strut
-merged\_pull\_requests\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
-Number of merged pull requests\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.17\columnwidth}\raggedright\strut
-open\_issues\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
-Number of open issues\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.17\columnwidth}\raggedright\strut
-closed\_issues\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
-Number of closed issues\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.17\columnwidth}\raggedright\strut
-forks\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
-Number of forks\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.17\columnwidth}\raggedright\strut
-stargazers\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
-Number of users who ``starred'' the repo\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.17\columnwidth}\raggedright\strut
-projects\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
-Number of projects (integrated project management tool)\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.17\columnwidth}\raggedright\strut
-size\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
-Size of the source code in KB\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.17\columnwidth}\raggedright\strut
-isOwnerHomepage\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
-Is the name of the repo REPO\_OWNER.github.io or
-REPO\_OWNER.github.com?\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.17\columnwidth}\raggedright\strut
-hasHomepage\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
-Does the website REPO\_OWNER.github.io/REPO\_NAME exist?\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.17\columnwidth}\raggedright\strut
-hasLicense\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
-Does the repo have a license file?\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.17\columnwidth}\raggedright\strut
-hasTravisConfig\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
-Does the repo have a Travis configuration file?\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.17\columnwidth}\raggedright\strut
-hasCircleConfig\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
-Does the repo have a CircleCI configuration file?\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.17\columnwidth}\raggedright\strut
-hasCiConfig\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
-hasTravisConfig OR hasCircleConfig\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.17\columnwidth}\raggedright\strut
-commitsCount\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
-Number of commits\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.17\columnwidth}\raggedright\strut
-branchesCount\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
-Number of branches\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.17\columnwidth}\raggedright\strut
-tagsCount\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
-Number of tags\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.17\columnwidth}\raggedright\strut
-releasesCount\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
-Number of releases\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.17\columnwidth}\raggedright\strut
-LANGUAGE\_*\strut
-\end{minipage} & \begin{minipage}[t]{0.16\columnwidth}\raggedright\strut
-How much code was written in the language in percent
-(e.g.~LANGUAGE\_Python, \ldots{})?\strut
-\end{minipage}\tabularnewline
-\bottomrule
-\end{longtable}
+\begin{table}[]
+\centering
+\caption{My caption}
+\label{my-label}
+\begin{tabularx}{\linewidth}{|l|X|}
+\hline
+Feature Name           & Description                                                                        \\ \hline
+watchers               & Number of users who watch the repo                                                 \\ \hline
+mentionableUsers       & Number of mentionable users (collaborators, contributors, ...)                     \\ \hline
+open\_pull\_requests   & Number of open pull requests                                                       \\ \hline
+closed\_pull\_requests & Number of closed pull requests                                                     \\ \hline
+merged\_pull\_requests & Number of merged pull requests                                                     \\ \hline
+open\_issues           & Number of open issues                                                              \\ \hline
+closed\_issues         & Number of closed issues                                                            \\ \hline
+forks                  & Number of forks                                                                    \\ \hline
+stargazers             & Number of users who "starred" the repo                                             \\ \hline
+projects               & Number of projects (integrated project management tool)                            \\ \hline
+size                   & Size of the source code in KB                                                      \\ \hline
+isOwnerHomepage        & Is the name of the repo REPO\_OWNER.github.io or REPO\_OWNER.github.com?         \\ \hline
+hasHomepage            & Does the website \newline{}REPO\_OWNER.github.io/REPO\_NAME exist?                           \\ \hline
+hasLicense             & Does the repo have a license file?                                                 \\ \hline
+hasTravisConfig        & Does the repo have a Travis configuration file?                                    \\ \hline
+hasCircleConfig        & Does the repo have a CircleCI configuration file?                                  \\ \hline
+hasCiConfig            & hasTravisConfig OR hasCircleConfig                                                 \\ \hline
+commitsCount           & Number of commits                                                                  \\ \hline
+branchesCount          & Number of branches                                                                 \\ \hline
+tagsCount              & Number of tags                                                                     \\ \hline
+releasesCount          & Number of releases                                                                 \\ \hline
+LANGUAGE\_*            & How much code was written in the language in percent (e.g. LANGUAGE\_Python, ...)? \\ \hline
+\end{tabularx}
+\end{table}
 
 Most of the features were available using the GitHub API. We added the
 \emph{isOwnerHomepage} and \emph{hasHomepage} features to detect whether
