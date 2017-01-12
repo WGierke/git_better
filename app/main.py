@@ -3,6 +3,7 @@ import argparse
 import os
 import sys
 import pandas as pd
+import numpy as np
 from load_data import process_data
 from classifier import get_numeric_ensemble
 from training import load_pickle, get_text_pipeline, \
@@ -10,6 +11,8 @@ from training import load_pickle, get_text_pipeline, \
     JOBLIB_DESCRIPTION_PIPELINE_NAME, JOBLIB_README_PIPELINE_NAME
 from evaluation import complete_columns
 from sklearn.ensemble import RandomForestClassifier, VotingClassifier
+from sklearn.cross_validation import train_test_split
+
 
 
 def main():
@@ -49,10 +52,21 @@ def classify(args):
 
 
 def train_and_predict(df_train, df_X):
-    y_train = df_train.pop("label")
     df_train, df_X = complete_columns(df_train, df_X)
-    ensemble_numeric = get_numeric_ensemble().fit(df_train, y_train)
-    print ensemble_numeric.predict(df_X)
+    df_val = pd.read_csv("data/validation_data.csv")
+    df_train, df_val = complete_columns(df_train, df_val)
+    df_val, df_X = complete_columns(df_val, df_X)
+
+    X_train, X_test = train_test_split(df_train, test_size=0.3, stratify=df_train["label"])
+    y_train = X_train.pop("label")
+    y_test = X_test.pop("label")
+    y_val = df_val.pop("label")
+    df_X.pop("label")
+    ensemble_numeric = get_numeric_ensemble().fit(X_train, y_train)
+
+    print "Score on Test set: " + str(ensemble_numeric.score(X_test, y_test))
+    print "Score on Validation set: " + str(ensemble_numeric.score(df_val, y_val))
+    print "Prediction for input: " + str(ensemble_numeric.predict(df_X))
 
 
 def predict(df_input):

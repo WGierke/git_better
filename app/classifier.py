@@ -28,7 +28,7 @@ except ImportError:
 
 from xgboost import XGBClassifier
 from operator import itemgetter
-from app.evaluation import drop_text_features
+from evaluation import drop_text_features
 
 
 class GIClassifier(object):

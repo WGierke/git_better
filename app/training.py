@@ -18,7 +18,7 @@ from classifier import DecisionTree, Forest, NaiveBayes, SVM, TheanoNeuralNetwor
     TensorFlowNeuralNetwork, XGBoost
 from classifier import TreeBag, SVMBag
 from classifier import AdaTree, AdaBayes, AdaSVM, GradBoost
-from app.evaluation import complete_columns
+from evaluation import complete_columns
 
 JOBLIB_SUFFIX = '.joblib.pkl'
 JOBLIB_DESCRIPTION_PIPELINE_NAME = 'best_description_pipeline_4839'
