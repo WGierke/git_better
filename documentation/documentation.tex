@@ -76,19 +76,19 @@ solution''\tabularnewline
 6 & DATA & Showcases ``Open Data''\tabularnewline
 86 & HW & Github Search for ``homework, solution''\tabularnewline
 \bottomrule
+\label{data_sources}
 \end{longtable}
 
 Overall, we were able to collect 1412 labeled repositories.
 
-\textbf{Training Data Distribution}
-
 \begin{figure}
-\centering
-\includegraphics[max size={\textwidth}{\textheight}]{graphics/training_data_distribution.png}
-\caption{Training Data Distribution}
+	\centering
+		\includegraphics[max size={\textwidth}{\textheight}]{graphics/training_data_distribution.png}
+	\caption{Training Data Distribution}
+	\label{training_data_distribution}
 \end{figure}
 
-As one can see, we tried to use key words for automated searching that
+As one can see in the table \ref{data_sources}, we tried to use key words for automated searching that
 are as close to the words that were used to describe the different
 classes as possible. Though, it's still possible that the collected
 training data is biased as we actively selected repositories by
@@ -107,14 +107,17 @@ To get a better idea of how the relationships between the data entries
 look like in a higher dimensional space, we used principal component
 analysis (PCA) and t-distributed stochastic neighbor embedding (t-SNE)
 to reduce the complexity of the data to 2D while retaining the principal
-components respectively the distances between the data points. The
-following figure visualizes the distribution of the labeled data entries
+components respectively the distances between the data points. The 
+figure \ref{t-sne-training-data} visualizes the distribution of the labeled data entries
 using t-SNE.
+
 \begin{figure}
-\centering
-\includegraphics[max size={\textwidth}{\textheight}]{graphics/t-sne-training-data.png}
-\caption{Distribution of the labeled data entries using t-SNE}
+	\centering
+		\includegraphics[max size={\textwidth}{\textheight}]{graphics/t-sne-training-data.png}
+	\caption{Distribution of the labeled data entries using t-SNE}
+	\label{t-sne-training-data}
 \end{figure}
+
 You can find the complete code to generate the figure in the
 \href{https://github.com/WGierke/git_better/blob/master/t-SNE\%20Visualization.ipynb}{t-SNE
 Visualization Notebook}. To explore the data interactively and in a
@@ -125,11 +128,13 @@ projector setup}. {[}maybe add footnotes{]} One can notice that the
 complicated to separate the other classes.
 
 We also used t-SNE to visualize the similarity between our retrieved
-training data and the given validation data.
+training data and the given validation data as you can see in figure \ref{t-sne-validation-data}.
+
 \begin{figure}
-\centering
-\includegraphics[max size={\textwidth}{\textheight}]{graphics/t-sne-validation-data.png}
-\caption{Distribution of the validation data entries using t-SNE}
+	\centering
+		\includegraphics[max size={\textwidth}{\textheight}]{graphics/t-sne-validation-data.png}
+	\caption{Distribution of the validation data entries using t-SNE}
+	\label{t-sne-validation-data}
 \end{figure}
 
 Since the validation data does not form separate clusters or outliers,
@@ -191,12 +196,12 @@ evaluated them on the validation data.
 Repositories}\label{classification-using-numeric-metadata-of-repositories}
 
 To develop classifiers based on numeric metadata of repositories, we
-used the following features:
+used the features explained in table \ref{features}.
 
 \begin{table}[]
 \centering
 \caption{My caption}
-\label{my-label}
+\label{features}
 \begin{tabularx}{\linewidth}{|l|X|}
 \hline
 Feature Name           & Description                                                                        \\ \hline
@@ -269,9 +274,10 @@ applying a non-linear method on it to map the original values in another
 space is called ``kernel trick'' and is used by Support Vector Machines
 (SVM) to learn non-linear models as well.\\
 As an example, suppose a dataset is given with the two features
-\emph{size} and \emph{watchers}:
+\emph{size} and \emph{watchers} as in table \ref{example-feature-engineering-basic}.
 
 \begin{longtable}[]{@{}cc@{}}
+%\label{example-feature-engineering-basic}
 \toprule
 size & watchers\tabularnewline
 \midrule
@@ -282,9 +288,10 @@ size & watchers\tabularnewline
 \end{longtable}
 
 The transformed dataset using polynomial features with a degree up to 2
-would look like this:
+would look like table \ref{example-feature-engineering-transformed}.
 
 \begin{longtable}[]{@{}ccccc@{}}
+%\label{example-feature-engineering-transformed}
 \toprule
 size¹ & watchers¹ & size¹xwatchers¹ & size² & watchers²\tabularnewline
 \midrule
@@ -364,15 +371,17 @@ algorithms.
 Model}\label{validation-of-prediction-model-1}
 
 \begin{figure}
-\centering
-\includegraphics[max size={\textwidth}{\textheight}]{graphics/confusion-matrix-readme-classifier.png}
-\caption{Readme Classifier: 51.6\% Accuracy on Validation Data}
+	\centering
+		\includegraphics[max size={\textwidth}{\textheight}]{graphics/confusion-matrix-readme-classifier.png}
+	\caption{Readme Classifier: 51.6\% Accuracy on Validation Data}
+	\label{confusion-matrix-readme-classifier}
 \end{figure}
 
 \begin{figure}
-\centering
-\includegraphics[max size={\textwidth}{\textheight}]{graphics/confusion-matrix-description-classifier.png}
-\caption{Description Classifier: 48.4\% Accuracy on Validation Data}
+	\centering
+		\includegraphics[max size={\textwidth}{\textheight}]{graphics/confusion-matrix-description-classifier.png}
+	\caption{Description Classifier: 48.4\% Accuracy on Validation Data}
+	\label{confusion-matrix-description-classifier}
 \end{figure}
 
 {[}Include images with additional validation data{]}
