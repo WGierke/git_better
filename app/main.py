@@ -9,10 +9,11 @@ from classifier import get_numeric_ensemble
 from training import load_pickle, get_text_pipeline, \
     get_undersample_df, drop_defect_rows, \
     JOBLIB_DESCRIPTION_PIPELINE_NAME, JOBLIB_README_PIPELINE_NAME
-from evaluation import complete_columns
+from evaluation import complete_columns, drop_text_features
 from sklearn.ensemble import RandomForestClassifier, VotingClassifier
 from sklearn.cross_validation import train_test_split
-
+from preprocess import ColumnSumFilter, ColumnStdFilter, PolynomialTransformer
+from sklearn.pipeline import Pipeline
 
 
 def main():
@@ -52,21 +53,50 @@ def classify(args):
 
 
 def train_and_predict(df_train, df_X):
-    df_train, df_X = complete_columns(df_train, df_X)
     df_val = pd.read_csv("data/validation_data.csv")
-    df_train, df_val = complete_columns(df_train, df_val)
-    df_val, df_X = complete_columns(df_val, df_X)
+    df_train, df_X, df_val = drop_text_features(df_train), drop_text_features(df_X), drop_text_features(df_val)
+    y_val = df_val.pop("label")
+    df_train.fillna(0, inplace=True)
+    df_X.fillna(0, inplace=True)
+    df_val.fillna(0, inplace=True)
+
+    ppl = Pipeline([
+        ('clmn_std_filter', ColumnStdFilter(min_std=1)),
+        ('clmn_sum_filter', ColumnSumFilter(min_sum=10)),
+    ])
+
+    df_train = ppl.transform(df_train)
+    useful_features = list(df_train.columns)
+    poly_transf = PolynomialTransformer(degree=2)
+    df_train = poly_transf.transform(df_train)
+
+    df_X = keep_useful_features(useful_features, df_X)
+    df_val = keep_useful_features(useful_features, df_val)
+
+    print set(df_X.columns) - set(df_train.columns)
+    print set(df_val.columns) - set(df_train.columns)
+
+    df_X = poly_transf.transform(df_X)
+    df_val = poly_transf.transform(df_val)
 
     X_train, X_test = train_test_split(df_train, test_size=0.3, stratify=df_train["label"])
-    y_train = X_train.pop("label")
-    y_test = X_test.pop("label")
-    y_val = df_val.pop("label")
-    df_X.pop("label")
+    y_train, y_test = X_train.pop("label"), X_test.pop("label")
     ensemble_numeric = get_numeric_ensemble().fit(X_train, y_train)
 
     print "Score on Test set: " + str(ensemble_numeric.score(X_test, y_test))
     print "Score on Validation set: " + str(ensemble_numeric.score(df_val, y_val))
     print "Prediction for input: " + str(ensemble_numeric.predict(df_X))
+
+
+def keep_useful_features(useful_features, df):
+    for c in df.columns:
+        if c not in useful_features:
+            df.drop(c, axis=1, inplace=True)
+    for f in useful_features:
+        if f not in df.columns:
+            df[f] = 0
+    assert len(useful_features), len(df.columns)
+    return df
 
 
 def predict(df_input):

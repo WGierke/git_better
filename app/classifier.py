@@ -29,6 +29,8 @@ except ImportError:
 from xgboost import XGBClassifier
 from operator import itemgetter
 from evaluation import drop_text_features
+from preprocess import ColumnSumFilter, ColumnStdFilter, PolynomialTransformer
+from sklearn.pipeline import Pipeline
 
 
 class GIClassifier(object):
@@ -241,7 +243,16 @@ class TensorFlowNeuralNetwork(GIClassifier):
         return self.clf.predict_proba(X)
         #.todense())
 
+
 def get_numeric_ensemble():
+    return Pipeline([
+            ('clmn_std_filter', ColumnStdFilter(min_std=1)),
+            ('clmn_sum_filter', ColumnSumFilter(min_sum=10)),
+            ('poly_transf', PolynomialTransformer(degree=2)),
+            ('clf_voting', get_voting_classifier())])
+
+
+def get_voting_classifier():
     return VotingClassifier(voting='soft', estimators=[
         ('clf_bayes', NaiveBayes(binarize=True)),
         ('clf_tree', DecisionTree()),
