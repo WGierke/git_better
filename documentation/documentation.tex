@@ -15,6 +15,7 @@
 \usepackage{hyperref}
 \usepackage{ulem}
 \usepackage{tabularx}
+\usepackage[export]{adjustbox}
 
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
@@ -83,7 +84,7 @@ Overall, we were able to collect 1412 labeled repositories.
 
 \begin{figure}
 \centering
-\includegraphics{graphics/training_data_distribution.png}
+\includegraphics[max size={\textwidth}{\textheight}]{graphics/training_data_distribution.png}
 \caption{Training Data Distribution}
 \end{figure}
 
@@ -109,7 +110,11 @@ to reduce the complexity of the data to 2D while retaining the principal
 components respectively the distances between the data points. The
 following figure visualizes the distribution of the labeled data entries
 using t-SNE.
-\includegraphics{graphics/t-sne-training-data.png}
+\begin{figure}
+\centering
+\includegraphics[max size={\textwidth}{\textheight}]{graphics/t-sne-training-data.png}
+\caption{Distribution of the labeled data entries using t-SNE}
+\end{figure}
 You can find the complete code to generate the figure in the
 \href{https://github.com/WGierke/git_better/blob/master/t-SNE\%20Visualization.ipynb}{t-SNE
 Visualization Notebook}. To explore the data interactively and in a
@@ -121,7 +126,11 @@ complicated to separate the other classes.
 
 We also used t-SNE to visualize the similarity between our retrieved
 training data and the given validation data.
-\includegraphics{graphics/t-sne-validation-data.png}
+\begin{figure}
+\centering
+\includegraphics[max size={\textwidth}{\textheight}]{graphics/t-sne-validation-data.png}
+\caption{Distribution of the validation data entries using t-SNE}
+\end{figure}
 
 Since the validation data does not form separate clusters or outliers,
 we could assume that testing the learned models on the validation data
@@ -354,11 +363,17 @@ algorithms.
 \subsubsection{Validation of Prediction
 Model}\label{validation-of-prediction-model-1}
 
-Readme Classifier: 51.6\% Accuracy on Validation Data\\
-\includegraphics{graphics/confusion-matrix-readme-classifier.png}
+\begin{figure}
+\centering
+\includegraphics[max size={\textwidth}{\textheight}]{graphics/confusion-matrix-readme-classifier.png}
+\caption{Readme Classifier: 51.6\% Accuracy on Validation Data}
+\end{figure}
 
-Description Classifier: 48.4\% Accuracy on Validation Data\\
-\includegraphics{graphics/confusion-matrix-description-classifier.png}
+\begin{figure}
+\centering
+\includegraphics[max size={\textwidth}{\textheight}]{graphics/confusion-matrix-description-classifier.png}
+\caption{Description Classifier: 48.4\% Accuracy on Validation Data}
+\end{figure}
 
 {[}Include images with additional validation data{]}
 
