@@ -17,4 +17,5 @@ log
 *.log
 *.out
 *.synctex.gz
+*.toc
 documentation/*.pdf
