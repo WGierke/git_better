@@ -45,8 +45,8 @@ def classify(args):
         else:
             df_train = pd.read_csv(args.training_file, sep=' ', names=["repository", "label"])
             df_train = process_data(data_frame=df_train)
-        df_train = drop_defect_rows(df_train)
-        df_train = get_undersample_df(df_train)
+        #df_train = drop_defect_rows(df_train)
+        #df_train = get_undersample_df(df_train)
         train_and_predict(df_train, df_input)
     else:
         predict(df_input)
@@ -54,37 +54,48 @@ def classify(args):
 
 def train_and_predict(df_train, df_X):
     df_val = pd.read_csv("data/validation_data.csv")
-    df_train, df_X, df_val = drop_text_features(df_train), drop_text_features(df_X), drop_text_features(df_val)
+    df_train = drop_text_features(df_train)
+    df_X = drop_text_features(df_X)
+    df_val = drop_text_features(df_val)
     y_val = df_val.pop("label")
+    y_train = df_train.pop("label")
+
     df_train.fillna(0, inplace=True)
     df_X.fillna(0, inplace=True)
     df_val.fillna(0, inplace=True)
+
+    for df in [df_val, df_train, df_X]:
+        for c in df.columns:
+            df[c] = df[c].astype(int)
 
     ppl = Pipeline([
         ('clmn_std_filter', ColumnStdFilter(min_std=1)),
         ('clmn_sum_filter', ColumnSumFilter(min_sum=10)),
     ])
 
-    df_train = ppl.transform(df_train)
+    ppl = ppl.fit(df_train)
+    df_train = ppl.fit_transform(df_train)
     useful_features = list(df_train.columns)
-    poly_transf = PolynomialTransformer(degree=2)
-    df_train = poly_transf.transform(df_train)
 
+    #poly_transf = PolynomialTransformer(degree=2)
+    #df_train = poly_transf.transform(df_train)
+
+    #Reset indices
+    df_train["label"] = y_train
+    print useful_features
     df_X = keep_useful_features(useful_features, df_X)
     df_val = keep_useful_features(useful_features, df_val)
 
-    print set(df_X.columns) - set(df_train.columns)
-    print set(df_val.columns) - set(df_train.columns)
+    #df_X = poly_transf.transform(df_X)
+    #df_val = poly_transf.transform(df_val)
 
-    df_X = poly_transf.transform(df_X)
-    df_val = poly_transf.transform(df_val)
-
-    X_train, X_test = train_test_split(df_train, test_size=0.3, stratify=df_train["label"])
-    y_train, y_test = X_train.pop("label"), X_test.pop("label")
+    X_train, X_test = train_test_split(df_train, test_size=0.3)
+    y_train = X_train.pop("label")
+    y_test = X_test.pop("label")
     ensemble_numeric = get_numeric_ensemble().fit(X_train, y_train)
-
     print "Score on Test set: " + str(ensemble_numeric.score(X_test, y_test))
     print "Score on Validation set: " + str(ensemble_numeric.score(df_val, y_val))
+    import ipdb; ipdb.set_trace()
     print "Prediction for input: " + str(ensemble_numeric.predict(df_X))
 
 
@@ -95,14 +106,12 @@ def keep_useful_features(useful_features, df):
     for f in useful_features:
         if f not in df.columns:
             df[f] = 0
-    assert len(useful_features), len(df.columns)
     return df
 
 
 def predict(df_input):
     model_description = load_pickle(JOBLIB_DESCRIPTION_PIPELINE_NAME)
     model_readme = load_pickle(JOBLIB_README_PIPELINE_NAME)
-    assert list(model_readme.classes_) == list(model_description.classes_)
     probabilities = [model_description.predict_proba(df_input["description"])]
     probabilities.append(model_readme.predict_proba(df_input["readme"]))
     probabilities = [sum(e)/len(e) for e in zip(*probabilities)]

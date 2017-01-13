@@ -164,4 +164,4 @@ def get_undersample_df(df):
 
     assert len(samples_df), minimum_count * label_counts
     assert len(samples_df.groupby('label').count().iloc[:, 0].unique()), 1
-    return samples_df
+    return samples_df.reset_index()
