@@ -36,48 +36,43 @@ from sklearn.pipeline import Pipeline
 class GIClassifier(object):
     clf = None
 
-    # def __call__(self, X):
-    #     if self.tune_parameters:
-    #         print(self.clf.get_params().keys())
-    #         try:
-    #             self.estimate_parameters_with_random_search()
-    #         except Exception as e:
-    #             print(e)
-    #             pass
-    #     self.fit()
-    #     return self.predict(X)
+    def __call__(self, X):
+        if self.tune_parameters:
+            print(self.clf.get_params().keys())
+            try:
+                self.estimate_parameters_with_random_search()
+            except Exception as e:
+                print(e)
+                pass
+        self.fit()
+        return self.predict(X)
 
-    # def report(self, grid_scores, n_top=3):
-    #     top_scores = sorted(
-    #         grid_scores, key=itemgetter(1), reverse=True)[:n_top]
-    #     for i, score in enumerate(top_scores):
-    #         print("Model with rank: {0}".format(i + 1))
-    #         print("Mean validation score: {0:.3f} (std: {1:.3f})".format(
-    #             score.mean_validation_score, np.std(score.cv_validation_scores)))
-    #         print("Parameters: {0}".format(score.parameters))
-    #         print("")
+    def report(self, grid_scores, n_top=3):
+        top_scores = sorted(
+            grid_scores, key=itemgetter(1), reverse=True)[:n_top]
+        for i, score in enumerate(top_scores):
+            print("Model with rank: {0}".format(i + 1))
+            print("Mean validation score: {0:.3f} (std: {1:.3f})".format(
+                score.mean_validation_score, np.std(score.cv_validation_scores)))
+            print("Parameters: {0}".format(score.parameters))
+            print("")
 
-    # def estimate_parameters_with_random_search(self):
-    #     random_search = RandomizedSearchCV(self.clf, param_distributions=self.param_dist_random,
-    #                                        n_iter=30)
-    #     random_search.fit(self.X, self.Y)
-    #     print("Random Search")
-    #     self.report(random_search.grid_scores_)
+    def estimate_parameters_with_random_search(self):
+        random_search = RandomizedSearchCV(self.clf, param_distributions=self.param_dist_random,
+                                           n_iter=30)
+        random_search.fit(self.X, self.Y)
+        print("Random Search")
+        self.report(random_search.grid_scores_)
 
     def fit(self, df, Y, tune_parameters=False):
-        assert len(Y) == len(df)
-        self.X = df.values
-        self.Y = Y
         self.tune_parameters = tune_parameters
-        self.clf.fit(self.X, Y)
+        self.clf.fit(df.values, Y)
         return self
 
     def predict(self, df):
-        df = df.fillna(0)
         return self.clf.predict(df.values)
 
     def predict_proba(self, df):
-        df = df.fillna(0)
         return self.clf.predict_proba(df.values)
 
 
@@ -237,14 +232,6 @@ class TensorFlowNeuralNetwork(GIClassifier):
     def predict_proba(self, X):
         return self.clf.predict_proba(X)
         #.todense())
-
-
-def get_numeric_ensemble():
-    return Pipeline([
-            ('clmn_std_filter', ColumnStdFilter(min_std=1)),
-            ('clmn_sum_filter', ColumnSumFilter(min_sum=10)),
-            ('poly_transf', PolynomialTransformer(degree=2)),
-            ('clf_voting', get_voting_classifier())])
 
 
 def get_voting_classifier():

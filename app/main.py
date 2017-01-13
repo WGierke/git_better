@@ -5,7 +5,7 @@ import sys
 import pandas as pd
 import numpy as np
 from load_data import process_data
-from classifier import get_numeric_ensemble
+from classifier import get_voting_classifier
 from training import load_pickle, get_text_pipeline, \
     get_undersample_df, drop_defect_rows, \
     JOBLIB_DESCRIPTION_PIPELINE_NAME, JOBLIB_README_PIPELINE_NAME
@@ -14,7 +14,6 @@ from sklearn.ensemble import RandomForestClassifier, VotingClassifier
 from sklearn.cross_validation import train_test_split
 from preprocess import ColumnSumFilter, ColumnStdFilter, PolynomialTransformer
 from sklearn.pipeline import Pipeline
-from sklearn.tree import DecisionTreeClassifier
 
 
 def main():
@@ -103,8 +102,7 @@ def train_and_predict(df_train, df_X):
     X_train, X_test = train_test_split(df_train, test_size=0.3)
     y_train = X_train.pop("label")
     y_test = X_test.pop("label")
-    #ensemble_numeric = get_numeric_ensemble().fit(X_train, y_train)
-    ensemble_numeric = DecisionTreeClassifier().fit(X_train, y_train)
+    ensemble_numeric = get_voting_classifier().fit(X_train, y_train)
 
     print "Score on Test set: " + str(ensemble_numeric.score(X_test, y_test))
     print "Score on Validation set: " + str(ensemble_numeric.score(df_val, y_val))
