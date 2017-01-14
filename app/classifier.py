@@ -7,7 +7,7 @@ from scipy.stats import randint as sp_randint
 import pandas as pd
 
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.naive_bayes import BernoulliNB
+from sklearn.naive_bayes import GaussianNB
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier, \
     BaggingClassifier, AdaBoostClassifier, GradientBoostingClassifier, \
@@ -101,7 +101,7 @@ class KNeighbors(GIClassifier):
 
 class NaiveBayes(GIClassifier):
     def __init__(self, **args):
-        self.clf = BernoulliNB(**args)
+        self.clf = GaussianNB(**args)
 
 
 class SVM(GIClassifier):
@@ -233,7 +233,7 @@ class TensorFlowNeuralNetwork(GIClassifier):
 
 def get_voting_classifier():
     return VotingClassifier(voting='soft', estimators=[
-        ('clf_bayes', NaiveBayes(binarize=False)),
+        ('clf_bayes', NaiveBayes()),
         ('clf_tree', DecisionTree()),
         ('clf_forest', Forest()),
         ('clf_kneighbors', KNeighbors()),
