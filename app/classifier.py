@@ -28,9 +28,6 @@ except ImportError:
 
 from xgboost import XGBClassifier
 from operator import itemgetter
-from evaluation import drop_text_features
-from preprocess import ColumnSumFilter, ColumnStdFilter, PolynomialTransformer
-from sklearn.pipeline import Pipeline
 
 
 class GIClassifier(object):
