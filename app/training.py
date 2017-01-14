@@ -33,7 +33,7 @@ def stemmed_words(doc):
 
 def get_text_pipeline():
     return Pipeline([
-        ('vect', CountVectorizer(stop_words='english', analyzer=stemmed_words)),
+        ('vect', CountVectorizer(stop_words='english', analyzer=stemmed_words, token_pattern='[a-zA-Z]{3,}')),
         ('tfidf', TfidfTransformer()),
         ('clf', SGDClassifier(loss="log")),
     ])

@@ -103,8 +103,7 @@ def add_rest_features(data_frame, index, repo):
     """size, language_rate, readme"""
     data_frame.set_value(index, 'size', repo.size)
     try:
-        regex = re.compile('[^a-zA-Z0-9 :\/-]')
-        readme = regex.sub('', repo.get_readme().decoded_content)
+        readme = repo.get_readme().decoded_content
         data_frame.set_value(index, 'readme', readme)
     except:
         data_frame.set_value(index, 'readme', '')
