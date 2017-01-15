@@ -53,10 +53,14 @@ def merge_commit_messages(repo_dir, override=False):
             commits = repo.commit_info()
             for commit in commits:
                 commit_message = commit.get('message')
-                # add \n if necessary
-                if os.linesep not in commit_message[-4:]:
-                    commit_message = commit_message + os.linesep
-                outfile.write(commit_message)
+                try:
+                    commit_message.decode('utf-8')
+                    # add \n if necessary
+                    if os.linesep not in commit_message[-4:]:
+                        commit_message = commit_message + os.linesep
+                    outfile.write(commit_message)
+                except UnicodeError:
+                    pass
     return open(os.path.join(repo_dir,"merged_commit_messages.txt"), "r").read()
 
 
