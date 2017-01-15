@@ -1,18 +1,17 @@
 from __future__ import division
 import argparse
 import os
-import sys
 import pandas as pd
-from load_data import process_data
-from classifier import get_voting_classifier
-from training import load_pickle, get_text_pipeline, \
-    get_undersample_df, drop_defect_rows, \
-    JOBLIB_DESCRIPTION_PIPELINE_NAME, JOBLIB_README_PIPELINE_NAME
+import sys
+from classifier import get_text_pipeline, get_voting_classifier, DescriptionClassifier, ReadmeClassifier, NumericEnsembleClassifier
 from constants import VALIDATION_DATA_PATH, ADDITIONAL_VALIDATION_DATA_PATH
 from evaluation import drop_text_features
-from sklearn.cross_validation import train_test_split
+from load_data import process_data
 from preprocess import ColumnSumFilter, ColumnStdFilter, PolynomialTransformer
+from sklearn.cross_validation import train_test_split
+from sklearn.ensemble import VotingClassifier
 from sklearn.pipeline import Pipeline
+from training import load_pickle, get_undersample_df, drop_defect_rows, JOBLIB_DESCRIPTION_PIPELINE_NAME, JOBLIB_README_PIPELINE_NAME
 
 
 def main():
@@ -81,54 +80,21 @@ def split_features(df_origin):
 
 def train_and_predict(df_training, df_input):
     df_val = pd.read_csv(VALIDATION_DATA_PATH)
+    y_val = df_val.pop("label")
     df_val_add = pd.read_csv(ADDITIONAL_VALIDATION_DATA_PATH)
+    y_val_add = df_val_add.pop("label")
 
-    X_training, train_descr, train_readme, y_train = split_features(df_training)
-    X_input, input_descr, input_readme, _ = split_features(df_input)
-    X_val, val_descr, val_readme, y_val = split_features(df_val)
-    X_val_add, val_add_descr, val_add_readme, y_val_add = split_features(df_val_add)
-
-    ppl_text_descr = get_text_pipeline()
-    ppl_text_descr = ppl_text_descr.fit(train_descr, y_train)
-    print "Val Descr Score: " + str(ppl_text_descr.score(val_descr, y_val))
-    print "Val Add Descr Score: " + str(ppl_text_descr.score(val_add_descr, y_val_add))
-    print ppl_text_descr.predict(input_descr)
-
-    ppl_text_readme = ppl_text_descr.fit(train_readme, y_train)
-    print "Val Readme Score: " + str(ppl_text_readme.score(val_readme, y_val))
-    print "Val Add Readme Score: " + str(ppl_text_readme.score(val_add_readme, y_val_add))
-    print ppl_text_readme.predict(input_readme)
-
-    ppl = Pipeline([
-        ('clmn_std_filter', ColumnStdFilter(min_std=1)),
-        ('clmn_sum_filter', ColumnSumFilter(min_sum=10)),
-    ])
-
-    ppl = ppl.fit(X_training)
-    X_training = ppl.transform(X_training)
-    useful_features = list(X_training.columns)
-
-    X_input = keep_useful_features(useful_features, X_input)
-    X_val = keep_useful_features(useful_features, X_val)
-    X_val_add = keep_useful_features(useful_features, X_val_add)
-
-    poly_transf = PolynomialTransformer(degree=2)
-    X_training = poly_transf.transform(X_training)
-    X_input = poly_transf.transform(X_input)
-    X_val = poly_transf.transform(X_val)
-    X_val_add = poly_transf.transform(X_val_add)
-
-    X_training["label"] = y_train
-
-    X_train, X_test = train_test_split(X_training, test_size=0.3)
+    X_train, X_test = train_test_split(df_training, test_size=0.3)
     y_train = X_train.pop("label")
     y_test = X_test.pop("label")
-    ensemble_numeric = get_voting_classifier().fit(X_train, y_train)
 
-    print "Score on Test set: " + str(ensemble_numeric.score(X_test, y_test))
-    print "Score on Validation set: " + str(ensemble_numeric.score(X_val, y_val))
-    print "Score on Additional Validation set: " + str(ensemble_numeric.score(X_val_add, y_val_add))
-    print "Prediction for input: " + str(ensemble_numeric.predict(X_input))
+    for model in [DescriptionClassifier(), ReadmeClassifier(), NumericEnsembleClassifier()]:
+        print model.__class__
+        model = model.fit(X_train, y_train)
+        for set_name, X, y in [("Test", X_test, y_test), ("Validation", df_val, y_val), ("Additional Validation", df_val_add, y_val_add)]:
+            print "Score on {}: {}".format(set_name, model.score(X, y))
+        print "Prediction for input data:"
+        print model.predict(df_input)
 
 
 def keep_useful_features(useful_features, df):

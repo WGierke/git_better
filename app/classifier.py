@@ -1,19 +1,23 @@
 # code partly from our previous project Data Mining Cup, https://github.com/AlexImmer/run-dmc
-import numpy as np, random
 import logging
+import numpy as np, random
+import pandas as pd
+from nltk.stem.snowball import EnglishStemmer
+from operator import itemgetter
+from preprocess import ColumnSumFilter, ColumnStdFilter, PolynomialTransformer
 from scipy.sparse import csr_matrix
 from scipy.stats import randint as sp_randint
-
-import pandas as pd
-
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.naive_bayes import GaussianNB
-from sklearn.svm import SVC
-from sklearn.ensemble import RandomForestClassifier, \
-    BaggingClassifier, AdaBoostClassifier, GradientBoostingClassifier, \
-    VotingClassifier
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier, BaggingClassifier, AdaBoostClassifier, GradientBoostingClassifier, VotingClassifier
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.grid_search import RandomizedSearchCV
+from sklearn.linear_model import SGDClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.pipeline import Pipeline
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+from xgboost import XGBClassifier
+
 
 try:
     import theanets as tn
@@ -25,9 +29,6 @@ try:
     import tensorflow.contrib.learn as sklearn
 except ImportError:
     print('Tensorflow not installed')
-
-from xgboost import XGBClassifier
-from operator import itemgetter
 
 
 class GIClassifier(object):
@@ -72,9 +73,11 @@ class GIClassifier(object):
     def predict_proba(self, df):
         return self.clf.predict_proba(df.values)
 
-
     def get_params(self, **args):
         return self.clf.get_params(**args)
+
+    def score(self, df, Y):
+        return self.clf.score(df, Y)
 
 
 class DecisionTree(GIClassifier):
@@ -229,6 +232,112 @@ class TensorFlowNeuralNetwork(GIClassifier):
     def predict_proba(self, X):
         return self.clf.predict_proba(X)
         #.todense())
+
+class MetaClassifier(GIClassifier):
+    important_column = None
+    fill_character = None
+
+    def fit(self, df, Y, tune_parameters=False):
+        self.tune_parameters = tune_parameters
+        df[self.important_column].fillna(self.fill_character, inplace=True)
+        self.clf.fit(df[self.important_column].values, Y)
+        return self
+
+    def predict(self, df):
+        df[self.important_column].fillna(self.fill_character, inplace=True)
+        return self.clf.predict(df[self.important_column].values)
+
+    def predict_proba(self, df):
+        df[self.important_column].fillna(self.fill_character, inplace=True)
+        return self.clf.predict_proba(df[self.important_column].values)
+
+    def score(self, df, Y):
+        df[self.important_column].fillna(self.fill_character, inplace=True)
+        return self.clf.score(df[self.important_column], Y)
+
+
+class DescriptionClassifier(MetaClassifier):
+    important_column = "description"
+    fill_character = ''
+
+    def __init__(self, **args):
+        self.clf = get_text_pipeline()
+
+
+class ReadmeClassifier(MetaClassifier):
+    important_column = "readme"
+    fill_character = ''
+
+    def __init__(self, **args):
+        self.clf = get_text_pipeline()
+
+
+class NumericEnsembleClassifier(MetaClassifier):
+    fill_character = 0
+    ppl = Pipeline([
+        ('clmn_std_filter', ColumnStdFilter(min_std=1)),
+        ('clmn_sum_filter', ColumnSumFilter(min_sum=10)),
+    ])
+    poly_transf = PolynomialTransformer(degree=2)
+
+    def __init__(self, **args):
+        self.clf = get_voting_classifier()
+
+    def fit(self, df_origin, Y, tune_parameters=False):
+        df = df_origin.copy()
+        self.tune_parameters = tune_parameters
+        self.numeric_columns = df.select_dtypes(include=[np.number]).columns
+        self.numeric_columns.drop("index")
+        self.ppl = self.ppl.fit(df[self.numeric_columns])
+        X_reduced = self.ppl.transform(df[self.numeric_columns])
+        self.important_column = X_reduced.columns
+        self.important_column = self.important_column.drop("index")
+        self.useful_features = list(X_reduced.columns)
+        X_poly = self.poly_transf.transform(X_reduced)
+        X_poly.fillna(self.fill_character, inplace=True)
+        self.clf.fit(X_poly, Y)
+        return self
+
+    def predict(self, df_origin):
+        df = self.transform_to_fitted_features(df_origin)
+        return self.clf.predict(df)
+
+    def predict_proba(self, df_origin):
+        df = self.transform_to_fitted_features(df_origin)
+        return self.clf.predict_proba(df[self.important_column])
+
+    def score(self, df_origin, Y):
+        df = self.transform_to_fitted_features(df_origin)
+        return self.clf.score(df, Y)
+
+    def keep_useful_features(self, df, useful_features):
+        for c in df.columns:
+            if c not in useful_features:
+                df.drop(c, axis=1, inplace=True)
+        for f in useful_features:
+            if f not in df.columns:
+                df[f] = 0
+        return df
+
+    def transform_to_fitted_features(self, df_origin):
+        df = df_origin.copy()
+        df[self.important_column].fillna(self.fill_character, inplace=True)
+        df = self.keep_useful_features(df, self.useful_features)
+        df = self.poly_transf.transform(df)
+        return df
+
+def get_text_pipeline():
+    return Pipeline([
+        ('vect', CountVectorizer(stop_words='english', analyzer=stemmed_words, token_pattern='[a-zA-Z]{3,}')),
+        ('tfidf', TfidfTransformer()),
+        ('clf', SGDClassifier(loss="log")),
+    ])
+
+
+def stemmed_words(doc):
+    stemmer = EnglishStemmer()
+    analyzer = CountVectorizer().build_analyzer()
+    return (stemmer.stem(w) for w in analyzer(doc))
 
 
 def get_voting_classifier():

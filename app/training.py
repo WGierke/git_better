@@ -2,41 +2,21 @@ import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 import numpy as np
 import pandas as pd
-from sklearn.externals import joblib
-from evaluation import get_cleaned_processed_df, eval_classifier, drop_text_features
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn.linear_model import SGDClassifier
-from sklearn.model_selection import GridSearchCV
-from sklearn.pipeline import Pipeline
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
-from sklearn.preprocessing import LabelEncoder
+from classifier import AdaTree, AdaBayes, AdaSVM, GradBoost, DecisionTree, Forest, NaiveBayes, SVM, TheanoNeuralNetwork, TensorFlowNeuralNetwork, XGBoost, TreeBag, SVMBag, get_text_pipeline
+from evaluation import complete_columns, get_cleaned_processed_df, eval_classifier, drop_text_features
 from nltk.stem.snowball import EnglishStemmer
+from sklearn.externals import joblib
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.linear_model import SGDClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import LabelEncoder
 
-from classifier import DecisionTree, Forest, NaiveBayes, SVM, TheanoNeuralNetwork, \
-    TensorFlowNeuralNetwork, XGBoost
-from classifier import TreeBag, SVMBag
-from classifier import AdaTree, AdaBayes, AdaSVM, GradBoost
-from evaluation import complete_columns
 
 JOBLIB_SUFFIX = '.joblib.pkl'
 JOBLIB_DESCRIPTION_PIPELINE_NAME = 'best_description_pipeline_4839'
 JOBLIB_README_PIPELINE_NAME = 'best_readme_pipeline_5161'
-
-
-def stemmed_words(doc):
-    stemmer = EnglishStemmer()
-    analyzer = CountVectorizer().build_analyzer()
-    return (stemmer.stem(w) for w in analyzer(doc))
-
-
-def get_text_pipeline():
-    return Pipeline([
-        ('vect', CountVectorizer(stop_words='english', analyzer=stemmed_words, token_pattern='[a-zA-Z]{3,}')),
-        ('tfidf', TfidfTransformer()),
-        ('clf', SGDClassifier(loss="log")),
-    ])
 
 
 def find_best_text_pipeline(df_values, labels, pipeline=None, params=None):
