@@ -122,19 +122,25 @@ def get_repo_clone_data(data_frame):
 
     return cloneUrls, labels, owners, names
 
-def get_data_repos(cloneUrls, labels, owners, names):
+# available options for mode are 'source_code', 'commit_messages' and 'file_names' def
+def get_data_repos(cloneUrls, labels, owners, names, mode='source_code', pull=False, override=True):
     df_merged_text = pd.DataFrame(columns=[['full_name','source code','label']])
 
     #i = 0
     for cloneUrl, label, owner, name in zip(cloneUrls, labels, owners, names):
         # if owner not in ['DataScienceSpecialization', 'cdcepi', 'gygy', 'koolshare', 'Gaohaoyang', 'GoogleWebComponents']:
             # if i%10==0:
-        repo_dir = clone_repo(owner, name, cloneUrl, pull=False)
-        merged_text = merge_files(repo_dir, override=True)
-        #merge_commit_messages(repo_dir)
-        #merge_file_names(repo_dir)
+        repo_dir = clone_repo(owner, name, cloneUrl)
+        if mode=='source_code':
+            merged_text = merge_files(repo_dir, override)
+        elif mode=='commit_messages':
+            merged_text = merge_commit_messages(repo_dir)
+        elif mode=='file_names':
+            merged_text = merge_file_names(repo_dir)
+        else:
+            print('Not supported mode')
         df_merged_text = df_merged_text.append(
-            pd.DataFrame([[owner, name,merged_text,label]],columns=['owner', 'name','source code','label']))
+            pd.DataFrame([[owner, name, merged_text,label]],columns=['owner', 'name','source code','label']))
             # i+=1
             # if i==1000:
             #     break
