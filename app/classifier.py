@@ -237,21 +237,25 @@ class MetaClassifier(GIClassifier):
     important_column = None
     fill_character = None
 
-    def fit(self, df, Y, tune_parameters=False):
+    def fit(self, df_origin, Y, tune_parameters=False):
+        df = df_origin.copy()
         self.tune_parameters = tune_parameters
         df[self.important_column].fillna(self.fill_character, inplace=True)
         self.clf.fit(df[self.important_column].values, Y)
         return self
 
-    def predict(self, df):
+    def predict(self, df_origin):
+        df = df_origin.copy()
         df[self.important_column].fillna(self.fill_character, inplace=True)
         return self.clf.predict(df[self.important_column].values)
 
-    def predict_proba(self, df):
+    def predict_proba(self, df_origin):
+        df = df_origin.copy()
         df[self.important_column].fillna(self.fill_character, inplace=True)
         return self.clf.predict_proba(df[self.important_column].values)
 
-    def score(self, df, Y):
+    def score(self, df_origin, Y):
+        df = df_origin.copy()
         df[self.important_column].fillna(self.fill_character, inplace=True)
         return self.clf.score(df[self.important_column], Y)
 
@@ -299,15 +303,18 @@ class NumericEnsembleClassifier(MetaClassifier):
         return self
 
     def predict(self, df_origin):
-        df = self.transform_to_fitted_features(df_origin)
+        df = df_origin.copy()
+        df = self.transform_to_fitted_features(df)
         return self.clf.predict(df)
 
     def predict_proba(self, df_origin):
-        df = self.transform_to_fitted_features(df_origin)
+        df = df_origin.copy()
+        df = self.transform_to_fitted_features(df)
         return self.clf.predict_proba(df[self.important_column])
 
     def score(self, df_origin, Y):
-        df = self.transform_to_fitted_features(df_origin)
+        df = df_origin.copy()
+        df = self.transform_to_fitted_features(df)
         return self.clf.score(df, Y)
 
     def keep_useful_features(self, df, useful_features):
@@ -321,7 +328,7 @@ class NumericEnsembleClassifier(MetaClassifier):
 
     def transform_to_fitted_features(self, df_origin):
         df = df_origin.copy()
-        df[self.important_column].fillna(self.fill_character, inplace=True)
+        df = df[self.important_column].fillna(self.fill_character)
         df = self.keep_useful_features(df, self.useful_features)
         df = self.poly_transf.transform(df)
         return df
