@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass[a4paper,12pt]{article}
 
 \usepackage{amsfonts}
 \usepackage{amsmath}
@@ -16,6 +16,7 @@
 \usepackage{ulem}
 \usepackage{tabularx}
 \usepackage[export]{adjustbox}
+\usepackage[T1]{fontenc}
 
 \begin{document}
 
@@ -24,10 +25,37 @@
   
 \newcommand{\specialcell}[2][c]{%
  \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+ 
+\begin{titlepage}
+\begin{center}
+  \vskip.2in
+  \large  Submission for informatiCup2017 \ldots
+  \vskip1in
+  \Large Hasso Plattner Institute (University of Potsdam)
+  \vskip1.5in
+  \emph{\huge GitHub Repository Classifier}
+\end{center}
 
+\vskip1.4in
 
-InformatiCup2017 Documentation %\label{informaticup2017-documentation}
-\pagebreak
+\begin{minipage}{.25\textwidth}
+  \begin{flushleft}
+    \bfseries\large Willi Gierke
+  \end{flushleft}
+\end{minipage}
+\hskip.4\textwidth
+\begin{minipage}{.25\textwidth}
+  \begin{flushleft}
+    \bfseries\large Sebastian Bischoff
+  \end{flushleft}
+\end{minipage}
+
+\vskip1.3in
+
+\centering
+\bfseries
+\Large Year \the\year
+\end{titlepage}
 
 \tableofcontents
 \pagebreak
