@@ -261,7 +261,7 @@ class DescriptionClassifier(MetaClassifier):
     fill_character = ''
 
     def __init__(self, **args):
-        self.clf = get_text_pipeline()
+        self.clf = get_text_pipeline(**args)
 
 
 class ReadmeClassifier(MetaClassifier):
@@ -269,7 +269,7 @@ class ReadmeClassifier(MetaClassifier):
     fill_character = ''
 
     def __init__(self, **args):
-        self.clf = get_text_pipeline()
+        self.clf = get_text_pipeline(**args)
 
 
 class NumericEnsembleClassifier(MetaClassifier):
@@ -281,7 +281,7 @@ class NumericEnsembleClassifier(MetaClassifier):
     poly_transf = PolynomialTransformer(degree=2)
 
     def __init__(self, **args):
-        self.clf = get_voting_classifier()
+        self.clf = get_voting_classifier(**args)
 
     def fit(self, df_origin, Y, tune_parameters=False):
         df = df_origin.copy()
@@ -326,12 +326,17 @@ class NumericEnsembleClassifier(MetaClassifier):
         df = self.poly_transf.transform(df)
         return df
 
-def get_text_pipeline():
-    return Pipeline([
+
+def get_text_pipeline(**args):
+    ppl = Pipeline([
         ('vect', CountVectorizer(stop_words='english', analyzer=stemmed_words, token_pattern='[a-zA-Z]{3,}')),
         ('tfidf', TfidfTransformer()),
         ('clf', SGDClassifier(loss="log")),
     ])
+
+    if args:
+        ppl.set_params(**args)
+    return ppl
 
 
 def stemmed_words(doc):
@@ -340,8 +345,8 @@ def stemmed_words(doc):
     return (stemmer.stem(w) for w in analyzer(doc))
 
 
-def get_voting_classifier():
-    return VotingClassifier(voting='soft', estimators=[
+def get_voting_classifier(**args):
+    voting_clf = VotingClassifier(voting='soft', estimators=[
         ('clf_bayes', NaiveBayes()),
         ('clf_tree', DecisionTree()),
         ('clf_forest', Forest()),
@@ -356,3 +361,8 @@ def get_voting_classifier():
         # ('clf_adatree', AdaTree(base_estimator=DecisionTreeClassifier)),
         # ('clf_adabayes', AdaBayes()),
         # ('clf_adasvm', AdaSVM())])
+
+    if args:
+        voting_clf.set_params(**args)
+
+    return voting_clf

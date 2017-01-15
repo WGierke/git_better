@@ -88,7 +88,11 @@ def train_and_predict(df_training, df_input):
     y_train = X_train.pop("label")
     y_test = X_test.pop("label")
 
-    for model in [DescriptionClassifier(), ReadmeClassifier(), NumericEnsembleClassifier()]:
+    meta_ensemble = VotingClassifier(estimators=[('description', DescriptionClassifier()),
+                                                 ('readme', ReadmeClassifier()),
+                                                 ('ensemble', NumericEnsembleClassifier())])
+
+    for model in [DescriptionClassifier(), ReadmeClassifier(), NumericEnsembleClassifier(), meta_ensemble]:
         print model.__class__
         model = model.fit(X_train, y_train)
         for set_name, X, y in [("Test", X_test, y_test), ("Validation", df_val, y_val), ("Additional Validation", df_val_add, y_val_add)]:
