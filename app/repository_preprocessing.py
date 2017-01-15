@@ -102,7 +102,11 @@ def merge_file_names(repo_dir, override=False):
                             and "merged_commit_messages.txt" not in file \
                             and "merged_file_names.txt" not in file \
                             and "merged_source.txt" not in file:
-                        outfile.write(file+os.linesep)
+                        try:
+                            file.decode('utf-8')
+                            outfile.write(file+os.linesep)
+                        except UnicodeError:
+                            pass
     return open(os.path.join(repo_dir,"merged_file_names.txt"), "r").read()
 
 
