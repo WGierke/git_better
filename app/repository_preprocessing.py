@@ -106,36 +106,44 @@ def merge_file_names(repo_dir, override=False):
     return open(os.path.join(repo_dir,"merged_file_names.txt"), "r").read()
 
 
+# Data necessary for building the data frame with source code
+def get_repo_clone_data(data_frame):
+    #data_frame = pd.DataFrame([["octocat/Hello-World","https://github.com/octocat/Hello-World.git","DEV"],
+    #                           ["FriendCode/gittle", "https://github.com/FriendCode/gittle.git","DEV"]],
+    #                          columns=["full_name","clone_url","label"])
+    labels = data_frame.pop("label")
+
+    owners = data_frame.pop("owner")
+    names = data_frame.pop("name")
+
+    cloneUrls = []
+    for owner, name in zip(owners, names):
+        cloneUrls.append('https://github.com/' + owner + '/' + name + '.git')
+
+    return cloneUrls, labels, owners, names
+
+def get_data_repos(cloneUrls, labels, owners, names):
+    df_merged_text = pd.DataFrame(columns=[['full_name','source code','label']])
+
+    #i = 0
+    for cloneUrl, label, owner, name in zip(cloneUrls, labels, owners, names):
+        # if owner not in ['DataScienceSpecialization', 'cdcepi', 'gygy', 'koolshare', 'Gaohaoyang', 'GoogleWebComponents']:
+            # if i%10==0:
+        repo_dir = clone_repo(owner, name, cloneUrl, pull=False)
+        merged_text = merge_files(repo_dir, override=True)
+        #merge_commit_messages(repo_dir)
+        #merge_file_names(repo_dir)
+        df_merged_text = df_merged_text.append(
+            pd.DataFrame([[owner, name,merged_text,label]],columns=['owner', 'name','source code','label']))
+            # i+=1
+            # if i==1000:
+            #     break
+    return df_merged_text
+
 if __name__ == '__main__':
     if not os.path.exists(os.path.join(REPOS_DIR,'merged_text.pickle')):
-        data_frame = get_cleaned_processed_df()
-        #data_frame = pd.DataFrame([["octocat/Hello-World","https://github.com/octocat/Hello-World.git","DEV"],
-        #                           ["FriendCode/gittle", "https://github.com/FriendCode/gittle.git","DEV"]],
-        #                          columns=["full_name","clone_url","label"])
-        labels = data_frame.pop("label")
-
-        owners = data_frame.pop("owner")
-        names = data_frame.pop("name")
-
-        cloneUrls = []
-        for owner, name in zip(owners, names):
-            cloneUrls.append('https://github.com/' + owner + '/' + name + '.git')
-
-        df_merged_text = pd.DataFrame(columns=[['full_name','source code','label']])
-
-        #i = 0
-        for cloneUrl, label, owner, name in zip(cloneUrls, labels, owners, names):
-            # if owner not in ['DataScienceSpecialization', 'cdcepi', 'gygy', 'koolshare', 'Gaohaoyang', 'GoogleWebComponents']:
-                # if i%10==0:
-            repo_dir = clone_repo(owner, name, cloneUrl, pull=False)
-            merged_text = merge_files(repo_dir, override=True)
-            #merge_commit_messages(repo_dir)
-            #merge_file_names(repo_dir)
-            df_merged_text = df_merged_text.append(
-                pd.DataFrame([[owner, name,merged_text,label]],columns=['owner', 'name','source code','label']))
-                # i+=1
-                # if i==1000:
-                #     break
+        cloneUrls, labels, owners, names = get_repo_clone_data(get_cleaned_processed_df())
+        df_merged_text = get_data_repos(cloneUrls, labels, owners, names)
         df_merged_text.to_pickle(os.path.join(REPOS_DIR,'merged_text.pickle'))
     else:
         df_merged_text = pd.read_pickle(os.path.join(REPOS_DIR,'merged_text.pickle'))
