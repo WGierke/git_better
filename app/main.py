@@ -90,7 +90,8 @@ def train_and_predict(df_training, df_input):
 
     meta_ensemble = VotingClassifier(estimators=[('description', DescriptionClassifier()),
                                                  ('readme', ReadmeClassifier()),
-                                                 ('ensemble', NumericEnsembleClassifier())])
+                                                 ('ensemble', NumericEnsembleClassifier())],
+                                    voting='soft')
 
     for model in [DescriptionClassifier(), ReadmeClassifier(), NumericEnsembleClassifier(), meta_ensemble]:
         print model.__class__
@@ -99,16 +100,6 @@ def train_and_predict(df_training, df_input):
             print "Score on {}: {}".format(set_name, model.score(X, y))
         print "Prediction for input data:"
         print model.predict(df_input)
-
-
-def keep_useful_features(useful_features, df):
-    for c in df.columns:
-        if c not in useful_features:
-            df.drop(c, axis=1, inplace=True)
-    for f in useful_features:
-        if f not in df.columns:
-            df[f] = 0
-    return df
 
 
 def predict(df_input):

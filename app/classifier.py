@@ -310,7 +310,7 @@ class NumericEnsembleClassifier(MetaClassifier):
     def predict_proba(self, df_origin):
         df = df_origin.copy()
         df = self.transform_to_fitted_features(df)
-        return self.clf.predict_proba(df[self.important_column])
+        return self.clf.predict_proba(df)
 
     def score(self, df_origin, Y):
         df = df_origin.copy()
@@ -328,7 +328,7 @@ class NumericEnsembleClassifier(MetaClassifier):
 
     def transform_to_fitted_features(self, df_origin):
         df = df_origin.copy()
-        df = df[self.important_column].fillna(self.fill_character)
+        df = df.fillna(self.fill_character)
         df = self.keep_useful_features(df, self.useful_features)
         df = self.poly_transf.transform(df)
         return df
