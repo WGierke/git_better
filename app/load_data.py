@@ -1,11 +1,11 @@
 import Queue
 import json
 import threading
-from app.constants import TRAINING_DATA_PATH
-from app.crawl import write_label_links
-from app.feature_aggregation import aggregate_features
-from app.preprocess import load_training_data, clean_data
-from app.utils import load_config
+from constants import TRAINING_DATA_PATH
+from crawl import write_label_links
+from feature_aggregation import aggregate_features
+from preprocess import load_training_data, clean_data
+from utils import load_config
 import os
 import pandas as pd
 from tqdm import __init__, tqdm

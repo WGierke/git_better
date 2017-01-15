@@ -1,18 +1,23 @@
 # code partly from our previous project Data Mining Cup, https://github.com/AlexImmer/run-dmc
-import numpy as np, random
 import logging
+import numpy as np, random
+import pandas as pd
+from nltk.stem.snowball import EnglishStemmer
+from operator import itemgetter
+from preprocess import ColumnSumFilter, ColumnStdFilter, PolynomialTransformer
 from scipy.sparse import csr_matrix
 from scipy.stats import randint as sp_randint
-
-import pandas as pd
-
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.naive_bayes import BernoulliNB
-from sklearn.svm import SVC
-from sklearn.ensemble import RandomForestClassifier, \
-    BaggingClassifier, AdaBoostClassifier, GradientBoostingClassifier
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier, BaggingClassifier, AdaBoostClassifier, GradientBoostingClassifier, VotingClassifier
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.grid_search import RandomizedSearchCV
+from sklearn.linear_model import SGDClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.pipeline import Pipeline
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+from xgboost import XGBClassifier
+
 
 try:
     import theanets as tn
@@ -25,18 +30,9 @@ try:
 except ImportError:
     print('Tensorflow not installed')
 
-from xgboost import XGBClassifier
-from operator import itemgetter
-
 
 class GIClassifier(object):
     clf = None
-
-    def __init__(self, X, Y, tune_parameters=False):
-        assert len(Y) == X.shape[0]
-        self.X = X
-        self.Y = Y
-        self.tune_parameters = tune_parameters
 
     def __call__(self, X):
         if self.tune_parameters:
@@ -66,167 +62,126 @@ class GIClassifier(object):
         print("Random Search")
         self.report(random_search.grid_scores_)
 
-    def fit(self):
-        self.clf.fit(self.X, self.Y)
+    def fit(self, df, Y, tune_parameters=False):
+        self.tune_parameters = tune_parameters
+        self.clf.fit(df.values, Y)
         return self
 
-    def predict(self, X):
-        return self.clf.predict(X)
+    def predict(self, df):
+        return self.clf.predict(df.values)
 
-    def predict_proba(self, X):
-        return self.clf.predict_proba(X)
+    def predict_proba(self, df):
+        return self.clf.predict_proba(df.values)
+
+    def get_params(self, **args):
+        return self.clf.get_params(**args)
+
+    def score(self, df, Y):
+        return self.clf.score(df, Y)
 
 
 class DecisionTree(GIClassifier):
-    def __init__(self, X, Y, tune_parameters=False):
-        super(DecisionTree, self).__init__(X, Y, tune_parameters)
-        if tune_parameters:
-            self.param_dist_random = {'max_depth': sp_randint(1, 100),
+    def __init__(self, **args):
+        self.param_dist_random = {'max_depth': sp_randint(1, 100),
                                       'min_samples_leaf': sp_randint(1, 150),
-                                      'max_features': sp_randint(1, self.X.shape[1] - 1),
                                       'criterion': ['entropy', 'gini']}
-        self.clf = DecisionTreeClassifier()
-
+        self.clf = DecisionTreeClassifier(**args)
 
 class Forest(GIClassifier):
-    def __init__(self, X, Y, tune_parameters=False):
-        super(Forest, self).__init__(X, Y, tune_parameters)
-        if tune_parameters:
-            self.param_dist_random = {'max_depth': sp_randint(1, 100),
+    def __init__(self, **args):
+        self.param_dist_random = {'max_depth': sp_randint(1, 100),
                                       'min_samples_leaf': sp_randint(1, 100),
-                                      'max_features': sp_randint(1, self.X.shape[1] - 1),
                                       'criterion': ['entropy', 'gini']}
-        self.clf = RandomForestClassifier(n_estimators=100, n_jobs=8)
+        self.clf = RandomForestClassifier(**args)
 
 
 class KNeighbors(GIClassifier):
-    def __init__(self, X, Y, tune_parameters=False):
-        super(KNeighbors, self).__init__(X, Y, tune_parameters)
-        if tune_parameters:
-            self.param_dist_random = {'leaf_size':sp_randint(20, 50),
+    def __init__(self, **args):
+        self.param_dist_random = {'leaf_size':sp_randint(20, 50),
                                     'n_neighbors': sp_randint(4, 30)}
-        self.clf = KNeighborsClassifier()
+        self.clf = KNeighborsClassifier(**args)
 
 
 class NaiveBayes(GIClassifier):
-    clf = BernoulliNB(binarize=True)
+    def __init__(self, **args):
+        self.clf = GaussianNB(**args)
 
 
 class SVM(GIClassifier):
-    def __init__(self, X, Y, tune_parameters=False):
-        super(SVM, self).__init__(X, Y, tune_parameters)
-        if tune_parameters:
-            self.param_dist_random = {'shrinking': [True, False],
+    def __init__(self, **args):
+        self.param_dist_random = {'shrinking': [True, False],
                                       'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
                                       'degree': sp_randint(2, 5)}
-        self.clf = SVC(kernel='rbf', shrinking=True)
+        self.clf = SVC(**args)
 
-    def predict_proba(self, X):
-        return self.clf.decision_function(X)
 
 
 class BagEnsemble(GIClassifier):
-    classifier = None
+    base_estimator = None
     estimators = 20
     max_features = .5
     max_samples = .5
 
-    def __init__(self, X, Y, tune_parameters=False):
-        super(BagEnsemble, self).__init__(X, Y, tune_parameters)
-        if tune_parameters:
-            self.param_dist_random = {'max_features': sp_randint(1, self.X.shape[1]),
+    def __init__(self, **args):
+        self.param_dist_random = {'max_features': sp_randint(1, self.X.shape[1]),
                                       'n_estimators': sp_randint(1, 100)}
-        self.clf = BaggingClassifier(self.classifier, n_estimators=self.estimators, n_jobs=8,
+        self.clf = BaggingClassifier(base_estimator=self.base_estimator, n_estimators=self.estimators, n_jobs=-1,
                                      max_samples=self.max_samples, max_features=self.max_features)
 
 
 class TreeBag(BagEnsemble):
-    classifier = DecisionTreeClassifier()
+    def __init__(self, **args):
+        self.base_estimator = DecisionTreeClassifier(**args)
 
 
 class SVMBag(GIClassifier):
-    classifier = None
-    estimators = 10
-    max_features = .5
-    max_samples = .5
 
-    def __init__(self, X, Y, tune_parameters=False):
-        super(SVMBag, self).__init__(X, Y, tune_parameters)
-        self.X, self.Y = X, Y
+    def __init__(self, **args):
         self.classifier = SVC(decision_function_shape='ovo')
-        self.clf = BaggingClassifier(self.classifier, n_estimators=self.estimators, n_jobs=8,
-                                     max_samples=self.max_samples, max_features=self.max_features)
-
-    def predict(self, X):
-        X = X
-        return self.clf.predict(X)
-
+        self.clf = BaggingClassifier(**args)
 
 class AdaBoostEnsemble(GIClassifier):
-    classifier = None
-    estimators = 800
-    learning_rate = .25
-    algorithm = 'SAMME.R'
 
-    def __init__(self, X, Y, tune_parameters=False):
-        super(AdaBoostEnsemble, self).__init__(X, Y, tune_parameters)
-        if tune_parameters:
-            self.param_dist_random = {'n_estimators': sp_randint(1, 1000),
+    def __init__(self, **args):
+        self.param_dist_random = {'n_estimators': sp_randint(1, 1000),
                                       'algorithm': ['SAMME', 'SAMME.R'],
-                                      'learning_rate': random.random(100)}
-            self.param_dist_grid = {'n_estimators': [100, 200, 400, 900, 1000],
+                                      'learning_rate': 100* random.random()}
+        self.param_dist_grid = {'n_estimators': [100, 200, 400, 900, 1000],
                                     'algorithm': ['SAMME', 'SAMME.R'],
                                     'learning_rate': [.1, .2, 0.25, .3,
                                                       .4, .5, .6]}
-        self.clf = AdaBoostClassifier(self.classifier,
-                                      n_estimators=self.estimators,
-                                      learning_rate=self.learning_rate,
-                                      algorithm=self.algorithm)
+        self.clf = AdaBoostClassifier(**args)
 
 
 class AdaTree(AdaBoostEnsemble):
-    classifier = DecisionTreeClassifier()
+
+    def __init__(self, **args):
+        self.clf = AdaBoostClassifier(base_estimator=DecisionTreeClassifier())
 
 
 class AdaBayes(AdaBoostEnsemble):
-    classifier = BernoulliNB()
+
+    def __init__(self, **args):
+        self.clf = AdaBoostClassifier(base_estimator=BernoulliNB)
 
 
 class AdaSVM(AdaBoostEnsemble):
-    algorithm = 'SAMME'
 
-    def __init__(self, X, Y, tune_parameters=False):
-        super(AdaSVM, self).__init__(X, Y, tune_parameters)
-        self.classifier = SVC(decision_function_shape='ovo')
+    def __init__(self, **args):
+        self.clf = AdaBoostClassifier(base_estimator=SVC)
 
 
 class GradBoost(GIClassifier):
-    estimators = 2000
-    learning_rate = 1
-    max_depth = 1
-    max_features = 0.97
 
-    def __init__(self, X, Y, tune_parameters=False):
-        super(GradBoost, self).__init__(X, Y)
-        self.clf = GradientBoostingClassifier(n_estimators=self.estimators,
-                                              learning_rate=self.learning_rate,
-                                              max_depth=self.max_depth,
-                                              max_features=self.max_features)
-
-    def predict(self, X):
-        return self.clf.predict(X)
-
-    def predict_proba(self, X):
-        return self.clf.predict(X)
+    def __init__(self, **args):
+        self.clf = GradientBoostingClassifier(**args)
 
 
 class XGBoost(GIClassifier):
-    def __init__(self, X, Y, tune_parameters=False):
-        super(XGBoost, self).__init__(X, Y, tune_parameters)
-        if tune_parameters:
-            self.param_dist_random = {'max_depth': sp_randint(1, 20),
+    def __init__(self, **args):
+        self.param_dist_random = {'max_depth': sp_randint(1, 20),
                                       'n_estimators' : sp_randint(50, 200)}
-        self.clf = XGBClassifier()
+        self.clf = XGBClassifier(**args)
 
 
 
@@ -277,3 +232,144 @@ class TensorFlowNeuralNetwork(GIClassifier):
     def predict_proba(self, X):
         return self.clf.predict_proba(X)
         #.todense())
+
+class MetaClassifier(GIClassifier):
+    important_column = None
+    fill_character = None
+
+    def fit(self, df_origin, Y, tune_parameters=False):
+        df = df_origin.copy()
+        self.tune_parameters = tune_parameters
+        df[self.important_column].fillna(self.fill_character, inplace=True)
+        self.clf.fit(df[self.important_column].values, Y)
+        return self
+
+    def predict(self, df_origin):
+        df = df_origin.copy()
+        df[self.important_column].fillna(self.fill_character, inplace=True)
+        return self.clf.predict(df[self.important_column].values)
+
+    def predict_proba(self, df_origin):
+        df = df_origin.copy()
+        df[self.important_column].fillna(self.fill_character, inplace=True)
+        return self.clf.predict_proba(df[self.important_column].values)
+
+    def score(self, df_origin, Y):
+        df = df_origin.copy()
+        df[self.important_column].fillna(self.fill_character, inplace=True)
+        return self.clf.score(df[self.important_column], Y)
+
+
+class DescriptionClassifier(MetaClassifier):
+    important_column = "description"
+    fill_character = ''
+
+    def __init__(self, **args):
+        self.clf = get_text_pipeline(**args)
+
+
+class ReadmeClassifier(MetaClassifier):
+    important_column = "readme"
+    fill_character = ''
+
+    def __init__(self, **args):
+        self.clf = get_text_pipeline(**args)
+
+
+class NumericEnsembleClassifier(MetaClassifier):
+    fill_character = 0
+    ppl = Pipeline([
+        ('clmn_std_filter', ColumnStdFilter(min_std=1)),
+        ('clmn_sum_filter', ColumnSumFilter(min_sum=10)),
+    ])
+    poly_transf = PolynomialTransformer(degree=2)
+
+    def __init__(self, **args):
+        self.clf = get_voting_classifier(**args)
+
+    def fit(self, df_origin, Y, tune_parameters=False):
+        df = df_origin.copy()
+        self.tune_parameters = tune_parameters
+        self.numeric_columns = df.select_dtypes(include=[np.number]).columns
+        self.numeric_columns.drop("index")
+        self.ppl = self.ppl.fit(df[self.numeric_columns])
+        X_reduced = self.ppl.transform(df[self.numeric_columns])
+        self.important_column = X_reduced.columns
+        self.important_column = self.important_column.drop("index")
+        self.useful_features = list(X_reduced.columns)
+        X_poly = self.poly_transf.transform(X_reduced)
+        X_poly.fillna(self.fill_character, inplace=True)
+        self.clf.fit(X_poly, Y)
+        return self
+
+    def predict(self, df_origin):
+        df = df_origin.copy()
+        df = self.transform_to_fitted_features(df)
+        return self.clf.predict(df)
+
+    def predict_proba(self, df_origin):
+        df = df_origin.copy()
+        df = self.transform_to_fitted_features(df)
+        return self.clf.predict_proba(df)
+
+    def score(self, df_origin, Y):
+        df = df_origin.copy()
+        df = self.transform_to_fitted_features(df)
+        return self.clf.score(df, Y)
+
+    def keep_useful_features(self, df, useful_features):
+        for c in df.columns:
+            if c not in useful_features:
+                df.drop(c, axis=1, inplace=True)
+        for f in useful_features:
+            if f not in df.columns:
+                df[f] = 0
+        return df
+
+    def transform_to_fitted_features(self, df_origin):
+        df = df_origin.copy()
+        df = df.fillna(self.fill_character)
+        df = self.keep_useful_features(df, self.useful_features)
+        df = self.poly_transf.transform(df)
+        return df
+
+
+def get_text_pipeline(**args):
+    ppl = Pipeline([
+        ('vect', CountVectorizer(stop_words='english', analyzer=stemmed_words, token_pattern='[a-zA-Z]{3,}')),
+        ('tfidf', TfidfTransformer()),
+        ('clf', SGDClassifier(loss="log")),
+    ])
+
+    if args:
+        ppl.set_params(**args)
+    return ppl
+
+
+def stemmed_words(doc):
+    stemmer = EnglishStemmer()
+    analyzer = CountVectorizer().build_analyzer()
+    return (stemmer.stem(w) for w in analyzer(doc))
+
+
+def get_voting_classifier(**args):
+    voting_clf = VotingClassifier(voting='soft', estimators=[
+        ('clf_bayes', NaiveBayes()),
+        ('clf_tree', DecisionTree()),
+        ('clf_forest', Forest()),
+        ('clf_kneighbors', KNeighbors()),
+        ('clf_svm', SVM(kernel='rbf', shrinking=True, probability=True)),
+        ('clf_grad_boost', GradBoost()),
+        ('clf_xgboost', XGBoost())])
+        # ('clf_bag_ensemble', BagEnsemble()),
+        #('clf_treebag', TreeBag())])
+        # ('clf_svm_bag', SVMBag(base_estimator=SVC)),
+        # ('clf_adaboost', AdaBoostEnsemble()),
+        # ('clf_adatree', AdaTree(base_estimator=DecisionTreeClassifier)),
+        # ('clf_adabayes', AdaBayes()),
+        # ('clf_adasvm', AdaSVM())])
+
+    if args:
+        voting_clf.set_params(**args)
+
+    return voting_clf
