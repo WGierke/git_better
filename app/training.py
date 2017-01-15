@@ -19,11 +19,11 @@ JOBLIB_DESCRIPTION_PIPELINE_NAME = 'best_description_pipeline_4839'
 JOBLIB_README_PIPELINE_NAME = 'best_readme_pipeline_5161'
 
 
-def find_best_text_pipeline(df_values, labels, pipeline=None, params=None):
+def find_best_text_pipeline(df_values, labels, pipeline=None, parameters=None):
     if not pipeline:
         pipeline = get_text_pipeline()
 
-    if not params:
+    if not parameters:
         parameters = {
             'vect__max_df': (0.5, 0.75, 1.0),
             'vect__ngram_range': ((1, 1), (1, 2), (1, 3)),
