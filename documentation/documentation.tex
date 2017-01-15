@@ -17,13 +17,15 @@
 \usepackage{tabularx}
 \usepackage[export]{adjustbox}
 
+\begin{document}
+
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
   
 \newcommand{\specialcell}[2][c]{%
  \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
 
-\begin{document}
+
 InformatiCup2017 Documentation %\label{informaticup2017-documentation}
 \pagebreak
 
@@ -55,33 +57,34 @@ Search API, GitHub Showcases and automated as well as manual Google
 searches to retrieve more data. One can find the amount of retrieved,
 labeled repositories and their origin in the following table.
 
-\begin{longtable}[]{@{}rcl@{}}
-\toprule
-Amount & Label & Origin\tabularnewline
-\midrule
-\endhead
-9 & DATA & Manual Google search for Open Data
-repositories\tabularnewline
-82 & DATA & Repositories of Github user `datasets'\tabularnewline
-17 & EDU & Github Search for ``course, material''\tabularnewline
-17 & DOCS & Github Search for ``documentation''\tabularnewline
-423 & WEB & Google Search for ``site:.github.io''\tabularnewline
-58 & HW & GitHub Search for ``homework, assignments,
-solution''\tabularnewline
-13 & DEV & Showcases ``Virtual Reality''\tabularnewline
-12 & DEV & Showcases ``Software Development Tools''\tabularnewline
-14 & DEV & Showcases ``Front-end JavaScript frameworks''\tabularnewline
-20 & DEV & Showcases ``DevOps tools''\tabularnewline
-16 & DEV & Showcases ``Text editors''\tabularnewline
-24 & DEV & Showcases ``Game Engines''\tabularnewline
-27 & DEV & Showcases ``Web Application Frameworks''\tabularnewline
-42 & DEV & Showcases ``Programming Languages''\tabularnewline
-180 & DOCS & GitHub Repo Content: Awesome Repos\tabularnewline
-6 & DATA & Showcases ``Open Data''\tabularnewline
-86 & HW & Github Search for ``homework, solution''\tabularnewline
-\bottomrule
+\begin{table}[]
+\centering
 \label{data_sources}
-\end{longtable}
+\caption{My caption}
+\begin{tabular}{|l|l|l|}
+\hline
+Amount & Label & Origin \\ \hline
+9 & DATA & Manual Google search for Open Data
+repositories \\ \hline
+82 & DATA & Repositories of Github user `datasets' \\ \hline
+17 & EDU & Github Search for ``course, material'' \\ \hline
+17 & DOCS & Github Search for ``documentation'' \\ \hline
+423 & WEB & Google Search for ``site:.github.io'' \\ \hline
+58 & HW & GitHub Search for ``homework, assignments,
+solution'' \\ \hline
+13 & DEV & Showcases ``Virtual Reality'' \\ \hline
+12 & DEV & Showcases ``Software Development Tools'' \\ \hline
+14 & DEV & Showcases ``Front-end JavaScript frameworks'' \\ \hline
+20 & DEV & Showcases ``DevOps tools'' \\ \hline
+16 & DEV & Showcases ``Text editors'' \\ \hline
+24 & DEV & Showcases ``Game Engines'' \\ \hline
+27 & DEV & Showcases ``Web Application Frameworks'' \\ \hline
+42 & DEV & Showcases ``Programming Languages'' \\ \hline
+180 & DOCS & GitHub Repo Content: Awesome Repos \\ \hline
+6 & DATA & Showcases ``Open Data'' \\ \hline
+86 & HW & Github Search for ``homework, solution'' \\ \hline
+\end{tabular}
+\end{table}
 
 Overall, we were able to collect 1412 labeled repositories.
 
@@ -280,30 +283,32 @@ space is called ``kernel trick'' and is used by Support Vector Machines
 As an example, suppose a dataset is given with the two features
 \emph{size} and \emph{watchers} as in table \ref{example-feature-engineering-basic}.
 
-\begin{longtable}[]{@{}cc@{}}
-%\label{example-feature-engineering-basic}
-\toprule
-size & watchers\tabularnewline
-\midrule
-\endhead
-2 & 5\tabularnewline
-10 & 8\tabularnewline
-\bottomrule
-\end{longtable}
+\begin{table}[]
+\label{example-feature-engineering-basic}
+\centering
+\caption{My caption}
+\begin{tabular}{|l|l|}
+\hline
+size & watchers \\ \hline
+2    & 5        \\ \hline
+10   & 8        \\ \hline
+\end{tabular}
+\end{table}
 
 The transformed dataset using polynomial features with a degree up to 2
 would look like table \ref{example-feature-engineering-transformed}.
 
-\begin{longtable}[]{@{}ccccc@{}}
-%\label{example-feature-engineering-transformed}
-\toprule
-size¹ & watchers¹ & size¹xwatchers¹ & size² & watchers²\tabularnewline
-\midrule
-\endhead
-2 & 5 & 10 & 4 & 25\tabularnewline
-10 & 8 & 80 & 100 & 64\tabularnewline
-\bottomrule
-\end{longtable}
+\begin{table}[]
+\label{example-feature-engineering-transformed}
+\centering
+\caption{My caption}
+\begin{tabular}{|l|l|l|l|l|}
+\hline
+size¹ & watchers¹ & size¹xwatchers¹ & size² & watchers² \\ \hline
+2 & 5 & 10 & 4 & 25 \\ \hline
+10 & 8 & 80 & 100 & 64 \\ \hline
+\end{tabular}
+\end{table}
 
 As one can see, the number of generated features increases polynomially
 in the number of input features. That's why the previous Feature
