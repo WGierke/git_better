@@ -21,7 +21,7 @@ def get_accuracy_and_plot_confusion(y_correct, y_pred, classes, plot=True, title
     """Return the accuracy of the prediction and plot the corresponding confusion matrix if desired"""
     if plot:
         cm = confusion_matrix(y_correct, y_pred)
-        plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blue)
+        plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
         plt.title(title)
         plt.colorbar()
         tick_marks = np.arange(len(classes))
@@ -60,11 +60,9 @@ def fill_text_features(df):
 
 
 def drop_text_features(df):
-    df.drop('readme', axis=1, inplace=True)
-    df.drop('description', axis=1, inplace=True)
-    df.drop('repository', axis=1, inplace=True)
-    df.drop('owner', axis=1, inplace=True)
-    df.drop('name', axis=1, inplace=True)
+    for f in ['readme', 'description', 'repository', 'owner', 'name']:
+        if f in df.columns:
+            df.drop(f, axis=1, inplace=True)
     return df
 
 

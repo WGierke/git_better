@@ -2,41 +2,26 @@ import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 import numpy as np
 import pandas as pd
-from sklearn.externals import joblib
-from evaluation import get_cleaned_processed_df, eval_classifier, drop_text_features
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfTransformer
-from sklearn.linear_model import SGDClassifier
-from sklearn.model_selection import GridSearchCV
-from sklearn.pipeline import Pipeline
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score
-from sklearn.preprocessing import LabelEncoder
+from classifier import AdaTree, AdaBayes, AdaSVM, GradBoost, DecisionTree, Forest, NaiveBayes, SVM, TheanoNeuralNetwork, TensorFlowNeuralNetwork, XGBoost, TreeBag, SVMBag, get_text_pipeline
+from evaluation import complete_columns, get_cleaned_processed_df, eval_classifier, drop_text_features
 from nltk.stem.snowball import EnglishStemmer
+from sklearn.externals import joblib
+from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
+from sklearn.linear_model import SGDClassifier
+from sklearn.metrics import accuracy_score
+from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import LabelEncoder
 
-from classifier import DecisionTree, Forest, NaiveBayes, SVM, TheanoNeuralNetwork, \
-    TensorFlowNeuralNetwork, XGBoost
-from classifier import TreeBag, SVMBag
-from classifier import AdaTree, AdaBayes, AdaSVM, GradBoost
 
 JOBLIB_SUFFIX = '.joblib.pkl'
 JOBLIB_DESCRIPTION_PIPELINE_NAME = 'best_description_pipeline_4839'
 JOBLIB_README_PIPELINE_NAME = 'best_readme_pipeline_5161'
 
 
-def stemmed_words(doc):
-    stemmer = EnglishStemmer()
-    analyzer = CountVectorizer().build_analyzer()
-    return (stemmer.stem(w) for w in analyzer(doc))
-
-
 def find_best_text_pipeline(df_values, labels, pipeline=None, params=None):
     if not pipeline:
-        pipeline = Pipeline([
-            ('vect', CountVectorizer(stop_words='english', analyzer=stemmed_words)),
-            ('tfidf', TfidfTransformer()),
-            ('clf', SGDClassifier(loss="log")),
-        ])
+        pipeline = get_text_pipeline()
 
     if not params:
         parameters = {
@@ -73,8 +58,8 @@ def find_best_repository_classification(df_values, labels, drop_languages=False)
     y_test = le.transform(y_test)
     y_val = le.transform(y_val)
 
-    X_train, val_df = equalize_feature_numbers(X_train, val_df)
-    X_test, val_df = equalize_feature_numbers(X_test, val_df)
+    X_train, val_df = complete_columns(X_train, val_df)
+    X_test, val_df = complete_columns(X_test, val_df)
 
     if(drop_languages):
         X_train = drop_languages(X_train)
@@ -127,17 +112,6 @@ def find_best_repository_classification(df_values, labels, drop_languages=False)
     #return results
 
 
-def equalize_feature_numbers(df1, df2):
-    for c in df1.columns:
-        if c not in df2.columns:
-            df2[c] = 0
-
-    for c in df2.columns:
-        if c not in df1.columns:
-            df1[c] = 0
-    return df1, df2
-
-
 def drop_languages(df):
     for c in df.columns:
         if "LANGUAGE" in c:
@@ -150,6 +124,10 @@ def save_pickle(model, filename):
 
 def load_pickle(filename):
     return joblib.load(filename + JOBLIB_SUFFIX)
+
+
+def drop_defect_rows(df):
+    return df.loc[df["mentionableUsers"] > 0]
 
 
 def get_undersample_df(df):
@@ -165,4 +143,5 @@ def get_undersample_df(df):
         samples_df = samples_df.append(samples)
 
     assert len(samples_df), minimum_count * label_counts
-    return samples_df
+    assert len(samples_df.groupby('label').count().iloc[:, 0].unique()), 1
+    return samples_df.reset_index()
