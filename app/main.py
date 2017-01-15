@@ -8,6 +8,7 @@ from classifier import get_voting_classifier
 from training import load_pickle, get_text_pipeline, \
     get_undersample_df, drop_defect_rows, \
     JOBLIB_DESCRIPTION_PIPELINE_NAME, JOBLIB_README_PIPELINE_NAME
+from constants import VALIDATION_DATA_PATH, ADDITIONAL_VALIDATION_DATA_PATH
 from evaluation import drop_text_features
 from sklearn.cross_validation import train_test_split
 from preprocess import ColumnSumFilter, ColumnStdFilter, PolynomialTransformer
@@ -44,69 +45,90 @@ def classify(args):
             df_train = pd.read_csv(args.training_file, sep=' ', names=[
                                    "repository", "label"])
             df_train = process_data(data_frame=df_train)
-        df_train = drop_defect_rows(df_train)
         df_train = get_undersample_df(df_train)
         train_and_predict(df_train, df_input)
     else:
         predict(df_input)
 
 
-def train_and_predict(df_train, df_X):
-    df_val = pd.read_csv("data/validation_data.csv")
-    df_val_add = pd.read_csv("data/validation_additional_processed_data.csv")
-    df_val = drop_defect_rows(df_val)
-    df_val_add = drop_defect_rows(df_val_add)
-
-    df_train = drop_text_features(df_train)
-    df_X = drop_text_features(df_X)
-    df_val = drop_text_features(df_val)
-    df_val_add = drop_text_features(df_val_add)
-    y_train = df_train.pop("label")
-    y_val = df_val.pop("label")
-    y_val_add = df_val_add.pop("label")
-
-    df_train.fillna(0, inplace=True)
-    df_X.fillna(0, inplace=True)
-    df_val.fillna(0, inplace=True)
-    df_val_add.fillna(0, inplace=True)
-
-    for df in [df_train, df_X, df_val, df_val_add]:
-        for c in df.columns:
-            if df[c].dtype == 'O':
+def normalize(df_origin):
+    """Fill missing values, drop unneeded columns and convert columns to appropriate dtypes"""
+    df = df_origin.copy()
+    df.drop(["name", "owner", "repository"], axis=1, inplace=True)
+    for c in df.columns:
+        if df[c].dtype == 'O':
+            if c in ['isOwnerHomepage', 'hasHomepage', 'hasLicense', 'hasTravisConfig', 'hasCircleConfig', 'hasCiConfig']:
                 df[c] = (df[c] == 'True').astype(int)
             else:
-                df[c] = df[c].astype(int)
+                df[c].fillna('', inplace=True)
+        else:
+            df[c].fillna(0, inplace=True)
+            df[c] = df[c].astype(int)
+    return df
+
+def split_features(df_origin):
+    """Split features in numeric features, description, readme and label"""
+    df = df_origin.copy()
+    df = drop_defect_rows(df)
+    y = None
+    if "label" in df.columns:
+        y = df.pop("label")
+    df = normalize(df)
+    descr = df.pop("description")
+    readme = df.pop("readme")
+    return df, descr, readme, y
+
+
+def train_and_predict(df_training, df_input):
+    df_val = pd.read_csv(VALIDATION_DATA_PATH)
+    df_val_add = pd.read_csv(ADDITIONAL_VALIDATION_DATA_PATH)
+
+    X_training, train_descr, train_readme, y_train = split_features(df_training)
+    X_input, input_descr, input_readme, _ = split_features(df_input)
+    X_val, val_descr, val_readme, y_val = split_features(df_val)
+    X_val_add, val_add_descr, val_add_readme, y_val_add = split_features(df_val_add)
+
+    ppl_text_descr = get_text_pipeline()
+    ppl_text_descr = ppl_text_descr.fit(train_descr, y_train)
+    print "Val Descr Score: " + str(ppl_text_descr.score(val_descr, y_val))
+    print "Val Add Descr Score: " + str(ppl_text_descr.score(val_add_descr, y_val_add))
+    print ppl_text_descr.predict(input_descr)
+
+    ppl_text_readme = ppl_text_descr.fit(train_readme, y_train)
+    print "Val Readme Score: " + str(ppl_text_readme.score(val_readme, y_val))
+    print "Val Add Readme Score: " + str(ppl_text_readme.score(val_add_readme, y_val_add))
+    print ppl_text_readme.predict(input_readme)
 
     ppl = Pipeline([
         ('clmn_std_filter', ColumnStdFilter(min_std=1)),
         ('clmn_sum_filter', ColumnSumFilter(min_sum=10)),
     ])
 
-    ppl = ppl.fit(df_train)
-    df_train = ppl.fit_transform(df_train)
-    useful_features = list(df_train.columns)
+    ppl = ppl.fit(X_training)
+    X_training = ppl.transform(X_training)
+    useful_features = list(X_training.columns)
 
-    df_X = keep_useful_features(useful_features, df_X)
-    df_val = keep_useful_features(useful_features, df_val)
-    df_val_add = keep_useful_features(useful_features, df_val_add)
+    X_input = keep_useful_features(useful_features, X_input)
+    X_val = keep_useful_features(useful_features, X_val)
+    X_val_add = keep_useful_features(useful_features, X_val_add)
 
     poly_transf = PolynomialTransformer(degree=2)
-    df_train = poly_transf.transform(df_train)
-    df_X = poly_transf.transform(df_X)
-    df_val = poly_transf.transform(df_val)
-    df_val_add = poly_transf.transform(df_val_add)
+    X_training = poly_transf.transform(X_training)
+    X_input = poly_transf.transform(X_input)
+    X_val = poly_transf.transform(X_val)
+    X_val_add = poly_transf.transform(X_val_add)
 
-    df_train["label"] = y_train
+    X_training["label"] = y_train
 
-    X_train, X_test = train_test_split(df_train, test_size=0.3)
+    X_train, X_test = train_test_split(X_training, test_size=0.3)
     y_train = X_train.pop("label")
     y_test = X_test.pop("label")
     ensemble_numeric = get_voting_classifier().fit(X_train, y_train)
 
     print "Score on Test set: " + str(ensemble_numeric.score(X_test, y_test))
-    print "Score on Validation set: " + str(ensemble_numeric.score(df_val, y_val))
-    print "Score on Additional Validation set: " + str(ensemble_numeric.score(df_val_add, y_val_add))
-    print "Prediction for input: " + str(ensemble_numeric.predict(df_X))
+    print "Score on Validation set: " + str(ensemble_numeric.score(X_val, y_val))
+    print "Score on Additional Validation set: " + str(ensemble_numeric.score(X_val_add, y_val_add))
+    print "Prediction for input: " + str(ensemble_numeric.predict(X_input))
 
 
 def keep_useful_features(useful_features, df):
