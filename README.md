@@ -3,7 +3,7 @@
 ## Installation
 ### Repository Classification
 - Make sure that you've installed Python 2.7
-- Mac users may install [xgboost](http://xgboost.readthedocs.io/en/latest/build.html) manually
+- Install [xgboost](http://xgboost.readthedocs.io/en/latest/build.html) manually
 - Create a virtual environment and install all dependencies  
 ```bash
 virtualenv -p /usr/bin/python2.7 venv
@@ -33,7 +33,7 @@ python server/manage.py migrate
 - Run the server (per default on port 8000)  
 ```bash
 python server/start_server.py
-``` 
+```
 - You can access the application now on [localhost:8000](http://localhost:8000)  
 
 #### Docker
@@ -49,7 +49,10 @@ docker run -d -p 8000:8000 git_better
 - You can access the application now on [localhost:8000](http://localhost:8000)  
 
 ## Usage
-To fetch all features for the repositories specified in the CSV located at `TRAINING_DATA_PATH` and save them in `data/processed_data.csv` run: `python app/process.py`
+To predict repository labels based on your own training data or based on pre-trained models, follow the instructions of our main script:   
+`python app/main.py --help`  
+As an example, to classify the input data from the challenge repository using our pre-trained models, run  
+`python app/main.py -i data/example-input.txt`
 
 To visualize the data with the TensorBoard Embedding Projector, run `python app/embedding_visualization.py` and start tensorboard with `tensorboard --logdir log/`. Tensorboard will display the port on which the server listens, open `localhost:[port]` with your browser (standard port is 6006).
 

@@ -1,3 +1,5 @@
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 import numpy as np
 import pandas as pd
 from sklearn.externals import joblib
@@ -18,7 +20,8 @@ from classifier import TreeBag, SVMBag
 from classifier import AdaTree, AdaBayes, AdaSVM, GradBoost
 
 JOBLIB_SUFFIX = '.joblib.pkl'
-JOBLIB_DESCRIPTION_PIPELINE_NAME = 'best_description_pipeline'
+JOBLIB_DESCRIPTION_PIPELINE_NAME = 'best_description_pipeline_4839'
+JOBLIB_README_PIPELINE_NAME = 'best_readme_pipeline_5161'
 
 
 def stemmed_words(doc):
@@ -32,18 +35,17 @@ def find_best_text_pipeline(df_values, labels, pipeline=None, params=None):
         pipeline = Pipeline([
             ('vect', CountVectorizer(stop_words='english', analyzer=stemmed_words)),
             ('tfidf', TfidfTransformer()),
-            ('clf', SGDClassifier()),
+            ('clf', SGDClassifier(loss="log")),
         ])
 
     if not params:
         parameters = {
             'vect__max_df': (0.5, 0.75, 1.0),
-            'vect__ngram_range': ((1, 1), (1, 2)),  # unigrams or bigrams
-            'tfidf__use_idf': (True, False),
+            'vect__ngram_range': ((1, 1), (1, 2), (1, 3)),
             'tfidf__norm': ('l1', 'l2'),
-            'clf__alpha': (0.00001, 0.000001),
+            'clf__alpha': (0.001, 0.0001, 0.00001, 0.000001),
             'clf__penalty': ('l2', 'elasticnet'),
-            'clf__n_iter': (10, 50, 80),
+            'clf__n_iter': (10, 12, 15)
         }
 
     grid_search = GridSearchCV(pipeline, parameters, n_jobs=-1, verbose=1)
@@ -54,7 +56,7 @@ def find_best_text_pipeline(df_values, labels, pipeline=None, params=None):
 
 
 def find_best_repository_classification(df_values, labels, drop_languages=False):
-    X_train, X_test, y_train, y_test = train_test_split(df_values, labels, test_size=0.3, random_state=23)
+    X_train, X_test, y_train, y_test = train_test_split(df_values, labels, test_size=0.3, random_state=23, stratify=labels)
 
     # Remove classifiers which you don't want to run and add new ones here
     basic = [DecisionTree, Forest, NaiveBayes, SVM]#], TheanoNeuralNetwork, TensorFlowNeuralNetwork]
@@ -113,7 +115,7 @@ def find_best_repository_classification(df_values, labels, drop_languages=False)
         print "score on test data: ", test_score
         print "score on evaluation data: ", eval_score
         # could add confusion matrix
-        
+
         # Theano needs float64 X data
         if(classifier==TensorFlowNeuralNetwork):
             X_val, X_train, X_test = X_val_buf, X_train_buf, X_test_buf

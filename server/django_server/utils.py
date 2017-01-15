@@ -13,7 +13,7 @@ def get_trending_links(language=None, since="daily"):
         TYPE: List of trending repositories (e.g. ['/rails/rails'])
     """
     language_param = "/" + language if language else ""
-    url = "https://github.com/trending{language}?since={since}".format(language=language_param, since=since)
+    url = "https://github.com/trending/{language}?since={since}".format(language=language_param, since=since)
     html_page = urllib2.urlopen(url)
     links = []
     soup = BeautifulSoup(html_page)
