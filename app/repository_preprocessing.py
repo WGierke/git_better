@@ -74,7 +74,12 @@ def merge_files(repo_dir, file_name, override=False):
 
                     # is_binary() is sth. like a heuristic
                     try:
-                        if(not is_binary(filepath)):
+                        if(not is_binary(filepath)) \
+                                and ".git" not in subdir \
+                                and "merged_commit_messages.txt" not in file \
+                                and "merged_file_names.txt" not in file \
+                                and "merged_wiki.txt" not in file \
+                                and "merged_source.txt" not in file:
                             with open(filepath, "rb") as infile:
                                 try:
                                     f = codecs.open(filepath, encoding='utf-8', errors='strict')
@@ -101,6 +106,7 @@ def merge_file_names(repo_dir, override=False):
                     if ".git" not in subdir \
                             and "merged_commit_messages.txt" not in file \
                             and "merged_file_names.txt" not in file \
+                            and "merged_wiki.txt" not in file \
                             and "merged_source.txt" not in file:
                         try:
                             file.decode('utf-8')
