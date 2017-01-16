@@ -64,10 +64,10 @@ def merge_commit_messages(repo_dir, override=False):
     return open(os.path.join(repo_dir,"merged_commit_messages.txt"), "r").read()
 
 
-def merge_files(repo_dir, override=False):
+def merge_files(repo_dir, file_name, override=False):
     # check if source code files are already merged
-    if override or not os.path.exists(os.path.join(repo_dir,"merged_source.txt")):
-        with codecs.open(os.path.join(repo_dir,"merged_source.txt"), "w", "utf-8") as outfile:
+    if override or not os.path.exists(os.path.join(repo_dir,file_name)):
+        with codecs.open(os.path.join(repo_dir,file_name), "w", "utf-8") as outfile:
             for subdir, dirs, files in os.walk(repo_dir):
                 for file in files:
                     filepath = os.path.join(subdir, file)
@@ -88,7 +88,7 @@ def merge_files(repo_dir, override=False):
                     except IOError, e:
                         print "File does not exist" + str(e)
                         pass
-    return open(os.path.join(repo_dir,"merged_source.txt"), "r").read()
+    return open(os.path.join(repo_dir,file_name), "r").read()
 
 # TODO: Is the folder name also interesting?
 def merge_file_names(repo_dir, override=False):
@@ -136,11 +136,15 @@ def get_data_repos(cloneUrls, labels, owners, names, mode='source_code', pull=Fa
             # if i%10==0:
         repo_dir = clone_repo(owner, name, cloneUrl)
         if mode=='source_code':
-            merged_text = merge_files(repo_dir, override)
+            merged_text = merge_files(repo_dir, file_name='merged_source.txt', override)
         elif mode=='commit_messages':
             merged_text = merge_commit_messages(repo_dir)
         elif mode=='file_names':
             merged_text = merge_file_names(repo_dir)
+        elif mode=='wiki':
+            repo_dir = repo_dir[:-4]
+            repo_dir = repo_dir + '.wiki.git'
+            merged_text = merge_files(repo_dir, file_name='merged_wiki.txt', override)
         else:
             print('Not supported mode')
         df_merged_text = df_merged_text.append(
