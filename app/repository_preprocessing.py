@@ -113,6 +113,12 @@ def merge_file_names(repo_dir, override=False):
                             outfile.write(file+os.linesep)
                         except UnicodeError:
                             pass
+                    try:
+                        dirname = dirs[-1]
+                        dirname.decode('utf-8')
+                        outfile.write(dirname+os.linesep)
+                    except UnicodeError:
+                        pass
     return open(os.path.join(repo_dir,"merged_file_names.txt"), "r").read()
 
 
