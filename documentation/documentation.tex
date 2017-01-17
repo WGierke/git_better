@@ -34,6 +34,13 @@ openbib,
 \AtBeginDocument{\AtBeginShipoutNext{\AtBeginShipoutDiscard}}
 \pagestyle{scrheadings}
 
+\pretitle{%
+  \begin{center}
+  \LARGE
+  \includegraphics[width=6cm]{graphics/octocat.jpg}\\[\bigskipamount]
+}
+\posttitle{\end{center}}
+
 \begin{document}
 
 \providecommand{\tightlist}{%
@@ -41,14 +48,9 @@ openbib,
 
 \begin{titlepage}
 \begin{center}
-  \titlehead{
-   \centering
-   %\includegraphics[height=4cm]{utils/hpi_logo_text.pdf}
-   }
    \title{GitHub Repository Classification}
    \subtitle{Classification of Software Repositories Hosted on GitHub}
-   %\author{{\small by} \textbf{Willi Gierke and Sebastian Bischoff}}
-   \author{Willi Gierke\\willi.gierke@student.hpi.de\\Hasso-Plattner-Institute \and Sebastian Bischoff\\sebastian.bischoff@student.hpi.de\\Hasso-Plattner-Institute\\\\\\\\\\\\}
+   \author{Willi Gierke\\\texttt{willi.gierke@student.hpi.de}\\Hasso-Plattner-Institute \and Sebastian Bischoff\\\texttt{sebastian.bischoff@student.hpi.de}\\Hasso-Plattner-Institute\\\\\\\\\\\\}
    \date{Potsdam, January 2017}
    \maketitle
 \end{center}
