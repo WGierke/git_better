@@ -1,4 +1,12 @@
-\documentclass[a4paper,12pt]{article}
+\documentclass[%
+a4paper,
+DIV12,
+2.5headlines,
+bigheadings,
+titlepage,
+openbib,
+%draft
+]{scrartcl}
 
 \usepackage{amsfonts}
 \usepackage{amsmath}
@@ -12,50 +20,37 @@
 \usepackage{booktabs}
 \usepackage{graphicx}
 \usepackage{grffile}
-\usepackage{hyperref}
 \usepackage{ulem}
 \usepackage{tabularx}
 \usepackage[export]{adjustbox}
 \usepackage[T1]{fontenc}
 \usepackage{listings}
+\usepackage{titling}
+\usepackage{graphicx}
+\usepackage{scrpage2}
+\usepackage[colorinlistoftodos,prependcaption,textsize=tiny]{todonotes}
+\usepackage[pdftex, colorlinks, linktocpage, linkcolor=black, citecolor=black, urlcolor=black]{hyperref}
+\usepackage{atbegshi}% http://ctan.org/pkg/atbegshi
+\AtBeginDocument{\AtBeginShipoutNext{\AtBeginShipoutDiscard}}
+\pagestyle{scrheadings}
 
 \begin{document}
 
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
-\newcommand{\specialcell}[2][c]{%
- \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
-
 \begin{titlepage}
 \begin{center}
-  \vskip.2in
-  \large  Submission for informatiCup2017 \ldots
-  \vskip1in
-  \Large Hasso Plattner Institute (University of Potsdam)
-  \vskip1.5in
-  \emph{\huge GitHub Repository Classifier}
+  \titlehead{
+   \centering
+   %\includegraphics[height=4cm]{utils/hpi_logo_text.pdf}
+   }
+   \title{GitHub Repository Classification}
+   \subtitle{Classification of Software Repositories Hosted on GitHub}
+   \author{{\small by} \textbf{Willi Gierke and Sebastian Bischoff}}
+   \date{Potsdam, January 2017}
+   \maketitle
 \end{center}
-
-\vskip1.4in
-
-\begin{minipage}{.25\textwidth}
-  \begin{flushleft}
-    \bfseries\large Willi Gierke
-  \end{flushleft}
-\end{minipage}
-\hskip.4\textwidth
-\begin{minipage}{.25\textwidth}
-  \begin{flushleft}
-    \bfseries\large Sebastian Bischoff
-  \end{flushleft}
-\end{minipage}
-
-\vskip1.3in
-
-\centering
-\bfseries
-\Large Year \the\year
 \end{titlepage}
 
 \tableofcontents
@@ -63,7 +58,7 @@
 
 \section{Challenge Description}\label{challenge-description}
 
-This years InformatiCup challenge was to classify GitHub repositories automatically based on given class descriptions and sample data. 
+This years InformatiCup challenge was to classify GitHub repositories automatically based on given class descriptions and sample data.
 In this work we present how we explored the given data, detected relevant features and built an application that predicts repository labels using different machine learning algorithms.
 
 \section{Data Exploration}\label{data-exploration}
@@ -72,9 +67,9 @@ This section explains how we extended the training data set and how we explored 
 
 \subsection{Data Retrieval}\label{data-retrieval}
 
-The corresponding repository of the challenge includes 30 labeled repositories and 31 repositories that can be used as validation data. 
-It wouldn't be possible to train convincing prediction models using only these provided data sets. 
-To extend the amount of available training data (and as a first step to reduce overfitting), we used the GitHub Search API, GitHub Showcases and automated as well as manual Google searches to retrieve more data. 
+The corresponding repository of the challenge includes 30 labeled repositories and 31 repositories that can be used as validation data.
+It wouldn't be possible to train convincing prediction models using only these provided data sets.
+To extend the amount of available training data (and as a first step to reduce overfitting), we used the GitHub Search API, GitHub Showcases and automated as well as manual Google searches to retrieve more data.
 One can find the amount of retrieved, labeled repositories and their origin in the following table.
 
 \begin{table}[]
@@ -115,18 +110,18 @@ Overall, we were able to collect 1412 labeled repositories.
 	\label{training_data_distribution}
 \end{figure}
 
-As one can see in the table \ref{data_sources}, we tried to use key words for automated searching that are as close to the words that were used to describe the different classes as possible. 
-Though, it's still possible that the collected training data is biased as we actively selected repositories by searching for them. 
-As an extension, an approach that could minimize this bias would be to randomly select repositories (e.g.~from the GHTorrent project) and label them manually. 
-For the beginning, however, we neither had the time nor the manpower to label a large amount of repositories manually. 
-Since the difficulty to collect data entries of a certain label differed, we ended up with unbalanced training data. 
+As one can see in the table \ref{data_sources}, we tried to use key words for automated searching that are as close to the words that were used to describe the different classes as possible.
+Though, it's still possible that the collected training data is biased as we actively selected repositories by searching for them.
+As an extension, an approach that could minimize this bias would be to randomly select repositories (e.g.~from the GHTorrent project) and label them manually.
+For the beginning, however, we neither had the time nor the manpower to label a large amount of repositories manually.
+Since the difficulty to collect data entries of a certain label differed, we ended up with unbalanced training data.
 As the class label distribution affects some classifiers heavily, we trained the models on randomly undersampled training data.
 
 \subsection{Data Analysis}\label{data-analysis}
 
 To get a better idea of how the relationships between the data entries look like in a higher dimensional space, we used principal component
 analysis (PCA) and t-distributed stochastic neighbor embedding (t-SNE) to reduce the complexity of the data to 2D while retaining the principal
-components respectively the distances between the data points. 
+components respectively the distances between the data points.
 The figure \ref{t-sne-training-data} visualizes the distribution of the labeled data entries using t-SNE.
 
 \begin{figure}
@@ -150,25 +145,25 @@ We also used t-SNE to visualize the similarity between our retrieved training da
 \end{figure}
 
 Since the validation data does not form separate clusters or outliers, we could assume that testing the learned models on the validation data
-is a good way to verify how well the models generalize. 
+is a good way to verify how well the models generalize.
 On the other side, the validation data only contains roughly 30 data entries which is not enough to give reliable statements about the model performances.
-Furthermore, the fact that the validation data seems to be selected manually implies that it's also biased. 
+Furthermore, the fact that the validation data seems to be selected manually implies that it's also biased.
 Thus, perfect validation data would be a lot of randomly selected repositories that have been labeled manually.
 The additional data sets\footnote{https://github.com/InformatiCup/InformatiCup2017/tree/master/additional\_data\_sets} from another team could allow us to validate our models better even if they are also biased.
 As already mentioned, a perfect training and validation set would only contain repositories that have been sampled randomly and labeled manually.
 
 \section{Prediction Model}\label{prediction-model}
 
-When a model fits its training data too well and doesn't learn to generalize, it's considered to ``overfit''. 
-This can occur if the model is too complex so it learns the training data by heart instead of understanding how to solve the given problem in general. 
+When a model fits its training data too well and doesn't learn to generalize, it's considered to ``overfit''.
+This can occur if the model is too complex so it learns the training data by heart instead of understanding how to solve the given problem in general.
 To prevent this, we collected more training data than we already received by the challenge, we applied regularization to hinder the model becoming too complex and we used ensemble learning.\\
 By collecting more data than already given we created a bigger problem domain that needs to be understood by the model.\\
-Regularization adds a measure of the models complexity to the cost function that needs to be optimized. 
+Regularization adds a measure of the models complexity to the cost function that needs to be optimized.
 Thus, the model does not only try to solve the given problem but it also tries to do that keeping itself as simple as possible.\\
-Ensemble learning uses multiple trained models to calculate one final prediction. 
-These models are trained using distinct features so they're not related to each other. 
-The assumption is that when one model makes a mistake predicting a label, the other models don't make a mistake in this situation so the (correct predicted) label of the other models is returned. 
-To decide which model prediction is the correct one we used the Majority Rule algorithm. 
+Ensemble learning uses multiple trained models to calculate one final prediction.
+These models are trained using distinct features so they're not related to each other.
+The assumption is that when one model makes a mistake predicting a label, the other models don't make a mistake in this situation so the (correct predicted) label of the other models is returned.
+To decide which model prediction is the correct one we used the Majority Rule algorithm.
 One model was trained on the numerical features of a repository, one on the description, one on the content of the readme and one on the source code of each repository.\\
 The following chapters will explain how we retrieved and cleaned the data for each model, how we selected relevant features and how we developed the prediction model.
 
@@ -176,9 +171,9 @@ The following chapters will explain how we retrieved and cleaned the data for ea
 Set}\label{training-and-test-data-set}
 
 To train and evaluate the classifiers, we used a train/test/validation split.\\
-First, the collected training data was splitted in a train and a test split in a stratified manner. 
+First, the collected training data was splitted in a train and a test split in a stratified manner.
 This ensured that the distribution of class labels was balanced in both splits.\\
-The classifiers were then trained on the train split and their accuracy was evaluated on the test split. 
+The classifiers were then trained on the train split and their accuracy was evaluated on the test split.
 To calculate their final quality, we evaluated them on the validation data.
 
 \subsection{Classification Using Numeric Metadata of
@@ -218,9 +213,9 @@ LANGUAGE\_*            & How much code was written in the language in percent (e
 \end{tabularx}
 \end{table}
 
-Most of the features were available using the GitHub API. 
-We added the \emph{isOwnerHomepage} and \emph{hasHomepage} features to detect whether a repository serves its source code using GitHub pages. 
-This could allow us to identify WEB repositories easier. 
+Most of the features were available using the GitHub API.
+We added the \emph{isOwnerHomepage} and \emph{hasHomepage} features to detect whether a repository serves its source code using GitHub pages.
+This could allow us to identify WEB repositories easier.
 We furthermore hoped that using \emph{hasCiConfig}, so whether a repo contains a configuration file for a Continuous Integration service, would improve the accuracy of detecting DEV repositories.
 
 \subsubsection{Data Cleaning and
@@ -230,18 +225,18 @@ Using the GitHub REST API and the GitHub GraphQL API, we were able to receive al
 
 \subsubsection{Feature Selection}\label{feature-selection}
 
-Feature Selection describes the process of dropping features that yield no or very little additional information in order to decrease overfitting and accelerate model fitting. 
+Feature Selection describes the process of dropping features that yield no or very little additional information in order to decrease overfitting and accelerate model fitting.
 Especially the programming language features needed to be reduced using Feature Selection.\\
 GitHub detects over 300 used programming languages\footnote{https://github.com/github/linguist/blob/master/lib/linguist/languages.yml} in repositories.
 The problem is that a lot of them are used only in a few repositories such that there are a lot of features that only hold very little variance and information.
 As an example, among the collected 1400 repositories there were 46 programming languages, like Pony or KiCad, that were only used in one repository at all.
-To remove those, we dropped features with low standard deviation and a low overall sum. 
+To remove those, we dropped features with low standard deviation and a low overall sum.
 As an example, we are already able to drop 135 language features if we require that the sum of a language feature over all 1400 training data entries is supposed to be bigger than 5.
 
 \subsubsection{Feature Engineering}\label{feature-engineering}
 
-In a next step, we derived further features from the features we already collected. 
-We used polynomial feature generation which takes the input variables and builds all possible polynomial combination of this features up to a given degree. 
+In a next step, we derived further features from the features we already collected.
+We used polynomial feature generation which takes the input variables and builds all possible polynomial combination of this features up to a given degree.
 The idea of taking input features and applying a non-linear method on it to map the original values in another space is called ``kernel trick'' and is used by Support Vector Machines (SVM) to learn non-linear models as well.\\
 As an example, suppose a dataset is given with the two features \textit{size} and \textit{watchers} as in table \ref{example-feature-engineering-basic}.
 
@@ -271,11 +266,11 @@ size$^1$ & watchers$^1$ & size$^1\cdot$watchers$^1$ & size$^2$ & watchers$^2$ \\
 \end{tabular}
 \end{table}
 
-As one can see, the number of generated features increases polynomially in the number of input features. 
+As one can see, the number of generated features increases polynomially in the number of input features.
 That's why the previous Feature Selection step was very important.
 
-As alternative we could have used deep learning techniques but you need many training samples because of their higher learning complexity. 
-Our \textasciitilde{}1500 samples aren't enough for this. 
+As alternative we could have used deep learning techniques but you need many training samples because of their higher learning complexity.
+Our \textasciitilde{}1500 samples aren't enough for this.
 Small feed-forward neural networks are applicable to our problem while deep neural networks are not.
 
 \subsubsection{Numeric Metadata Prediction
@@ -295,22 +290,22 @@ Model}\label{validation-of-prediction-model}
 \subsection{Classification Using Text Data (Description and
 Readme)}\label{classification-using-text-data-description-and-readme}
 
-Intuitively, one wouldn't use the numeric features like the number of branches etc. to decide what label fits the repository best. 
-Instead, one would use the description or the content of the readme to determine it. 
-For this reason we used term frequency--inverse document frequency (tf-idf) matrices to develop natural language processing (NLP) models that predict the label based on them. 
-Since there's a semantic difference between the description and the readme of a repository, we discarded the idea of concatenating the text features and training one model on it. 
+Intuitively, one wouldn't use the numeric features like the number of branches etc. to decide what label fits the repository best.
+Instead, one would use the description or the content of the readme to determine it.
+For this reason we used term frequency--inverse document frequency (tf-idf) matrices to develop natural language processing (NLP) models that predict the label based on them.
+Since there's a semantic difference between the description and the readme of a repository, we discarded the idea of concatenating the text features and training one model on it.
 Instead, we trained two seperate models on the description respectively readme of the repositories.
 
 \subsubsection{Data Cleaning and
 Preprocessing}\label{data-cleaning-and-preprocessing-1}
 
-To remove words like `the', `a', `and' etc. that occur very often and yield little meaning, we used the Natural Language Toolkit (NLTK) to drop English stopwords. 
+To remove words like `the', `a', `and' etc. that occur very often and yield little meaning, we used the Natural Language Toolkit (NLTK) to drop English stopwords.
 Since it's also not important whether the singular or the plural of words are used, we also used this toolkit to stem English words.
 
 \subsubsection{Feature Generation from Existing
 Data}\label{feature-generation-from-existing-data}
 
-We used a count vectorizer which converts a text into a n-dimensional vector representing the vocabulary, where n is the number of unique words. 
+We used a count vectorizer which converts a text into a n-dimensional vector representing the vocabulary, where n is the number of unique words.
 After this text-to-vector conversion we transformed the vector into a tf-idf vector which is a normalized representation of the original vector.
 
 [Include positive and negative words]
@@ -345,16 +340,16 @@ Model}\label{validation-of-prediction-model-1}
 \subsection{Classification Using Source
 Code}\label{classification-using-source-code}
 
-We tested different approaches to use the source code and connected data of a repository to classify it. 
-For this task we used only data included in the git repository, no github specific data like projects, the wiki pages\ldots{} Data from the repositories are including source code files with comments and git workflow specific data (branches, commits\ldots{}). 
+We tested different approaches to use the source code and connected data of a repository to classify it.
+For this task we used only data included in the git repository, no github specific data like projects, the wiki pages\ldots{} Data from the repositories are including source code files with comments and git workflow specific data (branches, commits\ldots{}).
 We used in this chapter mainly the source code, file names and commit messages.
 
 \subsubsection{Data Cleaning and
 Preprocessing}\label{data-cleaning-and-preprocessing-2}
 
-We cloned each repository locally to retrieve the data we need. 
-After this step we were able to merge all non-binary source code files, all filenames and all git commit messages into three different files. 
-We didn't filter based on languages and all UTF-8 files are included. 
+We cloned each repository locally to retrieve the data we need.
+After this step we were able to merge all non-binary source code files, all filenames and all git commit messages into three different files.
+We didn't filter based on languages and all UTF-8 files are included.
 This could be an additional preprocessing step to improve and simplify the stemming and classification.
 
 \subsubsection{Feature Generation from Existing
@@ -390,10 +385,12 @@ Model}\label{overall-prediction-model}
 \end{itemize}
 
 \section{Implemented Application}\label{implemented-application}
+\subsection{Tooling Choices}\label{tooling-choices}
+\subsection{Functionality}\label{functionality}
 
 Our implemented application takes a file containing GitHub repository URLs, classifies them using an ensemble model that's trained on passed training data and saves the URLs and their computed labels on the disk.
-If no training data is given, the input data will be classified using our pre-trained model. 
-It's possible to pass the input data, which is supposed to have the format of the challenge example\footnote{https://github.com/InformatiCup/InformatiCup2017/blob/master/example-input}, using the \texttt{-i} argument. 
+If no training data is given, the input data will be classified using our pre-trained model.
+It's possible to pass the input data, which is supposed to have the format of the challenge example\footnote{https://github.com/InformatiCup/InformatiCup2017/blob/master/example-input}, using the \texttt{-i} argument.
 Optional training data can be passed using the \texttt{-t} argument.\\
 As an example, to classify the example data given by the challenge using the training data given by the challenge one would run:
 
@@ -422,13 +419,13 @@ For setup instructions please refer to the README.md file.
 
 \section{Extensions}\label{extensions}
 
-To bring our research work to production, we built a service\footnote{https://git-better.herokuapp.com/} that classifies your public GitHub repositories using models that were trained on our training data. 
-The server uses GitHub OAuth to authenticate GitHub users and uses their OAuth tokens to request their public repositories and their necessary features. 
+To bring our research work to production, we built a service\footnote{https://git-better.herokuapp.com/} that classifies your public GitHub repositories using models that were trained on our training data.
+The server uses GitHub OAuth to authenticate GitHub users and uses their OAuth tokens to request their public repositories and their necessary features.
 We're planning to improve the design with visualizations of the repository distribution using D3.\\
 Another extension would be to recommend trending GitHub projects\footnote{https://github.com/trending} based on the public repositories of the user.\\
 Since there is no official GitHub API for the trending repositories, we would crawl all websites that are available at \\
-https://github.com/trending/\textit{language}?since=\textit{since} once a day, where \textit{language} is a supported programming language like Python or Ruby, and \textit{since} is one of `daily', `weekly' or `monthly'. 
-We would then recommend repositories to the user based on their classified labels, on the preferred language of the user, on the text or even code similarity between the trending projects and those of the user. 
+https://github.com/trending/\textit{language}?since=\textit{since} once a day, where \textit{language} is a supported programming language like Python or Ruby, and \textit{since} is one of `daily', `weekly' or `monthly'.
+We would then recommend repositories to the user based on their classified labels, on the preferred language of the user, on the text or even code similarity between the trending projects and those of the user.
 To implement the latter one, we could use tf-idf matrices like we already used for the text classifiers.
 
 \begin{itemize}
