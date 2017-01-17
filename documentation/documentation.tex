@@ -17,15 +17,16 @@
 \usepackage{tabularx}
 \usepackage[export]{adjustbox}
 \usepackage[T1]{fontenc}
+\usepackage{listings}
 
 \begin{document}
 
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
-  
+
 \newcommand{\specialcell}[2][c]{%
  \begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
- 
+
 \begin{titlepage}
 \begin{center}
   \vskip.2in
@@ -142,7 +143,7 @@ To get a better idea of how the relationships between the data entries
 look like in a higher dimensional space, we used principal component
 analysis (PCA) and t-distributed stochastic neighbor embedding (t-SNE)
 to reduce the complexity of the data to 2D while retaining the principal
-components respectively the distances between the data points. The 
+components respectively the distances between the data points. The
 figure \ref{t-sne-training-data} visualizes the distribution of the labeled data entries
 using t-SNE.
 
@@ -153,14 +154,9 @@ using t-SNE.
 	\label{t-sne-training-data}
 \end{figure}
 
-You can find the complete code to generate the figure in the
-\href{https://github.com/WGierke/git_better/blob/master/t-SNE\%20Visualization.ipynb}{t-SNE
-Visualization Notebook}. To explore the data interactively and in a
-three dimensional reduction you can use the
-\href{https://github.com/WGierke/git_better\#usage}{tensorflow embedding
-projector setup}. {[}maybe add footnotes{]} One can notice that the
-``DOCS'' repositories build a cluster while it seems to be more
-complicated to separate the other classes.
+You can find the complete code to generate the figure in the t-SNE Visualization Notebook\footnote{https://github.com/WGierke/git\_better/blob/master/t-SNE\%20Visualization.ipynb}.
+To explore the data interactively and in a three dimensional reduction you can use the Tensorflow Embedding Projector setup\footnote{https://github.com/WGierke/git\_better\#usage}.
+One can notice that the ``DOCS'' repositories build a cluster while it seems to be more complicated to separate the other classes.
 
 We also used t-SNE to visualize the similarity between our retrieved
 training data and the given validation data as you can see in figure \ref{t-sne-validation-data}.
@@ -180,10 +176,9 @@ not enough to give reliable statements about the model performances.
 Furthermore, the fact that the validation data seems to be selected
 manually implies that it's also biased. Thus, perfect validation data
 would be a lot of randomly selected repositories that have been labeled
-manually. The
-\href{https://github.com/InformatiCup/InformatiCup2017/tree/master/additional_data_sets}{additional
-data sets} from another team could allow us to validate our models
-better even if they are also biased. As already mentioned, a perfect
+manually.
+The additional data sets\footnote{https://github.com/InformatiCup/InformatiCup2017/tree/master/additional\_data\_sets} from another team could allow us to validate our models better even if they are also biased.
+As already mentioned, a perfect
 training and validation set would only contain repositories that have
 been sampled randomly and labeled manually.
 
@@ -250,7 +245,7 @@ closed\_issues         & Number of closed issues                                
 forks                  & Number of forks                                                                    \\ \hline
 stargazers             & Number of users who "starred" the repo                                             \\ \hline
 projects               & Number of projects (integrated project management tool)                            \\ \hline
-size                   & Size of the source code in KB                                                      \\ \hline
+size                   & Size of the source code in kilobyte                                                \\ \hline
 isOwnerHomepage        & Is the name of the repo REPO\_OWNER.github.io or REPO\_OWNER.github.com?         \\ \hline
 hasHomepage            & Does the website \newline{}REPO\_OWNER.github.io/REPO\_NAME exist?                           \\ \hline
 hasLicense             & Does the repo have a license file?                                                 \\ \hline
@@ -286,18 +281,10 @@ Feature Selection describes the process of dropping features that yield
 no or very little additional information in order to decrease
 overfitting and accelerate model fitting. Especially the programming
 language features needed to be reduced using Feature Selection.\\
-GitHub detects
-\href{https://github.com/github/linguist/blob/master/lib/linguist/languages.yml}{over
-300 used programming languages} in repositories. The problem is that a
-lot of them are used only in a few repositories such that there are a
-lot of features that only hold very little variance and information. As
-an example, among the collected 1400 repositories there were 46
-programming languages, like Pony or KiCad, that were only used in one
-repository at all. To remove those, we dropped features with low
-standard deviation and a low overall sum. As an example, we are already
-able to drop 135 language features if we require that the sum of a
-language feature over all 1400 training data entries is supposed to be
-bigger than 5.
+GitHub detects over 300 used programming languages\footnote{https://github.com/github/linguist/blob/master/lib/linguist/languages.yml} in repositories.
+The problem is that a lot of them are used only in a few repositories such that there are a lot of features that only hold very little variance and information.
+As an example, among the collected 1400 repositories there were 46 programming languages, like Pony or KiCad, that were only used in one repository at all.
+To remove those, we dropped features with low standard deviation and a low overall sum. As an example, we are already able to drop 135 language features if we require that the sum of a language feature over all 1400 training data entries is supposed to be bigger than 5.
 
 \subsubsection{Feature Engineering}\label{feature-engineering}
 
@@ -309,13 +296,13 @@ applying a non-linear method on it to map the original values in another
 space is called ``kernel trick'' and is used by Support Vector Machines
 (SVM) to learn non-linear models as well.\\
 As an example, suppose a dataset is given with the two features
-\emph{size} and \emph{watchers} as in table \ref{example-feature-engineering-basic}.
+\textit{size} and \textit{watchers} as in table \ref{example-feature-engineering-basic}.
 
 \begin{table}[]
 \label{example-feature-engineering-basic}
 \centering
-\caption{My caption}
-\begin{tabular}{|l|l|}
+\caption{Original features}
+\begin{tabular}{|r|r|}
 \hline
 size & watchers \\ \hline
 2    & 5        \\ \hline
@@ -329,10 +316,10 @@ would look like table \ref{example-feature-engineering-transformed}.
 \begin{table}[]
 \label{example-feature-engineering-transformed}
 \centering
-\caption{My caption}
-\begin{tabular}{|l|l|l|l|l|}
+\caption{Polynomially generated features (degree=2)}
+\begin{tabular}{|r|r|r|r|r|}
 \hline
-size¹ & watchers¹ & size¹xwatchers¹ & size² & watchers² \\ \hline
+size$^1$ & watchers$^1$ & size$^1\cdot$watchers$^1$ & size$^2$ & watchers$^2$ \\ \hline
 2 & 5 & 10 & 4 & 25 \\ \hline
 10 & 8 & 80 & 100 & 64 \\ \hline
 \end{tabular}
@@ -452,8 +439,7 @@ Data}\label{feature-generation-from-existing-data-1}
 We were able to use the same feature generation approach based on the
 count vectorizer and tf-idf vector as used in the text data
 classification.
-\href{https://clgiles.ist.psu.edu/papers/KDD-2002-whatsthecode.pdf}{Ugurel
-et al.} showed a similar approach successfully.
+Ugurel et al.\footnote{"What's the Code? Automatic Classification of Source Code Archives", KDD, 2002} showed a similar approach successfully.
 
 [Include positive and negative words]
 
@@ -489,18 +475,17 @@ training data and saves the URLs and their computed labels on the disk.
 If no training data is given, the input data will be classified using
 our pre-trained model. It's possible to pass the input data, which is
 supposed to have the format of the
-\href{https://github.com/InformatiCup/InformatiCup2017/blob/master/example-input}{challenge
-example}, using the \texttt{-i} argument. Optional training data can be
+challenge example\footnote{https://github.com/InformatiCup/InformatiCup2017/blob/master/example-input}, using the \texttt{-i} argument. Optional training data can be
 passed using the \texttt{-t} argument.\\
 As an example, to classify the example data given by the challenge using
-the training data given by the challenge one would run: ~
+the training data given by the challenge one would run:
 
-\texttt{python\ app/main.py\ -i\ data/example-input.txt\ -t\ data/training\_data\_small.csv}
+\begin{lstlisting}[language=bash]
+  $ python app/main.py -i data/example-input.txt
+                       -t data/training_data_small.csv
+\end{lstlisting}
 
-The saved output file \texttt{predictions.txt} will have the format of
-the
-\href{https://github.com/InformatiCup/InformatiCup2017/blob/master/example-output}{challenge
-example}.\\
+The saved output file \texttt{predictions.txt} will have the format of the challenge example\footnote{https://github.com/InformatiCup/InformatiCup2017/blob/master/example-output}.\\
 For setup instructions please refer to the README.md file.
 
 \section{Validation}\label{validation}
@@ -521,20 +506,20 @@ For setup instructions please refer to the README.md file.
 \section{Extensions}\label{extensions}
 
 To bring our research work to production, we built a
-\href{https://git-better.herokuapp.com/}{service} that classifies your
+service\footnote{https://git-better.herokuapp.com/} that classifies your
 public GitHub repositories using models that were trained on our
 training data. The server uses GitHub OAuth to authenticate GitHub users
 and uses their OAuth tokens to request their public repositories and
 their necessary features. We're planning to improve the design with
 visualizations of the repository distribution using D3.\\
 Another extension would be to recommend
-\href{https://github.com/trending}{trending GitHub projects} based on
+trending GitHub projects\footnote{https://github.com/trending} based on
 the public repositories of the user.\\
 Since there is no official GitHub API for the trending repositories, we
-would crawl all websites that are available at
-https://github.com/trending/\{language\}?since=\{since\} once a day,
-where \emph{language} is a supported programming language like Python or
-Ruby, and \emph{since} is one of `daily', `weekly' or `monthly'. We
+would crawl all websites that are available at \\
+https://github.com/trending/\textit{language}?since=\textit{since} once a day,
+where \textit{language} is a supported programming language like Python or
+Ruby, and \textit{since} is one of `daily', `weekly' or `monthly'. We
 would then recommend repositories to the user based on their classified
 labels, on the preferred language of the user, on the text or even code
 similarity between the trending projects and those of the user. To
