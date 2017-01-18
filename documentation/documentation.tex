@@ -46,21 +46,32 @@ openbib,
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
+\DeclareRobustCommand{\desiredTitle}{
+  GitHub Repository Classification\\\normalsize{Solution for the informatiCup 2017}
+}
+
+\DeclareRobustCommand{\desiredAuthor}{
+  \\\\Willi Gierke\\\texttt{willi.gierke@student.hpi.de}\\Hasso-Plattner-Institute \and \\\\Sebastian Bischoff\\\texttt{sebastian.bischoff@student.hpi.de}\\Hasso-Plattner-Institute\\\\\\\\\\\\
+}
+
 \begin{titlepage}
 \begin{center}
-   \title{GitHub Repository Classification\\\normalsize{Solution for the InformatiCup 2017}}
-   \author{\\\\Willi Gierke\\\texttt{willi.gierke@student.hpi.de}\\Hasso-Plattner-Institute \and \\\\Sebastian Bischoff\\\texttt{sebastian.bischoff@student.hpi.de}\\Hasso-Plattner-Institute\\\\\\\\\\\\}
+   \title{\desiredTitle}
+   \author{\desiredAuthor}
    \date{Potsdam, January 2017}
    \maketitle
 \end{center}
 \end{titlepage}
+
+\listoftodos
+\pagebreak
 
 \tableofcontents
 \pagebreak
 
 \section{Challenge Description}\label{challenge-description}
 
-This years InformatiCup challenge was to classify GitHub repositories automatically based on given class descriptions and sample data.
+This years informatiCup challenge was to classify GitHub repositories automatically based on given class descriptions and sample data.
 In this work we present how we explored the given data, detected relevant features and built an application that predicts repository labels using different machine learning algorithms.
 
 \section{Data Exploration}\label{data-exploration}
@@ -280,14 +291,15 @@ Model}\label{numeric-metadata-prediction-model}
 
 We tried the following classifiers: \ldots{}
 
-{[}Better without language features{]}
+\todo[inline]{{[}Better without language features{]}}
 
-{[}accuracy from single models{]}{[}accuracy from ensembled models{]}
+
+\todo[inline]{{[}accuracy from single models{]}{[}accuracy from ensembled models{]}}
 
 \subsubsection{Validation of Prediction
 Model}\label{validation-of-prediction-model}
 
-{[}accuracy+confusion matrix{]}
+\todo[inline]{{[}accuracy+confusion matrix{]}}
 
 \subsection{Classification Using Text Data (Description and
 Readme)}\label{classification-using-text-data-description-and-readme}
@@ -314,7 +326,7 @@ After this text-to-vector conversion we transformed the vector into a tf-idf vec
 
 \subsubsection{Feature Selection}\label{feature-selection-1}
 
-{[}removal of rare/frequent words and stopwords{]}
+\todo[inline]{{[}removal of rare/frequent words and stopwords{]}}
 
 \subsubsection{Prediction Model}\label{prediction-model-1}
 
@@ -337,7 +349,7 @@ Model}\label{validation-of-prediction-model-1}
 	\label{confusion-matrix-description-classifier}
 \end{figure}
 
-{[}Include images with additional validation data{]}
+\todo[inline]{{[}Include images with additional validation data{]}}
 
 \subsection{Classification Using Source
 Code}\label{classification-using-source-code}
@@ -364,16 +376,16 @@ Ugurel et al.\footnote{"What's the Code? Automatic Classification of Source Code
 
 \subsubsection{Feature Selection}\label{feature-selection-2}
 
-{[}removal of rare/frequent words and stopwords{]}
+\todo[inline]{{[}removal of rare/frequent words and stopwords{]}}
 
 \subsubsection{Prediction Model}\label{prediction-model-2}
 
-{[}Same as text data{]}
+\todo[inline]{{[}Same as text data{]}}
 
 \subsubsection{Validation of Prediction
 Model}\label{validation-of-prediction-model-2}
 
-{[}accuracy+confusion matrix{]}
+\todo[inline]{{[}accuracy+confusion matrix{]}}
 
 \subsection{Overall Prediction
 Model}\label{overall-prediction-model}
@@ -388,6 +400,28 @@ Model}\label{overall-prediction-model}
 
 \section{Implemented Application}\label{implemented-application}
 \subsection{Tooling Choices}\label{tooling-choices}
+Python and R are the most used programming languages to solve data science tasks.
+While R was specifically developed for statistical computing and data visualization, Python is a general purpose programming language which was designed to be easy to understand.
+Libraries like NumPy, SciPy and scikit-learn are closing the gap between the machine learning capabilities of R and Python.
+The main reason for us to prefer Python to R was that we wanted to build a web application that makes use of our developed models and insights.
+Furthermore, we were already familiar with Pythons data science stack\footnote{https://speakerdeck.com/jakevdp/pythons-data-science-stack-jsm-2016} as we already completed machine learning courses of our university using it.
+The Python libraries we used the most were pandas\footnote{pandas.pydata.org/}, scikit-learn\footnote{http://scikit-learn.org/} and Jupyter\footnote{https://jupyter.org/}.\\
+Pandas transfers the concept of a \textit{DataFrame} from the R language to Python.
+A \textit{DataFrame} is a matrix-like object whose columns and rows are identified by a name respectively an index.
+This allows the user to always be able to understand the content of the object in opposition to matrices as \textit{DataFrames} always also provide semantic meta data about the content they're holding.
+Scikit-learn is a powerful machine library that provides cutting edge data science algorithms.
+Using scikit-learns pipelines, it's possible to chain data preprocessing, model fitting and prediction easily.
+Thus, it's possible for the user to completely focus on the challenge to solve and not to worry about implementation details of the used algorithms.
+Due to the compatible Python data science stack, scikit-learn supports the usage of \textit{DataFrames}.\\
+Jupyter is an interactive web application that makes it possible to cache computation results and to persist code and visualizations in separate files called \textit{notebooks}.
+Therefor, it's very simple to try out and visualize new solution approaches as well as to share them with collaborators.\\
+To build a service using our learned models we used Django\footnote{https://djangoproject.com/}.
+Django is a high-level framework to rapidly build web applications which supports the easy integration of further plugins.
+We needed that to make it possible for the user to log in using their GitHub account.\\
+To deploy our built service we used Heroku\footnote{https://heroku.com}.
+Heroku is a cloud-based Platform as a Service that allows one to deploy server applications in various supported languages.
+Its free tier makes it possible to host basic servers with database access without additional costs.
+
 \subsection{Functionality}\label{functionality}
 
 Our implemented application takes a file containing GitHub repository URLs, classifies them using an ensemble model that's trained on passed training data and saves the URLs and their computed labels on the disk.
