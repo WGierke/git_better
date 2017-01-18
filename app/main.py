@@ -3,7 +3,7 @@ import argparse
 import os
 import pandas as pd
 import sys
-from classifier import get_text_pipeline, get_voting_classifier, DescriptionClassifier, ReadmeClassifier, NumericEnsembleClassifier
+from classifier import get_text_pipeline, get_voting_classifier, DescriptionClassifier, ReadmeClassifier, NumericEnsembleClassifier, normalize
 from constants import VALIDATION_DATA_PATH, ADDITIONAL_VALIDATION_DATA_PATH
 from evaluation import drop_text_features
 from load_data import process_data
@@ -49,21 +49,6 @@ def classify(args):
     else:
         predict(df_input)
 
-
-def normalize(df_origin):
-    """Fill missing values, drop unneeded columns and convert columns to appropriate dtypes"""
-    df = df_origin.copy()
-    df.drop(["name", "owner", "repository"], axis=1, inplace=True)
-    for c in df.columns:
-        if df[c].dtype == 'O':
-            if c in ['isOwnerHomepage', 'hasHomepage', 'hasLicense', 'hasTravisConfig', 'hasCircleConfig', 'hasCiConfig']:
-                df[c] = (df[c] == 'True').astype(int)
-            else:
-                df[c].fillna('', inplace=True)
-        else:
-            df[c].fillna(0, inplace=True)
-            df[c] = df[c].astype(int)
-    return df
 
 def split_features(df_origin):
     """Split features in numeric features, description, readme and label"""

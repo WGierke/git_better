@@ -259,6 +259,15 @@ class MetaClassifier(GIClassifier):
         df[self.important_column].fillna(self.fill_character, inplace=True)
         return self.clf.score(df[self.important_column], Y)
 
+    def keep_useful_features(self, df, useful_features):
+        for c in df.columns:
+            if c not in useful_features:
+                df.drop(c, axis=1, inplace=True)
+        for f in useful_features:
+            if f not in df.columns:
+                df[f] = 0
+        return df
+
 
 class DescriptionClassifier(MetaClassifier):
     important_column = "description"
@@ -317,21 +326,62 @@ class NumericEnsembleClassifier(MetaClassifier):
         df = self.transform_to_fitted_features(df)
         return self.clf.score(df, Y)
 
-    def keep_useful_features(self, df, useful_features):
-        for c in df.columns:
-            if c not in useful_features:
-                df.drop(c, axis=1, inplace=True)
-        for f in useful_features:
-            if f not in df.columns:
-                df[f] = 0
-        return df
-
     def transform_to_fitted_features(self, df_origin):
         df = df_origin.copy()
         df = df.fillna(self.fill_character)
         df = self.keep_useful_features(df, self.useful_features)
         df = self.poly_transf.transform(df)
         return df
+
+
+class EnsembleAllNumeric(MetaClassifier):
+    fill_character = 0
+
+    def __init__(self, **args):
+        self.clf = DecisionTreeClassifier(**args)
+
+    def fit(self, df_origin, Y, tune_parameters=False):
+        df = df_origin.copy()
+        df = normalize(df)
+        df = self.transform(df)
+        self.useful_features = list(df.columns)
+        df.loc[0,:].to_csv("test")
+        self.clf.fit(df, Y)
+        return self
+
+    def predict(self, df_origin):
+        df = df_origin.copy()
+        df = self.transform(df)
+        df = self.keep_useful_features(df, self.keep_useful_features)
+        return self.clf.predict(df)
+
+    def predict_proba(self, df_origin):
+        df = df_origin.copy()
+        df = self.transform(df)
+        df = self.keep_useful_features(df, self.keep_useful_features)
+        return self.clf.predict_proba(df)
+
+    def score(self, df_origin, Y):
+        df = df_origin.copy()
+        df = self.transform(df)
+        df = self.keep_useful_features(df, self.useful_features)
+        return self.clf.score(df, Y)
+
+    def transform(self, df):
+        text_columns = df.select_dtypes(exclude=[np.number]).columns
+        cv = CountVectorizer(token_pattern="[a-zA-Z0-9.:]{3,}")
+        for c in text_columns:
+            df[c] = df[c].astype(str)
+            matrix = cv.fit_transform(df[c]).todense()
+            features = cv.get_feature_names()
+            normalized_matrix = matrix / matrix.sum(axis=1, dtype=float)
+            for i in range(len(features)):
+                df[c + "_" + features[i]] = normalized_matrix[:, i]
+            df.drop(c, axis=1, inplace=True)
+        del cv
+        del matrix
+        del normalized_matrix
+        return df.fillna(0)
 
 
 def get_text_pipeline(**args):
@@ -373,3 +423,19 @@ def get_voting_classifier(**args):
         voting_clf.set_params(**args)
 
     return voting_clf
+
+
+def normalize(df_origin):
+    """Fill missing values, drop unneeded columns and convert columns to appropriate dtypes"""
+    df = df_origin.copy()
+    df.drop(["name", "owner", "repository"], axis=1, inplace=True)
+    for c in df.columns:
+        if df[c].dtype == 'O':
+            if c in ['isOwnerHomepage', 'hasHomepage', 'hasLicense', 'hasTravisConfig', 'hasCircleConfig', 'hasCiConfig']:
+                df[c] = (df[c] == 'True').astype(int)
+            else:
+                df[c].fillna('', inplace=True)
+        else:
+            df[c].fillna(0, inplace=True)
+            df[c] = df[c].astype(int)
+    return df
