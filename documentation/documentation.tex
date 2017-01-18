@@ -85,7 +85,7 @@ It wouldn't be possible to train convincing prediction models using only these p
 To extend the amount of available training data (and as a first step to reduce overfitting), we used the GitHub Search API, GitHub Showcases and automated as well as manual Google searches to retrieve more data.
 One can find the amount of retrieved, labeled repositories and their origin in the following table.
 
-\begin{table}[]
+\begin{table}[h]
 \centering
 \label{data_sources}
 \caption{My caption}
@@ -116,7 +116,7 @@ solution'' \\ \hline
 
 Overall, we were able to collect 1412 labeled repositories.
 
-\begin{figure}
+\begin{figure}[h]
 	\centering
 		\includegraphics[max size={\textwidth}{\textheight}]{graphics/training_data_distribution.png}
 	\caption{Training Data Distribution}
@@ -137,7 +137,7 @@ analysis (PCA) and t-distributed stochastic neighbor embedding (t-SNE) to reduce
 components respectively the distances between the data points.
 The figure \ref{t-sne-training-data} visualizes the distribution of the labeled data entries using t-SNE.
 
-\begin{figure}
+\begin{figure}[h]
 	\centering
 		\includegraphics[max size={\textwidth}{\textheight}]{graphics/t-sne-training-data.png}
 	\caption{Distribution of the labeled data entries using t-SNE}
@@ -150,7 +150,7 @@ One can notice that the ``DOCS'' repositories build a cluster while it seems to 
 
 We also used t-SNE to visualize the similarity between our retrieved training data and the given validation data as you can see in figure \ref{t-sne-validation-data}.
 
-\begin{figure}
+\begin{figure}[h]
 	\centering
 		\includegraphics[max size={\textwidth}{\textheight}]{graphics/t-sne-validation-data.png}
 	\caption{Distribution of the validation data entries using t-SNE}
@@ -194,7 +194,7 @@ Repositories}\label{classification-using-numeric-metadata-of-repositories}
 
 To develop classifiers based on numeric metadata of repositories, we used the features explained in table \ref{features}.
 
-\begin{table}[]
+\begin{table}[h]
 \centering
 \caption{My caption}
 \label{features}
@@ -253,7 +253,7 @@ We used polynomial feature generation which takes the input variables and builds
 The idea of taking input features and applying a non-linear method on it to map the original values in another space is called ``kernel trick'' and is used by Support Vector Machines (SVM) to learn non-linear models as well.\\
 As an example, suppose a dataset is given with the two features \textit{size} and \textit{watchers} as in table \ref{example-feature-engineering-basic}.
 
-\begin{table}[]
+\begin{table}[h]
 \label{example-feature-engineering-basic}
 \centering
 \caption{Original features}
@@ -267,7 +267,7 @@ size & watchers \\ \hline
 
 The transformed dataset using polynomial features with a degree up to 2 would look like table \ref{example-feature-engineering-transformed}.
 
-\begin{table}[]
+\begin{table}[h]
 \label{example-feature-engineering-transformed}
 \centering
 \caption{Polynomially generated features (degree=2)}
@@ -335,14 +335,14 @@ Based on our tf-idf vector we can classify the different repositories using the 
 \subsubsection{Validation of Prediction
 Model}\label{validation-of-prediction-model-1}
 
-\begin{figure}
+\begin{figure}[h]
 	\centering
 		\includegraphics[max size={\textwidth}{\textheight}]{graphics/confusion-matrix-readme-classifier.png}
 	\caption{Readme Classifier: 51.6\% Accuracy on Validation Data}
 	\label{confusion-matrix-readme-classifier}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[h]
 	\centering
 		\includegraphics[max size={\textwidth}{\textheight}]{graphics/confusion-matrix-description-classifier.png}
 	\caption{Description Classifier: 48.4\% Accuracy on Validation Data}
@@ -476,8 +476,6 @@ To implement the latter one, we could use tf-idf matrices like we already used f
 % the \\ insures the section title is centered below the phrase: AppendixA
 
 \input{appendix-a.tex}
-
-
 
 \newpage
 \section{\\Title of Appendix B} \label{App:AppendixB}
