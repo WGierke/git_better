@@ -13,3 +13,9 @@ log
 #*.meta
 #*.pbtxt
 #model*
+*.aux
+*.log
+*.out
+*.synctex.gz
+*.toc
+documentation/*.pdf
