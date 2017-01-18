@@ -414,6 +414,10 @@ Its free tier makes it possible to host basic servers with database access witho
 
 Our implemented application takes a file containing GitHub repository URLs, classifies them using an ensemble model that's trained on passed training data and saves the URLs and their computed labels on the disk.
 If no training data is given, the input data will be classified using our pretrained model.
+\subsection{Functionality}\label{functionality}
+
+Our implemented application takes a file containing GitHub repository URLs, classifies them using an ensemble model that's trained on passed training data and saves the URLs and their computed labels on the disk.
+If no training data is given, the input data will be classified using our pre-trained model.
 It's possible to pass the input data, which is supposed to have the format of the challenge example\footnote{https://github.com/InformatiCup/InformatiCup2017/blob/master/example-input}, using the \texttt{-i} argument.
 Optional training data can be passed using the \texttt{-t} argument.\\
 As an example, to classify the example data given by the challenge using the training data given by the challenge one would run:

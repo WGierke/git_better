@@ -91,7 +91,7 @@ def ensure_valid_token():
             for index, user_key in enumerate(USERNAME_TOKENS):
                 if user_key[2] > 0:
                     TOKEN_POINTER = index
-                    print "chose token for " + get_username()
+                    print "Chose token for " + get_username()
                     return
             print "No remaining requests for any token available. Checking again in 5 minutes."
             time.sleep(300)
