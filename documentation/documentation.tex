@@ -389,7 +389,15 @@ Ugurel et al.\footnote{"What's the Code? Automatic Classification of Source Code
 
 \todo[inline]{positive/negative words file names}
 
-
+In the following paragraph we will discuss the importance of features gained from the file names. 
+As one can see in table \ref{file-names-data} an obvious good indicator for the DATA category is the file ending "json". 
+Negative Words are mainly connected with development (e.g. "package", "test" and "main") and web (e.g. "css" and "html").
+Good features for the DEV category are "util", "package", "yml" and "test". 
+This corresponds to the heavily used category or file name "util" (for utility) among developers and "test" for software tests like unit tests. 
+The strong positive word "contributing" for the DOCS category comes from the CONTRIBUTING.md file, which explains the principles of contributing to open source projects to new users.
+PDF files are a indication for EDU repositories, where the other features are very similar between EDU and HW.
+The category WEB has no positive words because we used the complete data shown in the table \ref{training_data_distribution} and didn't undersample.
+So the classifier classifies each sample as WEB when no negative word occurs.
 
 \todo[inline]{positive/negative words source code}
 
