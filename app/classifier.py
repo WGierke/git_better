@@ -64,14 +64,14 @@ class GIClassifier(object):
 
     def fit(self, df, Y, tune_parameters=False):
         self.tune_parameters = tune_parameters
-        self.clf.fit(df.values, Y)
+        self.clf.fit(df[df.select_dtypes(include=[np.number]).columns], Y)
         return self
 
     def predict(self, df):
-        return self.clf.predict(df.values)
+        return self.clf.predict(df[df.select_dtypes(include=[np.number]).columns])
 
     def predict_proba(self, df):
-        return self.clf.predict_proba(df.values)
+        return self.clf.predict_proba(df[df.select_dtypes(include=[np.number]).columns])
 
     def set_params(self, **args):
         return self.clf.set_params(**args)
@@ -80,7 +80,7 @@ class GIClassifier(object):
         return self.clf.get_params(**args)
 
     def score(self, df, Y):
-        return self.clf.score(df, Y)
+        return self.clf.score(df[df.select_dtypes(include=[np.number]).columns], Y)
 
 
 class DecisionTree(GIClassifier):
@@ -194,7 +194,10 @@ class XGBoost(GIClassifier):
         self.clf = XGBClassifier(**args)
 
     def score(self, df, Y):
-        return self.clf.score(df.values, Y)
+        return self.clf.score(df[df.select_dtypes(include=[np.number]).columns].values, Y)
+
+    def predict(self, df):
+        return self.clf.score(df[df.select_dtypes(include=[np.number]).columns].values)
 
 
 class TheanoNeuralNetwork(GIClassifier):
@@ -271,15 +274,6 @@ class MetaClassifier(GIClassifier):
         df[self.important_column].fillna(self.fill_character, inplace=True)
         return self.clf.score(df[self.important_column], Y)
 
-    def keep_useful_features(self, df, useful_features):
-        for c in df.columns:
-            if c not in useful_features:
-                df.drop(c, axis=1, inplace=True)
-        for f in useful_features:
-            if f not in df.columns:
-                df[f] = 0
-        return df
-
 
 class DescriptionClassifier(MetaClassifier):
     important_column = "description"
@@ -312,11 +306,9 @@ class NumericEnsembleClassifier(MetaClassifier):
         df = df_origin.copy()
         self.tune_parameters = tune_parameters
         self.numeric_columns = df.select_dtypes(include=[np.number]).columns
-        self.numeric_columns.drop("index")
         self.ppl = self.ppl.fit(df[self.numeric_columns])
         X_reduced = self.ppl.transform(df[self.numeric_columns])
         self.important_column = X_reduced.columns
-        self.important_column = self.important_column.drop("index")
         self.useful_features = list(X_reduced.columns)
         X_poly = self.poly_transf.transform(X_reduced)
         X_poly.fillna(self.fill_character, inplace=True)
@@ -341,7 +333,7 @@ class NumericEnsembleClassifier(MetaClassifier):
     def transform_to_fitted_features(self, df_origin):
         df = df_origin.copy()
         df = df.fillna(self.fill_character)
-        df = self.keep_useful_features(df, self.useful_features)
+        df = keep_useful_features(df, self.useful_features)
         df = self.poly_transf.transform(df)
         return df
 
@@ -365,19 +357,19 @@ class EnsembleAllNumeric(MetaClassifier):
     def predict(self, df_origin):
         df = df_origin.copy()
         df = self.transform(df)
-        df = self.keep_useful_features(df, self.keep_useful_features)
+        df = keep_useful_features(df, self.useful_features)
         return self.clf.predict(df)
 
     def predict_proba(self, df_origin):
         df = df_origin.copy()
         df = self.transform(df)
-        df = self.keep_useful_features(df, self.keep_useful_features)
+        df = keep_useful_features(df, self.useful_features)
         return self.clf.predict_proba(df)
 
     def score(self, df_origin, Y):
         df = df_origin.copy()
         df = self.transform(df)
-        df = self.keep_useful_features(df, self.useful_features)
+        df = keep_useful_features(df, self.useful_features)
         return self.clf.score(df, Y)
 
     def transform(self, df):
@@ -455,4 +447,14 @@ def normalize(df_origin):
         else:
             df[c].fillna(0, inplace=True)
             df[c] = df[c].astype(int)
+    return df
+
+
+def keep_useful_features(df, useful_features):
+    for c in df.columns:
+        if c not in useful_features:
+            df.drop(c, axis=1, inplace=True)
+    for f in useful_features:
+        if f not in df.columns:
+            df[f] = 0
     return df

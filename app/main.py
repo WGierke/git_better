@@ -3,17 +3,20 @@ import argparse
 import os
 import pandas as pd
 import sys
-from classifier import get_text_pipeline, get_voting_classifier, DescriptionClassifier, ReadmeClassifier, NumericEnsembleClassifier, normalize, EnsembleAllNumeric
+from tqdm import tqdm
+from classifier import get_text_pipeline, get_voting_classifier, DescriptionClassifier, ReadmeClassifier, NumericEnsembleClassifier, normalize, EnsembleAllNumeric, keep_useful_features
 from constants import VALIDATION_DATA_PATH, ADDITIONAL_VALIDATION_DATA_PATH
 from evaluation import drop_text_features
 from load_data import process_data
 from preprocess import ColumnSumFilter, ColumnStdFilter, PolynomialTransformer
 from sklearn.cross_validation import train_test_split
-from sklearn.ensemble import VotingClassifier, RandomForestClassifier
+from sklearn.ensemble import VotingClassifier, ExtraTreesClassifier
 from sklearn.pipeline import Pipeline
 from training import load_pickle, get_undersample_df, drop_defect_rows, JOBLIB_DESCRIPTION_PIPELINE_NAME, JOBLIB_README_PIPELINE_NAME
 
 N_BEST_FEATURES = 100
+LOOPS = 100
+NUMERIZE_README = False
 
 def main():
     parser = argparse.ArgumentParser(
@@ -45,7 +48,6 @@ def classify(args):
             df_train = pd.read_csv(args.training_file, sep=' ', names=[
                                    "repository", "label"])
             df_train = process_data(data_frame=df_train)
-        df_train = get_undersample_df(df_train)
         train_and_predict(df_train, df_input)
     else:
         predict(df_input)
@@ -73,22 +75,21 @@ def use_numeric_flat_prediction(df, df_input):
     print 50*"="
     print "Fitting Numeric Flat"
     print 50*"="
-    #df = get_undersample_df(df)
     df = normalize(df)
 
     val_df = normalize(pd.read_csv("data/validation_data_processed.csv"))
     val_add_df = normalize(pd.read_csv("data/validation_additional_processed_data.csv"))
 
-    _ = df.pop("readme")
-    _ = val_df.pop("readme")
-    _ = val_add_df.pop("readme")
+    if not NUMERIZE_README:
+        _ = df.pop("readme")
+        _ = val_df.pop("readme")
+        _ = val_add_df.pop("readme")
 
     y = df.pop("label")
     y_val = val_df.pop("label")
     y_val_add = val_add_df.pop("label")
 
-    #_ = df.pop("Unnamed: 0")
-    _ = df.pop("index")
+    _ = df.pop("Unnamed: 0")
     _ = val_df.pop("Unnamed: 0")
     _ = val_add_df.pop("Unnamed: 0")
 
@@ -96,11 +97,8 @@ def use_numeric_flat_prediction(df, df_input):
     df = ensemble_clf.transform(df)
     useful_features = ensemble_clf.useful_features
     val_df = ensemble_clf.transform(val_df)
-    val_df = ensemble_clf.keep_useful_features(val_df, useful_features)
     val_add_df = ensemble_clf.transform(val_add_df)
-    val_add_df = ensemble_clf.keep_useful_features(val_add_df, useful_features)
 
-    from sklearn.ensemble import ExtraTreesClassifier
     model = ExtraTreesClassifier()
     model.fit(df, y)
 
@@ -119,26 +117,22 @@ def use_numeric_flat_prediction(df, df_input):
     clfs.append(ExtraTreesClassifier(n_jobs=-1))
     clfs.append(get_voting_classifier())
 
-    loops = 10
-    for clf in clfs:
-        print clf.__class__
-        val_score = 0
-        val_add_score = 0
-        for i in range(loops):
-            X_train, X_test = train_test_split(df, test_size=0.3)
-            y_train = X_train.pop("label")
-            y_test = X_test.pop("label")
+    val_scores = [0] *len(clfs)
+    val_add_scores = [0] *len(clfs)
 
-            clf.fit(X_train, y_train)
-            val_score += clf.score(val_df, y_val)
-            val_add_score += clf.score(val_add_df, y_val_add)
-        print "Validation: " + str(val_score/loops)
-        print "Additional: " + str(val_add_score/loops)
-        # model = model.fit(X_train, y_train)
-        # for set_name, X, y in [("Validation", val_df, y_val), ("Additional Validation", val_add_df, y_val_add)]:
-        #     print "Score on {}: {}".format(set_name, model.score(X, y))
-        # print "Prediction for input data:"
-        # print model.predict(df_input)
+    for _ in tqdm(range(LOOPS)):
+        df_train = get_undersample_df(df.copy())
+        _ = df_train.pop("index")
+        y_train = df_train.pop("label")
+        for i in range(len(clfs)):
+            clf = clfs[i]
+            clf.fit(df_train, y_train)
+            val_scores[i] += clf.score(val_df, y_val)
+            val_add_scores[i] += clf.score(val_add_df, y_val_add)
+    for i in range(len(clfs)):
+        print clfs[i].__class__
+        print "Validation: " + str(val_scores[i]/LOOPS)
+        print "Additional: " + str(val_add_scores[i]/LOOPS)
 
 
 def use_mixed_stack_prediction(df_training, df_input):
@@ -146,36 +140,42 @@ def use_mixed_stack_prediction(df_training, df_input):
     print "Fitting Mixed Stack"
     print 50*"="
 
-    df_val = pd.read_csv(VALIDATION_DATA_PATH)
-    y_val = df_val.pop("label")
-    df_val_add = pd.read_csv(ADDITIONAL_VALIDATION_DATA_PATH)
-    y_val_add = df_val_add.pop("label")
+    df_training = normalize(df_training)
+
+    val_df = normalize(pd.read_csv(VALIDATION_DATA_PATH))
+    val_df = keep_useful_features(val_df, df_training.columns)
+    y_val = val_df.pop("label")
+    val_df_add = normalize(pd.read_csv(ADDITIONAL_VALIDATION_DATA_PATH))
+    val_df_add = keep_useful_features(val_df_add, df_training.columns)
+    y_val_add = val_df_add.pop("label")
 
     meta_ensemble = VotingClassifier(estimators=[('description', DescriptionClassifier()),
                                                  ('readme', ReadmeClassifier()),
                                                  ('ensemble', NumericEnsembleClassifier())],
                                     voting='soft')
 
-    loops = 10
     clfs = [DescriptionClassifier(), ReadmeClassifier(), NumericEnsembleClassifier(), meta_ensemble]
     clfs.extend([clf[1] for clf in get_voting_classifier().estimators])
-    for clf in clfs:
-        print clf.__class__
-        val_score = 0
-        val_add_score = 0
-        for i in range(loops):
-            X_train, X_test = train_test_split(df_training, test_size=0.3)
-            y_train = X_train.pop("label")
-            y_test = X_test.pop("label")
-            clf = clf.fit(X_train, y_train)
-            val_score += clf.score(df_val, y_val)
-            val_add_score += clf.score(df_val_add, y_val_add)
-        print "Validation: " + str(val_score/loops)
-        print "Additional: " + str(val_add_score/loops)
-            # for set_name, X, y in [("Test", X_test, y_test), ("Validation", df_val, y_val), ("Additional Validation", df_val_add, y_val_add)]:
-            #     print "Score on {}: {}".format(set_name, model.score(X, y))
-            # print "Prediction for input data:"
-            # print model.predict(df_input)
+
+    val_scores = [0] * len(clfs)
+    val_add_scores = [0] * len(clfs)
+
+    for _ in tqdm(range(LOOPS)):
+        df_train = get_undersample_df(df_training.copy())
+        _ = df_train.pop("index")
+        y_train = df_train.pop("label")
+        for i in range(len(clfs)):
+            try:
+                clf = clfs[i]
+                clf.fit(df_train, y_train)
+                val_scores[i] += clf.score(val_df, y_val)
+                val_add_scores[i] += clf.score(val_df_add, y_val_add)
+            except Exception, e:
+                print e
+    for i in range(len(clfs)):
+        print clfs[i].__class__
+        print "Validation: " + str(val_scores[i]/LOOPS)
+        print "Additional: " + str(val_add_scores[i]/LOOPS)
 
 
 def predict(df_input):
