@@ -28,6 +28,7 @@ openbib,
 \usepackage{titling}
 \usepackage{graphicx}
 \usepackage{scrpage2}
+\usepackage{float}
 \usepackage[colorinlistoftodos,prependcaption,textsize=tiny]{todonotes}
 \usepackage[pdftex, colorlinks, linktocpage, linkcolor=black, citecolor=black, urlcolor=black]{hyperref}
 \usepackage{atbegshi}% http://ctan.org/pkg/atbegshi
@@ -71,7 +72,7 @@ openbib,
 
 \section{Challenge Description}\label{challenge-description}
 
-This years informatiCup challenge was to classify GitHub repositories automatically based on given class descriptions and sample data.
+This years informatiCup challenge was to classify GitHub repos (repositories) automatically based on given class descriptions and sample data.
 In this work we present how we explored the given data, detected relevant features and built an application that predicts repository labels using different machine learning algorithms.
 
 \section{Data Exploration}\label{data-exploration}
@@ -82,48 +83,26 @@ This section explains how we extended the training data set and how we explored 
 
 The corresponding repository of the challenge includes 30 labeled repositories and 31 repositories that can be used as validation data.
 It wouldn't be possible to train convincing prediction models using only these provided data sets.
-To extend the amount of available training data (and as a first step to reduce overfitting), we used the GitHub Search API, GitHub Showcases and automated as well as manual Google searches to retrieve more data.
-One can find the amount of retrieved, labeled repositories and their origin in the following table.
-
-\begin{table}[]
-\centering
-\label{data_sources}
-\caption{My caption}
-\begin{tabular}{|l|l|l|}
-\hline
-Amount & Label & Origin \\ \hline
-9 & DATA & Manual Google search for Open Data
-repositories \\ \hline
-82 & DATA & Repositories of Github user `datasets' \\ \hline
-17 & EDU & Github Search for ``course, material'' \\ \hline
-17 & DOCS & Github Search for ``documentation'' \\ \hline
-423 & WEB & Google Search for ``site:.github.io'' \\ \hline
-58 & HW & GitHub Search for ``homework, assignments,
-solution'' \\ \hline
-13 & DEV & Showcases ``Virtual Reality'' \\ \hline
-12 & DEV & Showcases ``Software Development Tools'' \\ \hline
-14 & DEV & Showcases ``Front-end JavaScript frameworks'' \\ \hline
-20 & DEV & Showcases ``DevOps tools'' \\ \hline
-16 & DEV & Showcases ``Text editors'' \\ \hline
-24 & DEV & Showcases ``Game Engines'' \\ \hline
-27 & DEV & Showcases ``Web Application Frameworks'' \\ \hline
-42 & DEV & Showcases ``Programming Languages'' \\ \hline
-180 & DOCS & GitHub Repo Content: Awesome Repos \\ \hline
-6 & DATA & Showcases ``Open Data'' \\ \hline
-86 & HW & Github Search for ``homework, solution'' \\ \hline
-\end{tabular}
-\end{table}
-
+To extend the amount of available training data (and as a first step to reduce overfitting), we used the GitHub Search API\footnote{https://developer.github.com/v3/search/}, GitHub Showcases\footnote{https://github.com/showcases} and automated as well as manual Google\footnote{https://google.com} searches to retrieve more data.
+We used manual Google searches only in the beginning as we realized very quickly that this approach is not effective enough on the long run.\\
+One possibility to overcome this challenge was to use repos which have already been labeled by humans.
+As an example, GitHub Showcases are collections of repos hostet on GitHub that include content about certain topics like "Open Data" or "Web application frameworks".
+Another example are "awesome" GitHub repos.
+These projects, like "awesome-machine-learning"\footnote{https://github.com/josephmisiti/awesome-machine-learning}, contain curated links to further material about their topics.
+Thus, within the scope of this challenge, they can be classified as DOCS repos.
+The repository "awesome-awesomeness"\footnote{https://github.com/bayandin/awesome-awesomeness} references these "awesome" projects.
+Therefor, by crawling the referenced projects in this document we were able to automatically obtain a lot of DOCS repositories.\\
+Another possibility we used was to utilize the GitHub Search API.
+After searching for e.g. "course, material" and verifying the obtained results, we labeled the repos as EDU.\\
+GitHub can automatically serve content of repositories at https://\textit{username}.github.io if their name matches the pattern \textit{username}.github.io.
+That's why a lot of users host their websites on GitHub.
+For this reason we used Googles "Advanced Search"\footnote{https://www.google.com/advanced\_search} to search for websites whose domains included ".github.io".
+This approach allowed us to automatically obtain a large amount of labeled repositories in very little time.
+One can find the amount of retrieved, labeled repositories and their origin in table \ref{data_sources}.
 Overall, we were able to collect 1412 labeled repositories.
+One can find the distribution of the collection labeled training data in figure \ref{training_data_distribution}.
 
-\begin{figure}
-	\centering
-		\includegraphics[max size={\textwidth}{\textheight}]{graphics/training_data_distribution.png}
-	\caption{Training Data Distribution}
-	\label{training_data_distribution}
-\end{figure}
-
-As one can see in the table \ref{data_sources}, we tried to use key words for automated searching that are as close to the words that were used to describe the different classes as possible.
+As one can see in table \ref{data_sources}, we tried to use key words for automated searching that are as close to the words that were used to describe the different classes as possible.
 Though, it's still possible that the collected training data is biased as we actively selected repositories by searching for them.
 As an extension, an approach that could minimize this bias would be to randomly select repositories (e.g.~from the GHTorrent project) and label them manually.
 For the beginning, however, we neither had the time nor the manpower to label a large amount of repositories manually.
@@ -136,27 +115,10 @@ To get a better idea of how the relationships between the data entries look like
 analysis (PCA) and t-distributed stochastic neighbor embedding (t-SNE) to reduce the complexity of the data to 2D while retaining the principal
 components respectively the distances between the data points.
 The figure \ref{t-sne-training-data} visualizes the distribution of the labeled data entries using t-SNE.
-
-\begin{figure}
-	\centering
-		\includegraphics[max size={\textwidth}{\textheight}]{graphics/t-sne-training-data.png}
-	\caption{Distribution of the labeled data entries using t-SNE}
-	\label{t-sne-training-data}
-\end{figure}
-
 You can find the complete code to generate the figure in the t-SNE Visualization Notebook\footnote{https://github.com/WGierke/git\_better/blob/master/t-SNE\%20Visualization.ipynb}.
 To explore the data interactively and in a three dimensional reduction you can use the Tensorflow Embedding Projector setup\footnote{https://github.com/WGierke/git\_better\#usage}.
-One can notice that the ``DOCS'' repositories build a cluster while it seems to be more complicated to separate the other classes.
-
+One can notice that the ``DOCS'' repositories build a cluster while it seems to be more complicated to separate the other classes.\\
 We also used t-SNE to visualize the similarity between our retrieved training data and the given validation data as you can see in figure \ref{t-sne-validation-data}.
-
-\begin{figure}
-	\centering
-		\includegraphics[max size={\textwidth}{\textheight}]{graphics/t-sne-validation-data.png}
-	\caption{Distribution of the validation data entries using t-SNE}
-	\label{t-sne-validation-data}
-\end{figure}
-
 Since the validation data does not form separate clusters or outliers, we could assume that testing the learned models on the validation data
 is a good way to verify how well the models generalize.
 On the other side, the validation data only contains roughly 30 data entries which is not enough to give reliable statements about the model performances.
