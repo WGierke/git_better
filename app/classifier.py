@@ -401,7 +401,7 @@ def get_text_pipeline(**args):
     ppl = Pipeline([
         ('vect', CountVectorizer(stop_words='english', analyzer=stemmed_words, token_pattern='[a-zA-Z]{3,}')),
         ('tfidf', TfidfTransformer()),
-        ('clf', SGDClassifier(loss="log")),
+        ('clf', SGDClassifier(loss="log", n_jobs=-1)),
     ])
 
     if args:

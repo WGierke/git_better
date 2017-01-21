@@ -92,7 +92,7 @@ def use_numeric_flat_prediction(df, df_input):
     _ = val_df.pop("Unnamed: 0")
     _ = val_add_df.pop("Unnamed: 0")
 
-    ensemble_clf = EnsembleAllNumeric().fit(df, y)
+    ensemble_clf = EnsembleAllNumeric(n_jobs=-1).fit(df, y)
     df = ensemble_clf.transform(df)
     useful_features = ensemble_clf.useful_features
     val_df = ensemble_clf.transform(val_df)
