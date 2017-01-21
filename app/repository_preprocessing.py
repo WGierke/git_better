@@ -147,6 +147,9 @@ def get_data_repos(cloneUrls, labels, owners, names, mode='source_code', pull=Fa
     for cloneUrl, label, owner, name in zip(cloneUrls, labels, owners, names):
         # if owner not in ['DataScienceSpecialization', 'cdcepi', 'gygy', 'koolshare', 'Gaohaoyang', 'GoogleWebComponents']:
             # if i%10==0:
+        if mode=='wiki':
+            name = name[:-4]
+            name = name + '.wiki.git'
         repo_dir = clone_repo(owner, name, cloneUrl)
         if mode=='source_code':
             merged_text = merge_files(repo_dir, 'merged_source.txt', override=override)
@@ -155,8 +158,6 @@ def get_data_repos(cloneUrls, labels, owners, names, mode='source_code', pull=Fa
         elif mode=='file_names':
             merged_text = merge_file_names(repo_dir)
         elif mode=='wiki':
-            repo_dir = repo_dir[:-4]
-            repo_dir = repo_dir + '.wiki.git'
             merged_text = merge_files(repo_dir, 'merged_wiki.txt', override=override)
         else:
             print('Not supported mode')
