@@ -358,16 +358,16 @@ Model}\label{validation-of-prediction-model-1}
 Code}\label{classification-using-source-code}
 
 We tested different approaches to use the source code and connected data of a repository to classify it.
-For this task we used only data included in the git repository, no github specific data like projects, the wiki pages\ldots{} Data from the repositories are including source code files with comments and git workflow specific data (branches, commits\ldots{}).
-We used in this chapter mainly the source code, file names and commit messages.
+Data from the repositories are including source code files with comments and git workflow specific data (branches, commits\ldots{}).
+We used in this chapter mainly the source code, file names, commit messages and the wiki pages.
 
 \subsubsection{Data Cleaning and
 Preprocessing}\label{data-cleaning-and-preprocessing-2}
 
-We cloned each repository locally to retrieve the data we need.
-After this step we were able to merge all non-binary source code files, all filenames and all git commit messages into three different files.
+We cloned each repository and his wiki, which is also a git repository, locally to retrieve the data we need.
+After this step we were able to merge all non-binary source code files, all filenames, all git commit messages and all wiki pages into four different files.
 We didn't filter based on languages and all UTF-8 files are included.
-This could be an additional preprocessing step to improve and simplify the stemming and classification.
+This could be an additional preprocessing step to improve, correct and simplify the stemming and classification.
 
 \subsubsection{Feature Generation from Existing
 Data}\label{feature-generation-from-existing-data-1}
