@@ -3,16 +3,20 @@ import argparse
 import os
 import pandas as pd
 import sys
-from classifier import get_text_pipeline, get_voting_classifier, DescriptionClassifier, ReadmeClassifier, NumericEnsembleClassifier
+from tqdm import tqdm
+from classifier import get_text_pipeline, get_voting_classifier, DescriptionClassifier, ReadmeClassifier, NumericEnsembleClassifier, normalize, EnsembleAllNumeric, keep_useful_features
 from constants import VALIDATION_DATA_PATH, ADDITIONAL_VALIDATION_DATA_PATH
 from evaluation import drop_text_features
 from load_data import process_data
 from preprocess import ColumnSumFilter, ColumnStdFilter, PolynomialTransformer
 from sklearn.cross_validation import train_test_split
-from sklearn.ensemble import VotingClassifier
+from sklearn.ensemble import VotingClassifier, ExtraTreesClassifier
 from sklearn.pipeline import Pipeline
 from training import load_pickle, get_undersample_df, drop_defect_rows, JOBLIB_DESCRIPTION_PIPELINE_NAME, JOBLIB_README_PIPELINE_NAME
 
+N_BEST_FEATURES = 100
+LOOPS = 1
+NUMERIZE_README = False
 
 def main():
     parser = argparse.ArgumentParser(
@@ -44,26 +48,10 @@ def classify(args):
             df_train = pd.read_csv(args.training_file, sep=' ', names=[
                                    "repository", "label"])
             df_train = process_data(data_frame=df_train)
-        df_train = get_undersample_df(df_train)
         train_and_predict(df_train, df_input)
     else:
         predict(df_input)
 
-
-def normalize(df_origin):
-    """Fill missing values, drop unneeded columns and convert columns to appropriate dtypes"""
-    df = df_origin.copy()
-    df.drop(["name", "owner", "repository"], axis=1, inplace=True)
-    for c in df.columns:
-        if df[c].dtype == 'O':
-            if c in ['isOwnerHomepage', 'hasHomepage', 'hasLicense', 'hasTravisConfig', 'hasCircleConfig', 'hasCiConfig']:
-                df[c] = (df[c] == 'True').astype(int)
-            else:
-                df[c].fillna('', inplace=True)
-        else:
-            df[c].fillna(0, inplace=True)
-            df[c] = df[c].astype(int)
-    return df
 
 def split_features(df_origin):
     """Split features in numeric features, description, readme and label"""
@@ -79,27 +67,118 @@ def split_features(df_origin):
 
 
 def train_and_predict(df_training, df_input):
-    df_val = pd.read_csv(VALIDATION_DATA_PATH)
-    y_val = df_val.pop("label")
-    df_val_add = pd.read_csv(ADDITIONAL_VALIDATION_DATA_PATH)
-    y_val_add = df_val_add.pop("label")
+    use_numeric_flat_prediction(df_training.copy(), df_input.copy())
+    use_mixed_stack_prediction(df_training.copy(), df_input.copy())
 
-    X_train, X_test = train_test_split(df_training, test_size=0.3)
-    y_train = X_train.pop("label")
-    y_test = X_test.pop("label")
+
+def use_numeric_flat_prediction(df, df_input):
+    print 50*"="
+    print "Fitting Numeric Flat"
+    print 50*"="
+    df = normalize(df)
+
+    val_df = normalize(pd.read_csv("data/validation_data_processed.csv"))
+    val_add_df = normalize(pd.read_csv("data/validation_additional_processed_data.csv"))
+
+    if not NUMERIZE_README:
+        _ = df.pop("readme")
+        _ = val_df.pop("readme")
+        _ = val_add_df.pop("readme")
+
+    y = df.pop("label")
+    y_val = val_df.pop("label")
+    y_val_add = val_add_df.pop("label")
+
+    _ = df.pop("Unnamed: 0")
+    _ = val_df.pop("Unnamed: 0")
+    _ = val_add_df.pop("Unnamed: 0")
+
+    ensemble_clf = EnsembleAllNumeric(n_jobs=-1).fit(df, y)
+    df = ensemble_clf.transform(df)
+    useful_features = ensemble_clf.useful_features
+    val_df = ensemble_clf.transform(val_df)
+    val_add_df = ensemble_clf.transform(val_add_df)
+
+    model = ExtraTreesClassifier()
+    model.fit(df, y)
+
+    zipped = zip(useful_features, model.feature_importances_)
+    zipped.sort(key=lambda x: x[1], reverse=True)
+    best_features = [x[0] for x in zipped[:N_BEST_FEATURES]]
+
+    df = keep_useful_features(df, best_features)
+    val_df = keep_useful_features(val_df, best_features)
+    val_add_df = keep_useful_features(val_add_df, best_features)
+    df_input = keep_useful_features(df_input, best_features)
+
+    df["label"] = y
+
+    clfs = [clf[1] for clf in get_voting_classifier().estimators]
+    clfs.append(ExtraTreesClassifier(n_jobs=-1))
+    clfs.append(get_voting_classifier())
+
+    val_scores = [0] *len(clfs)
+    val_add_scores = [0] *len(clfs)
+
+    for _ in tqdm(range(LOOPS)):
+        df_train = get_undersample_df(df.copy())
+        _ = df_train.pop("index")
+        y_train = df_train.pop("label")
+        for i in range(len(clfs)):
+            try:
+                clf = clfs[i]
+                clf.fit(df_train, y_train)
+                val_scores[i] += clf.score(val_df, y_val)
+                val_add_scores[i] += clf.score(val_add_df, y_val_add)
+            except Exception, e:
+                print e
+    for i in range(len(clfs)):
+        print clfs[i].__class__
+        print "Validation: " + str(val_scores[i]/LOOPS)
+        print "Additional: " + str(val_add_scores[i]/LOOPS)
+
+
+def use_mixed_stack_prediction(df_training, df_input):
+    print 50*"="
+    print "Fitting Mixed Stack"
+    print 50*"="
+
+    df_training = normalize(df_training)
+
+    val_df = normalize(pd.read_csv(VALIDATION_DATA_PATH))
+    val_df = keep_useful_features(val_df, df_training.columns)
+    y_val = val_df.pop("label")
+    val_df_add = normalize(pd.read_csv(ADDITIONAL_VALIDATION_DATA_PATH))
+    val_df_add = keep_useful_features(val_df_add, df_training.columns)
+    y_val_add = val_df_add.pop("label")
 
     meta_ensemble = VotingClassifier(estimators=[('description', DescriptionClassifier()),
                                                  ('readme', ReadmeClassifier()),
                                                  ('ensemble', NumericEnsembleClassifier())],
                                     voting='soft')
 
-    for model in [DescriptionClassifier(), ReadmeClassifier(), NumericEnsembleClassifier(), meta_ensemble]:
-        print model.__class__
-        model = model.fit(X_train, y_train)
-        for set_name, X, y in [("Test", X_test, y_test), ("Validation", df_val, y_val), ("Additional Validation", df_val_add, y_val_add)]:
-            print "Score on {}: {}".format(set_name, model.score(X, y))
-        print "Prediction for input data:"
-        print model.predict(df_input)
+    clfs = [DescriptionClassifier(), ReadmeClassifier(), NumericEnsembleClassifier(), meta_ensemble]
+    clfs.extend([clf[1] for clf in get_voting_classifier().estimators])
+
+    val_scores = [0] * len(clfs)
+    val_add_scores = [0] * len(clfs)
+
+    for _ in tqdm(range(LOOPS)):
+        df_train = get_undersample_df(df_training.copy())
+        _ = df_train.pop("index")
+        y_train = df_train.pop("label")
+        for i in range(len(clfs)):
+            try:
+                clf = clfs[i]
+                clf.fit(df_train, y_train)
+                val_scores[i] += clf.score(val_df, y_val)
+                val_add_scores[i] += clf.score(val_df_add, y_val_add)
+            except Exception, e:
+                print e
+    for i in range(len(clfs)):
+        print clfs[i].__class__
+        print "Validation: " + str(val_scores[i]/LOOPS)
+        print "Additional: " + str(val_add_scores[i]/LOOPS)
 
 
 def predict(df_input):

@@ -131,7 +131,8 @@ def drop_defect_rows(df):
 
 
 def get_undersample_df(df):
-    df = get_cleaned_processed_df()
+    if df is None:
+        df = get_cleaned_processed_df()
     samples_df = pd.DataFrame(columns=df.columns)
     label_counts = df.groupby('label').count().iloc[:, 0]
     minimum_count = label_counts.min()
