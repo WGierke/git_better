@@ -284,7 +284,7 @@ Since it's also not important whether the singular or the plural of words are us
 \subsubsection{Feature Generation from Existing
 Data}\label{feature-generation-from-existing-data}
 
-We used a count vectorizer which converts a text into a n-dimensional vector representing the vocabulary, where n is the number of unique words.
+We used a count vectorizer which converts a text into an n-dimensional vector representing the vocabulary, where n is the number of unique words.
 After this text-to-vector conversion we transformed the vector into a tf-idf vector which is a normalized representation of the original vector.
 
 [Include positive and negative words]
@@ -326,7 +326,7 @@ We used in this chapter mainly the source code, file names, commit messages and 
 \subsubsection{Data Cleaning and
 Preprocessing}\label{data-cleaning-and-preprocessing-2}
 
-We cloned each repository and his wiki, which is also a git repository, locally to retrieve the data we need.
+We cloned each repository and its wiki, which is also a git repository, locally to retrieve the data we need.
 After this step we were able to merge all non-binary source code files, all filenames, all git commit messages and all wiki pages into four different files.
 We didn't filter based on languages and all UTF-8 files are included.
 This could be an additional preprocessing step to improve, correct and simplify the stemming and classification.
@@ -386,8 +386,8 @@ Furthermore, we were already familiar with Pythons data science stack\footnote{h
 The Python libraries we used the most were pandas\footnote{pandas.pydata.org/}, scikit-learn\footnote{http://scikit-learn.org/} and Jupyter\footnote{https://jupyter.org/}.\\
 Pandas transfers the concept of a \textit{DataFrame} from the R language to Python.
 A \textit{DataFrame} is a matrix-like object whose columns and rows are identified by a name respectively an index.
-This allows the user to always be able to understand the content of the object in opposition to matrices as \textit{DataFrames} always also provide semantic meta data about the content they're holding.
-Scikit-learn is a powerful machine library that provides cutting edge data science algorithms.
+This allows the user to always be able to understand the content of the object in opposition to matrices as \textit{DataFrames} always also provide semantic metadata about the content they're holding.
+Scikit-learn is a powerful machine learning library that provides cutting edge data science algorithms.
 Using scikit-learns pipelines, it's possible to chain data preprocessing, model fitting and prediction easily.
 Thus, it's possible for the user to completely focus on the challenge to solve and not to worry about implementation details of the used algorithms.
 Due to the compatible Python data science stack, scikit-learn supports the usage of \textit{DataFrames}.\\
