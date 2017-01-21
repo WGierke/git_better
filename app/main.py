@@ -15,7 +15,7 @@ from sklearn.pipeline import Pipeline
 from training import load_pickle, get_undersample_df, drop_defect_rows, JOBLIB_DESCRIPTION_PIPELINE_NAME, JOBLIB_README_PIPELINE_NAME
 
 N_BEST_FEATURES = 100
-LOOPS = 100
+LOOPS = 1
 NUMERIZE_README = False
 
 def main():
@@ -106,10 +106,10 @@ def use_numeric_flat_prediction(df, df_input):
     zipped.sort(key=lambda x: x[1], reverse=True)
     best_features = [x[0] for x in zipped[:N_BEST_FEATURES]]
 
-    df = ensemble_clf.keep_useful_features(df, best_features)
-    val_df = ensemble_clf.keep_useful_features(val_df, best_features)
-    val_add_df = ensemble_clf.keep_useful_features(val_add_df, best_features)
-    df_input = ensemble_clf.keep_useful_features(df_input, best_features)
+    df = keep_useful_features(df, best_features)
+    val_df = keep_useful_features(val_df, best_features)
+    val_add_df = keep_useful_features(val_add_df, best_features)
+    df_input = keep_useful_features(df_input, best_features)
 
     df["label"] = y
 
@@ -125,10 +125,13 @@ def use_numeric_flat_prediction(df, df_input):
         _ = df_train.pop("index")
         y_train = df_train.pop("label")
         for i in range(len(clfs)):
-            clf = clfs[i]
-            clf.fit(df_train, y_train)
-            val_scores[i] += clf.score(val_df, y_val)
-            val_add_scores[i] += clf.score(val_add_df, y_val_add)
+            try:
+                clf = clfs[i]
+                clf.fit(df_train, y_train)
+                val_scores[i] += clf.score(val_df, y_val)
+                val_add_scores[i] += clf.score(val_add_df, y_val_add)
+            except Exception, e:
+                print e
     for i in range(len(clfs)):
         print clfs[i].__class__
         print "Validation: " + str(val_scores[i]/LOOPS)
