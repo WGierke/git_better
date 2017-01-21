@@ -114,9 +114,10 @@ def merge_file_names(repo_dir, override=False):
                         except UnicodeError:
                             pass
                     try:
-                        dirname = dirs[-1]
-                        dirname.decode('utf-8')
-                        outfile.write(dirname+os.linesep)
+                        if len(dirs) > 1:
+                            dirname = dirs[-1]
+                            dirname.decode('utf-8')
+                            outfile.write(dirname+os.linesep)
                     except UnicodeError:
                         pass
     return open(os.path.join(repo_dir,"merged_file_names.txt"), "r").read()
@@ -148,7 +149,7 @@ def get_data_repos(cloneUrls, labels, owners, names, mode='source_code', pull=Fa
             # if i%10==0:
         repo_dir = clone_repo(owner, name, cloneUrl)
         if mode=='source_code':
-            merged_text = merge_files(repo_dir, override, file_name='merged_source.txt')
+            merged_text = merge_files(repo_dir, 'merged_source.txt', override=override)
         elif mode=='commit_messages':
             merged_text = merge_commit_messages(repo_dir)
         elif mode=='file_names':
@@ -156,7 +157,7 @@ def get_data_repos(cloneUrls, labels, owners, names, mode='source_code', pull=Fa
         elif mode=='wiki':
             repo_dir = repo_dir[:-4]
             repo_dir = repo_dir + '.wiki.git'
-            merged_text = merge_files(repo_dir, override, file_name='merged_wiki.txt')
+            merged_text = merge_files(repo_dir, 'merged_wiki.txt', override=override)
         else:
             print('Not supported mode')
         df_merged_text = df_merged_text.append(
