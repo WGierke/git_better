@@ -14,7 +14,7 @@ from sklearn.linear_model import SGDClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.pipeline import Pipeline
-from sklearn.svm import SVC
+from sklearn.svm import SVC, LinearSVC
 from sklearn.tree import DecisionTreeClassifier
 from xgboost import XGBClassifier
 
@@ -73,6 +73,9 @@ class GIClassifier(object):
     def predict_proba(self, df):
         return self.clf.predict_proba(df.values)
 
+    def set_params(self, **args):
+        return self.clf.set_params(**args)
+
     def get_params(self, **args):
         return self.clf.get_params(**args)
 
@@ -114,6 +117,13 @@ class SVM(GIClassifier):
                                       'degree': sp_randint(2, 5)}
         self.clf = SVC(**args)
 
+
+class LinearSVM(GIClassifier):
+    def __init__(self, **args):
+        self.param_dist_random = {'shrinking': [True, False],
+                                      'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
+                                      'degree': sp_randint(2, 5)}
+        self.clf = LinearSVC(**args)
 
 
 class BagEnsemble(GIClassifier):
@@ -183,6 +193,8 @@ class XGBoost(GIClassifier):
                                       'n_estimators' : sp_randint(50, 200)}
         self.clf = XGBClassifier(**args)
 
+    def score(self, df, Y):
+        return self.clf.score(df.values, Y)
 
 
 class TheanoNeuralNetwork(GIClassifier):
@@ -335,17 +347,18 @@ class NumericEnsembleClassifier(MetaClassifier):
 
 
 class EnsembleAllNumeric(MetaClassifier):
+    """Fits a RandomForestClassifier on the features where the text features have been transformed to numeric ones"""
     fill_character = 0
 
     def __init__(self, **args):
-        self.clf = DecisionTreeClassifier(**args)
+        from sklearn.ensemble import RandomForestClassifier
+        self.clf = RandomForestClassifier(**args)
 
     def fit(self, df_origin, Y, tune_parameters=False):
         df = df_origin.copy()
         df = normalize(df)
         df = self.transform(df)
         self.useful_features = list(df.columns)
-        df.loc[0,:].to_csv("test")
         self.clf.fit(df, Y)
         return self
 
@@ -369,7 +382,7 @@ class EnsembleAllNumeric(MetaClassifier):
 
     def transform(self, df):
         text_columns = df.select_dtypes(exclude=[np.number]).columns
-        cv = CountVectorizer(token_pattern="[a-zA-Z0-9.:]{3,}")
+        cv = CountVectorizer(token_pattern="[a-zA-Z0-9.:]{3,}", min_df=0.001)
         for c in text_columns:
             df[c] = df[c].astype(str)
             matrix = cv.fit_transform(df[c]).todense()
@@ -378,9 +391,9 @@ class EnsembleAllNumeric(MetaClassifier):
             for i in range(len(features)):
                 df[c + "_" + features[i]] = normalized_matrix[:, i]
             df.drop(c, axis=1, inplace=True)
-        del cv
-        del matrix
-        del normalized_matrix
+            del cv
+            del matrix
+            del normalized_matrix
         return df.fillna(0)
 
 
@@ -406,9 +419,10 @@ def get_voting_classifier(**args):
     voting_clf = VotingClassifier(voting='soft', estimators=[
         ('clf_bayes', NaiveBayes()),
         ('clf_tree', DecisionTree()),
-        ('clf_forest', Forest()),
+        ('clf_forest', Forest(n_jobs=-1)),
         ('clf_kneighbors', KNeighbors()),
-        ('clf_svm', SVM(kernel='rbf', shrinking=True, probability=True)),
+        ('clf_svm', SVM(kernel='rbf', probability=True)),
+        #('clf_linear_svm', LinearSVM()),
         ('clf_grad_boost', GradBoost()),
         ('clf_xgboost', XGBoost())])
         # ('clf_bag_ensemble', BagEnsemble()),
@@ -428,7 +442,10 @@ def get_voting_classifier(**args):
 def normalize(df_origin):
     """Fill missing values, drop unneeded columns and convert columns to appropriate dtypes"""
     df = df_origin.copy()
-    df.drop(["name", "owner", "repository"], axis=1, inplace=True)
+    drop_columns = ["name", "owner", "repository"]
+    for c in drop_columns:
+        if c in df.columns:
+            df.drop(c, axis=1, inplace=True)
     for c in df.columns:
         if df[c].dtype == 'O':
             if c in ['isOwnerHomepage', 'hasHomepage', 'hasLicense', 'hasTravisConfig', 'hasCircleConfig', 'hasCiConfig']:
