@@ -31,6 +31,8 @@ openbib,
 \usepackage[colorinlistoftodos,prependcaption,textsize=tiny]{todonotes}
 \usepackage[pdftex, colorlinks, linktocpage, linkcolor=black, citecolor=black, urlcolor=black]{hyperref}
 \usepackage{atbegshi}% http://ctan.org/pkg/atbegshi
+\usepackage{placeins}
+
 \AtBeginDocument{\AtBeginShipoutNext{\AtBeginShipoutDiscard}}
 \pagestyle{scrheadings}
 
@@ -475,13 +477,16 @@ To implement the latter one, we could use tf-idf matrices like we already used f
 \section{\\Evaluation of file name classifier} \label{App:AppendixA}
 % the \\ insures the section title is centered below the phrase: AppendixA
 
+\FloatBarrier
 \input{appendix-file-names.tex}
+\FloatBarrier
 
 \newpage
 \section{\\Evaluation of commit message classifier} \label{App:AppendixB}
 % the \\ insures the section title is centered below the phrase: Appendix B
 
+\FloatBarrier
 \input{appendix-commit-messages.tex}
-
+\FloatBarrier
 
 \end{document}
