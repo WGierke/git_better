@@ -32,6 +32,8 @@ openbib,
 \usepackage[colorinlistoftodos,prependcaption,textsize=tiny]{todonotes}
 \usepackage[pdftex, colorlinks, linktocpage, linkcolor=black, citecolor=black, urlcolor=black]{hyperref}
 \usepackage{atbegshi}% http://ctan.org/pkg/atbegshi
+\usepackage{placeins}
+
 \AtBeginDocument{\AtBeginShipoutNext{\AtBeginShipoutDiscard}}
 \pagestyle{scrheadings}
 
@@ -64,7 +66,6 @@ openbib,
 \end{center}
 \end{titlepage}
 
-\listoftodos
 \pagebreak
 
 \tableofcontents
@@ -72,7 +73,7 @@ openbib,
 
 \section{Challenge Description}\label{challenge-description}
 
-This years informatiCup challenge was to classify GitHub repositories (repos) automatically based on given class descriptions and sample data.
+This years informatiCup challenge was to automatically classify GitHub repositories (repos) based on given class descriptions and sample data from the exercise description.
 In this work we present how we explored the given data, detected relevant features and built an application that predicts repository labels using different machine learning algorithms.
 
 \section{Data Exploration}\label{data-exploration}
@@ -103,7 +104,7 @@ Overall, we were able to collect 1412 labeled repositories.
 One can find the distribution of the collection labeled training data in figure \ref{training_data_distribution}.
 
 As one can see in table \ref{data_sources}, we tried to use key words for automated searching that are as close to the words that were used to describe the different classes as possible.
-Though, it's still possible that the collected training data is biased as we actively selected repositories by searching for them.
+Although, it's still possible that the collected training data is biased as we actively selected repositories by searching for them.
 As an extension, an approach that could minimize this bias would be to randomly select repositories (e.g.~from the GHTorrent project) and label them manually.
 For the beginning, however, we neither had the time nor the manpower to label a large amount of repositories manually.
 Since the difficulty to collect data entries of a certain label differed, we ended up with unbalanced training data.
@@ -124,7 +125,7 @@ is a good way to verify how well the models generalize.
 On the other side, the validation data only contains roughly 30 data entries which is not enough to give reliable statements about the model performances.
 Furthermore, the fact that the validation data seems to be selected manually implies that it's also biased.
 Thus, perfect validation data would be a lot of randomly selected repositories that have been labeled manually.
-The additional data sets\footnote{https://github.com/InformatiCup/InformatiCup2017/tree/master/additional\_data\_sets} from another team could allow us to validate our models better even if they are also biased.
+The additional data sets\footnote{https://github.com/InformatiCup/InformatiCup2017/tree/master/additional\_data\_sets} from another team allowed us to validate our models better although they were also biased.
 As already mentioned, a perfect training and validation set would only contain repositories that have been sampled randomly and labeled manually.
 
 \section{Prediction Model}\label{prediction-model}
@@ -155,43 +156,10 @@ To calculate their final quality, we evaluated them on the validation data.
 Repositories}\label{classification-using-numeric-metadata-of-repositories}
 
 To develop classifiers based on numeric metadata of repositories, we used the features explained in table \ref{features}.
-
-\begin{table}[]
-\centering
-\caption{My caption}
-\label{features}
-\begin{tabularx}{\linewidth}{|l|X|}
-\hline
-Feature Name           & Description                                                                        \\ \hline
-watchers               & Number of users who watch the repo                                                 \\ \hline
-mentionableUsers       & Number of mentionable users (collaborators, contributors, ...)                     \\ \hline
-open\_pull\_requests   & Number of open pull requests                                                       \\ \hline
-closed\_pull\_requests & Number of closed pull requests                                                     \\ \hline
-merged\_pull\_requests & Number of merged pull requests                                                     \\ \hline
-open\_issues           & Number of open issues                                                              \\ \hline
-closed\_issues         & Number of closed issues                                                            \\ \hline
-forks                  & Number of forks                                                                    \\ \hline
-stargazers             & Number of users who "starred" the repo                                             \\ \hline
-projects               & Number of projects (integrated project management tool)                            \\ \hline
-size                   & Size of the source code in kilobyte                                                \\ \hline
-isOwnerHomepage        & Is the name of the repo REPO\_OWNER.github.io or REPO\_OWNER.github.com?         \\ \hline
-hasHomepage            & Does the website \newline{}REPO\_OWNER.github.io/REPO\_NAME exist?                           \\ \hline
-hasLicense             & Does the repo have a license file?                                                 \\ \hline
-hasTravisConfig        & Does the repo have a Travis configuration file?                                    \\ \hline
-hasCircleConfig        & Does the repo have a CircleCI configuration file?                                  \\ \hline
-hasCiConfig            & hasTravisConfig OR hasCircleConfig                                                 \\ \hline
-commitsCount           & Number of commits                                                                  \\ \hline
-branchesCount          & Number of branches                                                                 \\ \hline
-tagsCount              & Number of tags                                                                     \\ \hline
-releasesCount          & Number of releases                                                                 \\ \hline
-LANGUAGE\_*            & How much code was written in the language in percent (e.g. LANGUAGE\_Python, ...)? \\ \hline
-\end{tabularx}
-\end{table}
-
 Most of the features were available using the GitHub API.
-We added the \emph{isOwnerHomepage} and \emph{hasHomepage} features to detect whether a repository serves its source code using GitHub pages.
+We added the \textit{isOwnerHomepage} and \textit{hasHomepage} features to detect whether a repository serves its source code using GitHub pages.
 This could allow us to identify WEB repositories easier.
-We furthermore hoped that using \emph{hasCiConfig}, so whether a repo contains a configuration file for a Continuous Integration service, would improve the accuracy of detecting DEV repositories.
+We furthermore hoped that using \textit{hasCiConfig}, so whether a repo contains a configuration file for a Continuous Integration service like Travis CI\footnote{https://travis-ci.org/} or CircleCI\footnote{https://circleci.com/}, would improve the accuracy of detecting DEV repositories.
 
 \subsubsection{Data Cleaning and
 Preprocessing}\label{data-cleaning-and-preprocessing}
@@ -200,13 +168,22 @@ Using the GitHub REST API and the GitHub GraphQL API, we were able to receive al
 
 \subsubsection{Feature Selection}\label{feature-selection}
 
-Feature Selection describes the process of dropping features that yield no or very little additional information in order to decrease overfitting and accelerate model fitting.
+Feature Selection describes the process of removing features that yield no or very little additional information in order to decrease overfitting and accelerate model fitting.
 Especially the programming language features needed to be reduced using Feature Selection.\\
 GitHub detects over 300 used programming languages\footnote{https://github.com/github/linguist/blob/master/lib/linguist/languages.yml} in repositories.
 The problem is that a lot of them are used only in a few repositories such that there are a lot of features that only hold very little variance and information.
-As an example, among the collected 1400 repositories there were 46 programming languages, like Pony or KiCad, that were only used in one repository at all.
-To remove those, we dropped features with low standard deviation and a low overall sum.
-As an example, we are already able to drop 135 language features if we require that the sum of a language feature over all 1400 training data entries is supposed to be bigger than 5.
+As an example, among the collected 1400 repositories there were 46 programming languages, like Pony or KiCad, that were only used in one repository at all.\\
+In the beginning of the project, we dropped features with low standard deviations and a low overall sum according to chosen thresholds.
+While this statistical approach is very fast, it didn't improve the accuracy a lot.
+Instead, we used extremely randomized trees\footnote{Geurts et al., "Extremely randomized trees", Machine Learning, 63(1), 3-42, 2006} to compute the feature importances.
+The earlier a feature is used in a decision tree to split the data by a threshold, the more important is the feature.
+Intuitively, the closer a feature is to the root of a decision tree, the higher is its importance score.
+Figure \ref{feature_importance_numeric_graphic} visualizes that only approximately 30 of the 172 features of the training data were important for predictions.
+Table \ref{feature_importance_numeric} shows the top 20 features and their importance scores.
+One can note that it's important whether a repository serves a website or even serves the owners homepage.
+This is very comprehensible as very few projects containing data, documents or homework serve their own websites.
+It's also remarkable that the feature \textit{projects} feature is not important enough to occur among the top 20 features.
+This might be due to the fact that this project management tool was introduced late 2016 so there aren't so many project teams already using it, yet.
 
 \subsubsection{Feature Engineering}\label{feature-engineering}
 
@@ -215,7 +192,7 @@ We used polynomial feature generation which takes the input variables and builds
 The idea of taking input features and applying a non-linear method on it to map the original values in another space is called ``kernel trick'' and is used by Support Vector Machines (SVM) to learn non-linear models as well.\\
 As an example, suppose a dataset is given with the two features \textit{size} and \textit{watchers} as in table \ref{example-feature-engineering-basic}.
 
-\begin{table}[]
+\begin{table}[h]
 \label{example-feature-engineering-basic}
 \centering
 \caption{Original features}
@@ -229,7 +206,7 @@ size & watchers \\ \hline
 
 The transformed dataset using polynomial features with a degree up to 2 would look like table \ref{example-feature-engineering-transformed}.
 
-\begin{table}[]
+\begin{table}[h]
 \label{example-feature-engineering-transformed}
 \centering
 \caption{Polynomially generated features (degree=2)}
@@ -240,28 +217,25 @@ size$^1$ & watchers$^1$ & size$^1\cdot$watchers$^1$ & size$^2$ & watchers$^2$ \\
 10 & 8 & 80 & 100 & 64 \\ \hline
 \end{tabular}
 \end{table}
-
 As one can see, the number of generated features increases polynomially in the number of input features.
-That's why the previous Feature Selection step was very important.
-
-As alternative we could have used deep learning techniques but you need many training samples because of their higher learning complexity.
-Our \textasciitilde{}1500 samples aren't enough for this.
+That's why the previous Feature Selection step was very important.\\
+As an alternative we could have used deep learning techniques but one needs many training samples because of their higher learning complexity.
+Our roughly 1500 samples aren't enough for this.
 Small feed-forward neural networks are applicable to our problem while deep neural networks are not.
 
 \subsubsection{Numeric Metadata Prediction
 Model}\label{numeric-metadata-prediction-model}
-
-We tried the following classifiers: \ldots{}
-
-\todo[inline]{{[}Better without language features{]}}
-
-
-\todo[inline]{{[}accuracy from single models{]}{[}accuracy from ensembled models{]}}
+In a next step, we applied Naives Bayes, Decision Trees, Random Forests, k-Nearest Neighbours (k-NN), Support Vector Machines (SVM) as well as Gradient Boost classifiers on the numeric features.
+We also ensembled the classifiers using a weighted voting approach.
+You can find their average accuracies scores on the official validation data and on the additional validation data provided by another team from 100 run times in table \ref{benchmark_numeric}.
+One can notice that all classifiers performed much better on the official validation data set than on the additional one.
+The ensemble classifier outperformed all other classifiers which implies that it was able to generalize better and that the ensemble approach worked.
 
 \subsubsection{Validation of Prediction
 Model}\label{validation-of-prediction-model}
 
-\todo[inline]{{[}accuracy+confusion matrix{]}}
+After the classifier was applied on a random undersampled set of our training data for 100 times, it achieved accuracies of 39,3\% and 26.7\% on the validation respectively additional validation data on average.
+Figure \ref{confusion_matrix_numeric_ensemble} visualizes one confusion matrix of the ensemble and table \ref{boolean_matrix_numeric_ensemble} shows the according boolean matrix.
 
 \subsection{Classification Using Text Data (Description and
 Readme)}\label{classification-using-text-data-description-and-readme}
@@ -283,50 +257,53 @@ Data}\label{feature-generation-from-existing-data}
 
 We used a count vectorizer which converts a text into a n-dimensional vector representing the vocabulary, where n is the number of unique words.
 After this text-to-vector conversion we transformed the vector into a tf-idf vector which is a normalized representation of the original vector.
-
-[Include positive and negative words]
+Thus, the texts are now merged into a matrix which holds as many features as there are unique words in the texts.
 
 \subsubsection{Feature Selection}\label{feature-selection-1}
 
-\todo[inline]{{[}removal of rare/frequent words and stopwords{]}}
+To reduce overfitting and accelerate model fitting, it's possible to drop very frequent words or words that occur very rarely.
+In our example, we dropped words with a document frequency of under 0.01 and over 0.9.
 
 \subsubsection{Prediction Model}\label{prediction-model-1}
 
-Based on our tf-idf vector we can classify the different repositories using the n-dimensional vector as features and normal classification algorithms.
+We chose to use the stochastic gradient descent (SGD) algorithm to apply it on the feature matrix.
+The reason is that SGD can work efficiently with sparse features which is why it has been successfully applied to further NLP problems before.
 
-\subsubsection{Validation of Prediction
-Model}\label{validation-of-prediction-model-1}
 
-\begin{figure}
+
+\subsubsection{Validation of Prediction Model}\label{validation-of-prediction-model-1}
+
+As one can see in Figures \ref{confusion-matrix-readme-classifier} and \ref{confusion-matrix-description-classifier}, the description and readme classifiers outperformed the numeric ensemble classifier with 51.6\% respectively 48.4\% accuracy.
+\begin{figure}[H]
 	\centering
-		\includegraphics[max size={\textwidth}{\textheight}]{graphics/confusion-matrix-readme-classifier.png}
+		\includegraphics[width=7cm]{graphics/confusion-matrix-readme-classifier.png}
 	\caption{Readme Classifier: 51.6\% Accuracy on Validation Data}
 	\label{confusion-matrix-readme-classifier}
 \end{figure}
 
-\begin{figure}
+\begin{figure}[H]
 	\centering
-		\includegraphics[max size={\textwidth}{\textheight}]{graphics/confusion-matrix-description-classifier.png}
+		\includegraphics[width=7cm]{graphics/confusion-matrix-description-classifier.png}
 	\caption{Description Classifier: 48.4\% Accuracy on Validation Data}
 	\label{confusion-matrix-description-classifier}
 \end{figure}
 
-\todo[inline]{{[}Include images with additional validation data{]}}
+This is especially remarkable if one keeps in mind that both classifiers only use one feature and that the \textit{description} feature only contains very few words in comparison to the large readme file of a repository.
 
 \subsection{Classification Using Source
 Code}\label{classification-using-source-code}
 
 We tested different approaches to use the source code and connected data of a repository to classify it.
-For this task we used only data included in the git repository, no github specific data like projects, the wiki pages\ldots{} Data from the repositories are including source code files with comments and git workflow specific data (branches, commits\ldots{}).
-We used in this chapter mainly the source code, file names and commit messages.
+Data from the repositories are including source code files with comments and git workflow specific data (branches, commits\ldots{}).
+In this chapter we mainly used the source code, file names, commit messages and the wiki pages.
 
 \subsubsection{Data Cleaning and
 Preprocessing}\label{data-cleaning-and-preprocessing-2}
 
-We cloned each repository locally to retrieve the data we need.
-After this step we were able to merge all non-binary source code files, all filenames and all git commit messages into three different files.
+We cloned each repository and its wiki which is also a git repository locally in order to retrieve the data we need.
+After this step we were able to merge all non-binary source code files, all filenames, all git commit messages and all wiki pages into four different files.
 We didn't filter based on languages and all UTF-8 files are included.
-This could be an additional preprocessing step to improve and simplify the stemming and classification.
+This could be an additional preprocessing step to improve, correct and simplify the stemming and classification.
 
 \subsubsection{Feature Generation from Existing
 Data}\label{feature-generation-from-existing-data-1}
@@ -334,31 +311,82 @@ Data}\label{feature-generation-from-existing-data-1}
 We were able to use the same feature generation approach based on the count vectorizer and tf-idf vector as used in the text data classification.
 Ugurel et al.\footnote{"What's the Code? Automatic Classification of Source Code Archives", KDD, 2002} showed a similar approach successfully.
 
-[Include positive and negative words]
-
-\subsubsection{Feature Selection}\label{feature-selection-2}
-
-\todo[inline]{{[}removal of rare/frequent words and stopwords{]}}
-
 \subsubsection{Prediction Model}\label{prediction-model-2}
 
-\todo[inline]{{[}Same as text data{]}}
+Shortened words in the following tables are caused by the stemming of the input data.\\
+
+In the following paragraph we will discuss the importance of features gained from the file names, see \ref{App:AppendixB}. \\
+As one can see in table \ref{file-names-data} an obvious good indicator for the DATA category is the file ending "json".
+Negative Words are mainly connected with development (e.g. "package", "test" and "main") and web (e.g. "css" and "html").\\
+Good features for the DEV category are "util", "package", "yml" and "test".
+This corresponds to the heavily used category or file name "util" (for utility) among developers and "test" for software tests like unit tests. \\
+The strong positive word "contributing" for the DOCS category comes from the CONTRIBUTING.md file, which explains the principles of contributing to open source projects to new users.\\
+PDF files are an indication for EDU repositories, where the other features are very similar between EDU and HW.\\
+The category WEB has no positive words because we used the complete data shown in the table \ref{training_data_distribution} and didn't undersample.\\
+So the classifier classifies each sample as WEB when no negative word occurs.\\
+
+Commit messages provide an additional insightful source for our predictions which one can see in \ref{App:AppendixC}.\\
+The most relevant word in the category DATA is trivially "data".
+"json" and "csv" are common filetypes used to store the data which are probably retrieved using the "script[s]".
+"Merge" under the highest negative words indicates that people only linearly add files to their repository and don't cause merge conflicts.\\
+"when" in the category DEV probably stands for conditional expressions like "Add second loop when flag is set".
+The other words are typical expressions in this context "test", "option", "support", "fix" and "compile".
+The negative words show that developers do not use the typical beginning of commit messages like "add", "update", "change" and "commit" as proposed by Chris Beams \footnote{http://chris.beams.io/posts/git-commit/\#imperative} and others.\\
+Apart from "section", "article" and "book" nearly all other positive words in the DOCS category are git workflow specific phrases.
+The negative words separate it from the WEB category ("html", "index", "page" and "post") and from the EDU and HW category ("solution" and "slide").\\
+Almost all of the first eleven positive words are very logical for the EDU category ("slide", "material", "note"\dots).\\
+The HW category on ther other side has very special words for its domain like "solution", "assignment" and "work".\\
+Good indicator for the WEB category are the words "post", "page", "html", "index", "site" and "blog" which are all obviously connected with this class.\\
+
+We trained two different source code classifier but we will describe only the smaller and more general model (Appendix \ref{App:AppendixE}).\\
+The DATA category is dominated by numbers which we could read from non-binary files.
+The negative words separate DATA from DEV and DOCS mainly.\\
+The DEV category is a mixture of different programming languages which are not part of the WEB category.
+Keywords of object oriented programming languages are dominant in DEV.
+In contrast HTML and CSS is recognizable in WEB.\\
+The categories DOCS, EDU and HW are structureless with some typical words from the previous classifiers.
 
 \subsubsection{Validation of Prediction
 Model}\label{validation-of-prediction-model-2}
 
-\todo[inline]{{[}accuracy+confusion matrix{]}}
+Our classifier based on the cloned repositories performed well as one can see in the table \ref{accuracy-different-classifier}.
+We trained the commit message classifier with \texttt{min\_df=0.1} and \texttt{max\_df=0.9}, the file name classifier with \texttt{min\_df=0.1} and \texttt{max\_df=0.9}, the small source code classifier with \texttt{min\_df=0.3} and \texttt{max\_df=0.8} and the big source code classifier with \texttt{max\_df=0.8}.\\
+\texttt{max\_df} specifies the maximum document frequency, \texttt{min\_df} the minimum document frequency.\footnote{http://scikit-learn.org/stable/modules/generated/sklearn.feature\_extraction.text.TfidfVectorizer.html}
+A higher \texttt{min\_df} leads to fewer rare words and a better generalization, a lower \texttt{max\_df} excludes words which are present in many documents and doesn't hold much information.\\
 
-\subsection{Overall Prediction
-Model}\label{overall-prediction-model}
+One can find the boolean matrix for the file name classifier on the validation data in the table \ref{boolean_matrix_file_names_validation} and on the additional validation data in the table \ref{boolean_matrix_file_names_add_validation}.\\
+One can find the boolean matrix for the commit message classifier on the validation data in the table \ref{boolean_matrix_commit_messages_validation} and on the additional validation data in the table \ref{boolean_matrix_commit_messages_add_validation}.\\
+One can find the boolean matrix for the source code classifier on the validation data in the table \ref{boolean_matrix_small_source_code_validation} and on the additional validation data in the table \ref{boolean_matrix_small_source_code_add_validation}.\\
 
-\begin{itemize}
-\tightlist
-\item
-  {[}Describe our ensembled model{]}
-\item
-  {[}Document three repositories which work well{]}
-\end{itemize}
+\begin{table}[h]
+\centering
+\caption{Accuracy of different classifier}
+\label{accuracy-different-classifier}
+\begin{tabular}{|l|l|l|}
+\hline
+                                                                            & validation & additional validation \\ \hline
+commit message                                                             & 38.7\%     & 38.3\%                \\ \hline
+file name                                                                  & 48.4\%     & 29.3\%                \\ \hline
+\begin{tabular}[c]{@{}l@{}}source code\\ (1600 features)\end{tabular}       & 38.7\%     & 26.3\%                \\ \hline
+\begin{tabular}[c]{@{}l@{}}source code\\ (30 million features)\end{tabular} & 51.6\%     & 34.3\%                \\ \hline
+\end{tabular}
+\end{table}
+
+\subsection{Overall Prediction Model}\label{overall-prediction-model}
+
+The different approaches to classify the repositories based on the source code achieved even better results than the description/readme classifiers.
+Though, the current state of the prediction using the source code is not ready for production use so far as it required us to download the full repository code, all commit messages and the complete wikis.
+Overall, this required us to download over 200 GB of data for the training data which took over 24 hours due to the slow Git cloning protocol.
+For this reasons we decided to ensemble the numeric ensemble classifier and the description/readme classifiers using weighted voting as we already did it with the classifiers on the numeric features.\\
+Figure \ref{process} visualizes our used \textit{meta-ensemble classifier}.
+Due to performance reasons we're not using classifiers in production that require to clone repository content.
+In the beginning, we're fetching relevant features using the GitHub REST and GraphQL API.
+We're also adding our own calculated features such as \textit{hasHomepage}, \textit{isOwnerHomepage}, \textit{hasCiConfig} etc.
+We then apply a set of classifiers on the numeric features and ensemble them using weighted voting.
+The content of the \textit{description} and \textit{readme} features are then transformed to a tf-idf matrix.
+A SGD classifier the learns to predict the labels based on them.
+In the end, the numeric ensemble classifier, the description classifier and the readme classifier are then ensembled using weighted voting.
+
 
 \section{Implemented Application}\label{implemented-application}
 \subsection{Tooling Choices}\label{tooling-choices}
@@ -370,8 +398,8 @@ Furthermore, we were already familiar with Pythons data science stack\footnote{h
 The Python libraries we used the most were pandas\footnote{pandas.pydata.org/}, scikit-learn\footnote{http://scikit-learn.org/} and Jupyter\footnote{https://jupyter.org/}.\\
 Pandas transfers the concept of a \textit{DataFrame} from the R language to Python.
 A \textit{DataFrame} is a matrix-like object whose columns and rows are identified by a name respectively an index.
-This allows the user to always be able to understand the content of the object in opposition to matrices as \textit{DataFrames} always also provide semantic meta data about the content they're holding.
-Scikit-learn is a powerful machine library that provides cutting edge data science algorithms.
+This allows the user to always be able to understand the content of the object in opposition to matrices as \textit{DataFrames} always also provide semantic metadata about the content they're holding.
+Scikit-learn is a powerful machine learning library that provides cutting edge data science algorithms.
 Using scikit-learns pipelines, it's possible to chain data preprocessing, model fitting and prediction easily.
 Thus, it's possible for the user to completely focus on the challenge to solve and not to worry about implementation details of the used algorithms.
 Due to the compatible Python data science stack, scikit-learn supports the usage of \textit{DataFrames}.\\
@@ -395,25 +423,59 @@ As an example, to classify the example data given by the challenge using the tra
 \begin{lstlisting}[language=bash]
   $ python app/main.py -i data/example-input.txt
                        -t data/training_data_small.csv
+                       -l 10
 \end{lstlisting}
 
+The script would load all features for the training data \textit{training\_data\_small.csv} and the input data \textit{example-input.txt}.
+It would then train 10 \textit{meta-ensemble classifiers} on the training data and it would use the one with the best average score on the validation sets to predict the input data.
 The saved output file \texttt{predictions.txt} will have the format of the challenge example\footnote{https://github.com/InformatiCup/InformatiCup2017/blob/master/example-output}.\\
 For setup instructions please refer to the README.md file.
 
 \section{Validation}\label{validation}
 
-\begin{itemize}
-\tightlist
-\item
-  {[}boolean(!) matrix on validation data{]}
-\item
-  {[}compute recall and precision{]}
-\item
-  {[}discuss quality of results and whether higher yield or higher
-  precision is more important{]}
-\item
-  {[}(elaborate on the additional dataset given by another team?){]}
-\end{itemize}
+In this chapter we want to evaluate the performance of our chosen \textit{meta-ensemble classifier}.
+After 100 times being applied on a random undersampled set of our training data, the classifier achieved accuracies of 61,3\% and 47.7\% on the validation respectively additional validation data.
+The best classifier we were able to train achieved on average an accuracy of 67.7 \% on the validation data and 46.7\% on the additional validation data set.
+One can find its confusion matrix of the official validation data in Figure \ref{confusion_matrix_meta_ensemble} and the according boolean matrix with precision and recall values in table \ref{boolean_matrix_meta_ensemble}.//
+
+\begin{table}[H]
+\centering
+\caption{Boolean Matrix for Meta-Ensemble}
+\label{boolean_matrix_meta_ensemble}
+\begin{tabular}{|r|r|r|r|r|}
+ \hline
+ Label & Predicted Correctly & Predicted Incorrectly & Precision & Recall \\ \hline
+ WEB & 2 & 2 & 0.40 & 0.50 \\ \hline
+ DOCS & 2 & 2 & 0.50 & 0.50 \\ \hline
+ HW & 5 & 0 & 0.71 & 1.00 \\ \hline
+ DEV & 8 & 3 & 0.89 & 0.73 \\ \hline
+ EDU & 2 & 2 & 1.00 & 0.50 \\ \hline
+ DATA & 2 & 1 & 0.50 & 0.67 \\ \hline
+ \multicolumn{3}{|l|}{Weighted Average} & 0.72 & 0.68 \\ \hline
+ \end{tabular}
+\end{table}
+
+\begin{figure}[H]
+	\centering
+		\includegraphics[width=8cm]{graphics/confusion_matrix_meta_ensemble.png}
+	\caption{Confusion Matrix for Meta Ensemble (67.7\% Accuracy)}
+	\label{confusion_matrix_meta_ensemble}
+\end{figure}
+
+In our opinion, we prefer a higher recall over a higher precision.
+We would like to use our prediction model to recommend repos to a user that are similar to his own repositorries.
+In this situation it might be better for a user to reject a repository by himself as interesting (high recall and low precision) than not seing an interesting repo at all (low recall and high precision).
+
+The great benefit of our ensemble classifier is that the base classifiers are independent of each other.
+This means that even if one classifier predicts the class label incorrectly, the remaining two classifiers can outrule him using their prediction confidences.\\
+One example would be the repository ga-chicago/wdi5-homework\footnote{https://github.com/ga-chicago/wdi5-homework}.
+Since its readme file is empty, fellow approaches that might only use the content of the readme file to predict the label wouldn't be able to predict a label with high certainty.
+Instead, our description classifier can predict \textit{HW} with a high confidence as the description includes positive \textit{HW} words like "homework", "assignment" and "submission".\\
+The readme and the numeric ensemble classifiers of our meta ensemble predict the label \textit{DEV} for certain as there multiple positive \textit{DEV} words included in the readme like "source code" or "bugs" and as there are a lot of issues, pull requests and commits.\\
+Fellow solution approaches that only use numeric meta data of repos would probably classify openaddresses/openaddresses\footnote{https://github.com/openaddresses/openaddresses} as \textit{DEV} as it contains a lot of contributions, stargazers, forks, issues and pull requests.
+Since there are a lot of positive \textit{DATA} words contained in the description and the readme of the repo, like "open" and "data", the description and readme classifiers would certainly overrule the numeric ensemble classifier with the predicted \textit{DATA} label.
+The description of the repo PowerDNS/pdns\footnote{https://github.com/PowerDNS/pdns} doesn't include any words that could be assigned to any label for certain.
+Approaches that only use the description could simply fail here.
 
 \section{Extensions}\label{extensions}
 
@@ -426,26 +488,61 @@ https://github.com/trending/\textit{language}?since=\textit{since} once a day, w
 We would then recommend repositories to the user based on their classified labels, on the preferred language of the user, on the text or even code similarity between the trending projects and those of the user.
 To implement the latter one, we could use tf-idf matrices like we already used for the text classifiers.
 
-\begin{itemize}
-\tightlist
-\item
-  {[}maybe add pictures as fall-back{]}
-\end{itemize}
-
 \newpage
 \appendix
-\section{\\Evaluation of file name classifier} \label{App:AppendixA}
+\section{\\General figures and tables} \label{App:AppendixA}
 % the \\ insures the section title is centered below the phrase: AppendixA
 
-\input{appendix-a.tex}
-
-
+\FloatBarrier
+\input{appendix-general.tex}
+\FloatBarrier
 
 \newpage
-\section{\\Title of Appendix B} \label{App:AppendixB}
+\section{\\Evaluation of description classifier} \label{App:AppendixB}
+% the \\ insures the section title is centered below the phrase: AppendixA
+
+\FloatBarrier
+\input{appendix-description.tex}
+\FloatBarrier
+
+\newpage
+\section{\\Evaluation of readme classifier} \label{App:AppendixF}
+% the \\ insures the section title is centered below the phrase: AppendixA
+
+\FloatBarrier
+\input{appendix-readme.tex}
+\FloatBarrier
+
+\newpage
+\section{\\Evaluation of file name classifier} \label{App:AppendixG}
+% the \\ insures the section title is centered below the phrase: AppendixA
+
+\FloatBarrier
+\input{appendix-file-names.tex}
+\FloatBarrier
+
+\newpage
+\section{\\Evaluation of commit message classifier} \label{App:AppendixC}
 % the \\ insures the section title is centered below the phrase: Appendix B
 
-Text of Appendix B is Here
+\FloatBarrier
+\input{appendix-commit-messages.tex}
+\FloatBarrier
 
+\newpage
+\section{\\Evaluation of source code classifier} \label{App:AppendixD}
+% the \\ insures the section title is centered below the phrase: Appendix B
+
+\FloatBarrier
+\input{appendix-source-code.tex}
+\FloatBarrier
+
+\newpage
+\section{\\Evaluation of small source code classifier} \label{App:AppendixE}
+% the \\ insures the section title is centered below the phrase: Appendix B
+
+\FloatBarrier
+\input{appendix-small-source-code.tex}
+\FloatBarrier
 
 \end{document}
