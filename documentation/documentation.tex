@@ -274,19 +274,6 @@ The reason is that SGD can work efficiently with sparse features which is why it
 \subsubsection{Validation of Prediction Model}\label{validation-of-prediction-model-1}
 
 As one can see in Figures \ref{confusion-matrix-readme-classifier} and \ref{confusion-matrix-description-classifier}, the description and readme classifiers outperformed the numeric ensemble classifier with 51.6\% respectively 48.4\% accuracy.
-\begin{figure}[H]
-	\centering
-		\includegraphics[width=7cm]{graphics/confusion-matrix-readme-classifier.png}
-	\caption{Readme Classifier: 51.6\% Accuracy on Validation Data}
-	\label{confusion-matrix-readme-classifier}
-\end{figure}
-
-\begin{figure}[H]
-	\centering
-		\includegraphics[width=7cm]{graphics/confusion-matrix-description-classifier.png}
-	\caption{Description Classifier: 48.4\% Accuracy on Validation Data}
-	\label{confusion-matrix-description-classifier}
-\end{figure}
 
 This is especially remarkable if one keeps in mind that both classifiers only use one feature and that the \textit{description} feature only contains very few words in comparison to the large readme file of a repository.
 
