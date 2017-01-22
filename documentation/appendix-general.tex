@@ -120,3 +120,27 @@ LANGUAGE\_*            & How much code was written in the language in percent (e
 	Add. Val. & 19\%        & 21\%          & 23\%          & 21\% & 20\% & 22\% & 25\%         \\ \hline
 	\end{tabular}
 \end{table}
+
+\begin{table}[h]
+\centering
+\caption{Boolean Matrix for Numeric Ensemble}
+\label{boolean_matrix_numeric_ensemble}
+\begin{tabular}{|r|r|r|r|r|}
+ \hline
+ Label & Predicted Correctly & Predicted Incorrectly & Precision & Recall \\ \hline
+ WEB & 3 & 1 & 0.14 & 0.75 \\ \hline
+ DOCS & 0 & 4 & 0.00 & 0.00 \\ \hline
+ HW & 0 & 5 & 0.00 & 0.00 \\ \hline
+ DEV & 5 & 6 & 0.71 & 0.45 \\ \hline
+ EDU & 0 & 4 & 0.00 & 0.00 \\ \hline
+ DATA & 0 & 3 & 0.00 & 0.00 \\ \hline
+ \multicolumn{3}{|l|}{Weighted Average} & 0.27 & 0.26 \\ \hline
+ \end{tabular}
+ \end{table}
+
+\begin{figure}[h]
+	\centering
+		\includegraphics[width=12cm]{graphics/confusion-matrix-numeric-ensemble.png}
+	\caption{Confusion Matrix for Numeric Ensemble}
+	\label{confusion_matrix_numeric_ensemble}
+\end{figure}

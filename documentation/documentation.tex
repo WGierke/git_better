@@ -235,6 +235,9 @@ The ensemble classifier outperformed all other classifiers which implies that it
 \subsubsection{Validation of Prediction
 Model}\label{validation-of-prediction-model}
 
+\ref{confusion_matrix_numeric_ensemble}
+\ref{boolean_matrix_numeric_ensemble}
+
 \todo[inline]{accuracy+confusion matrix}
 
 \subsection{Classification Using Text Data (Description and
@@ -255,37 +258,39 @@ Since it's also not important whether the singular or the plural of words are us
 \subsubsection{Feature Generation from Existing
 Data}\label{feature-generation-from-existing-data}
 
-We used a count vectorizer which converts a text into an n-dimensional vector representing the vocabulary, where n is the number of unique words.
+We used a count vectorizer which converts a text into a n-dimensional vector representing the vocabulary, where n is the number of unique words.
 After this text-to-vector conversion we transformed the vector into a tf-idf vector which is a normalized representation of the original vector.
-
-[Include positive and negative words]
+Thus, the texts are now merged into a matrix which holds as many features as there are unique words in the texts.
 
 \subsubsection{Feature Selection}\label{feature-selection-1}
 
-\todo[inline]{removal of rare/frequent words and stopwords}
+To reduce overfitting and accelerate model fitting, it's possible to drop very frequent words or words that occur very rarely.
+In our example, we dropped words with a document frequency of under 0.01 and over 0.9.
 
 \subsubsection{Prediction Model}\label{prediction-model-1}
 
-Based on our tf-idf vector we can classify the different repositories using the n-dimensional vector as features and normal classification algorithms.
+We chose to use the stochastic gradient descent (SGD) algorithm to apply it on the feature matrix.
+The reason is that SGD can work efficiently with sparse features which is why it has been successfully applied to further NLP problems before.
 
-\subsubsection{Validation of Prediction
-Model}\label{validation-of-prediction-model-1}
+\todo[inline]{Include positive and negative words}
+\subsubsection{Validation of Prediction Model}\label{validation-of-prediction-model-1}
 
-\begin{figure}[h]
+As one can see in Figures \ref{confusion-matrix-readme-classifier} and \ref{confusion-matrix-description-classifier}, the description and readme classifiers outperformed the numeric ensemble classifier with 51.6\% respectively 48.4\% accuracy.
+\begin{figure}[H]
 	\centering
-		\includegraphics[max size={\textwidth}{\textheight}]{graphics/confusion-matrix-readme-classifier.png}
+		\includegraphics[width=7cm]{graphics/confusion-matrix-readme-classifier.png}
 	\caption{Readme Classifier: 51.6\% Accuracy on Validation Data}
 	\label{confusion-matrix-readme-classifier}
 \end{figure}
 
-\begin{figure}[h]
+\begin{figure}[H]
 	\centering
-		\includegraphics[max size={\textwidth}{\textheight}]{graphics/confusion-matrix-description-classifier.png}
+		\includegraphics[width=7cm]{graphics/confusion-matrix-description-classifier.png}
 	\caption{Description Classifier: 48.4\% Accuracy on Validation Data}
 	\label{confusion-matrix-description-classifier}
 \end{figure}
 
-\todo[inline]{Include images with additional validation data}
+This is especially remarkable if one keeps in mind that both classifiers only use one feature and that the \textit{description} feature only contains very few words in comparison to the large readme file of a repository.
 
 \subsection{Classification Using Source
 Code}\label{classification-using-source-code}
