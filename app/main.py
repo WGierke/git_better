@@ -15,7 +15,7 @@ from sklearn.pipeline import Pipeline
 from training import load_pickle, get_undersample_df, drop_defect_rows, JOBLIB_DESCRIPTION_PIPELINE_NAME, JOBLIB_README_PIPELINE_NAME
 
 N_BEST_FEATURES = 100
-LOOPS = 1
+LOOPS = 10
 NUMERIZE_README = False
 
 def main():
@@ -67,11 +67,13 @@ def split_features(df_origin):
 
 
 def train_and_predict(df_training, df_input):
-    use_numeric_flat_prediction(df_training.copy(), df_input.copy())
+    #use_numeric_flat_prediction(df_training.copy(), df_input.copy())
     use_mixed_stack_prediction(df_training.copy(), df_input.copy())
 
 
 def use_numeric_flat_prediction(df, df_input):
+    """Add the normalized term frequencies of the text features
+       to the numeric features and train a set of classifiers on that."""
     print 50*"="
     print "Fitting Numeric Flat"
     print 50*"="
@@ -152,6 +154,10 @@ def use_mixed_stack_prediction(df_training, df_input):
     val_df_add = keep_useful_features(val_df_add, df_training.columns)
     y_val_add = val_df_add.pop("label")
 
+    _ = df_training.pop("Unnamed: 0")
+    _ = val_df.pop("Unnamed: 0")
+    _ = val_df_add.pop("Unnamed: 0")
+
     meta_ensemble = VotingClassifier(estimators=[('description', DescriptionClassifier()),
                                                  ('readme', ReadmeClassifier()),
                                                  ('ensemble', NumericEnsembleClassifier())],
@@ -159,7 +165,6 @@ def use_mixed_stack_prediction(df_training, df_input):
 
     clfs = [DescriptionClassifier(), ReadmeClassifier(), NumericEnsembleClassifier(), meta_ensemble]
     clfs.extend([clf[1] for clf in get_voting_classifier().estimators])
-
     val_scores = [0] * len(clfs)
     val_add_scores = [0] * len(clfs)
 
@@ -168,13 +173,10 @@ def use_mixed_stack_prediction(df_training, df_input):
         _ = df_train.pop("index")
         y_train = df_train.pop("label")
         for i in range(len(clfs)):
-            try:
-                clf = clfs[i]
-                clf.fit(df_train, y_train)
-                val_scores[i] += clf.score(val_df, y_val)
-                val_add_scores[i] += clf.score(val_df_add, y_val_add)
-            except Exception, e:
-                print e
+            clf = clfs[i]
+            clf.fit(df_train, y_train)
+            val_scores[i] += clf.score(val_df, y_val)
+            val_add_scores[i] += clf.score(val_df_add, y_val_add)
     for i in range(len(clfs)):
         print clfs[i].__class__
         print "Validation: " + str(val_scores[i]/LOOPS)

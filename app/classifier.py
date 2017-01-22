@@ -294,8 +294,8 @@ class ReadmeClassifier(MetaClassifier):
 class NumericEnsembleClassifier(MetaClassifier):
     fill_character = 0
     ppl = Pipeline([
-        ('clmn_std_filter', ColumnStdFilter(min_std=1)),
-        ('clmn_sum_filter', ColumnSumFilter(min_sum=10)),
+        ('clmn_std_filter', ColumnStdFilter(min_std=0)),
+        ('clmn_sum_filter', ColumnSumFilter(min_sum=1)),
     ])
     poly_transf = PolynomialTransformer(degree=2)
 
@@ -308,10 +308,19 @@ class NumericEnsembleClassifier(MetaClassifier):
         self.numeric_columns = df.select_dtypes(include=[np.number]).columns
         self.ppl = self.ppl.fit(df[self.numeric_columns])
         X_reduced = self.ppl.transform(df[self.numeric_columns])
-        self.important_column = X_reduced.columns
-        self.useful_features = list(X_reduced.columns)
-        X_poly = self.poly_transf.transform(X_reduced)
+
+        from sklearn.ensemble import ExtraTreesClassifier
+        import matplotlib.pyplot as plt
+        model = ExtraTreesClassifier(n_jobs=-1)
+        X_poly = X_reduced
         X_poly.fillna(self.fill_character, inplace=True)
+        model.fit(X_poly, Y)
+        zipped = zip(X_poly.columns, model.feature_importances_)
+        zipped.sort(key=lambda x: x[1], reverse=True)
+        self.useful_features = zipped[:30]
+        self.useful_features = [x[0] for x in zipped]
+        self.useful_features = list(set(self.useful_features))
+        X_poly = keep_useful_features(X_poly, self.useful_features)
         self.clf.fit(X_poly, Y)
         return self
 
@@ -333,8 +342,8 @@ class NumericEnsembleClassifier(MetaClassifier):
     def transform_to_fitted_features(self, df_origin):
         df = df_origin.copy()
         df = df.fillna(self.fill_character)
+        #df = self.poly_transf.transform(df)
         df = keep_useful_features(df, self.useful_features)
-        df = self.poly_transf.transform(df)
         return df
 
 
@@ -415,8 +424,8 @@ def get_voting_classifier(**args):
         ('clf_kneighbors', KNeighbors()),
         ('clf_svm', SVM(kernel='rbf', probability=True)),
         #('clf_linear_svm', LinearSVM()),
-        ('clf_grad_boost', GradBoost()),
-        ('clf_xgboost', XGBoost())])
+        ('clf_grad_boost', GradBoost())])
+        #('clf_xgboost', XGBoost())])
         # ('clf_bag_ensemble', BagEnsemble()),
         #('clf_treebag', TreeBag())])
         # ('clf_svm_bag', SVMBag(base_estimator=SVC)),
