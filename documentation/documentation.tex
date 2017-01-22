@@ -321,12 +321,12 @@ Ugurel et al.\footnote{"What's the Code? Automatic Classification of Source Code
 
 \subsubsection{Prediction Model}\label{prediction-model-2}
 
-\todo[inline]{Same as text data}
+Shortened words in the following tables are caused by the stemming of the input data.\\
 
 \todo[inline]{positive/negative words commit messages}
 
-In the following paragraph we will discuss the importance of features gained from the file names, see \ref{App:AppendixB}. \\
-As one can see in table \ref{file-names-data} an obvious good indicator for the DATA category is the file ending "json".
+In the following paragraph we will discuss the importance of features gained from the file names, see Appendix \ref{App:AppendixB}. \\
+As one can see in table \ref{file-names-data} an obvious good indicator for the DATA category is the file ending "json". 
 Negative Words are mainly connected with development (e.g. "package", "test" and "main") and web (e.g. "css" and "html").\\
 Good features for the DEV category are "util", "package", "yml" and "test".
 This corresponds to the heavily used category or file name "util" (for utility) among developers and "test" for software tests like unit tests. \\
@@ -335,7 +335,26 @@ PDF files are an indication for EDU repositories, where the other features are v
 The category WEB has no positive words because we used the complete data shown in the table \ref{training_data_distribution} and didn't undersample.\\
 So the classifier classifies each sample as WEB when no negative word occurs.\\
 
-\todo[inline]{positive/negative words source code}
+Commit messages provide an additional insightful source for our predictions which one can see in Appendix \ref{App:AppendixC}.\\
+The most relevant word in the category DATA is trivially "data". 
+"json" and "csv" are common filetypes used to store the data which are probably retrieved using the "script[s]".
+"Merge" under the highest negative words indicates that people only linearly add files to their repository and don't cause merge conflicts.\\
+"when" in the category DEV probably stands for conditional expressions like "Add second loop when flag is set".
+The other words are typical expressions in this context "test", "option", "support", "fix" and "compile".
+The negative words show that developers do not use the typical beginning of commit message like "add", "update", "change" and "commit" as proposed for example by Chris Beams.\\ \footnote{http://chris.beams.io/posts/git-commit/\#imperative}
+Except of "section", "article" and "book" nearly all other positive words in the DOCS category are git workflow specific phrases.
+The negative words separate it from the WEB category ("html", "index", "page" and "post") and from the EDU and HW category ("solution" and "slide").\\
+Almost all of the first eleven positive words are very logical for the EDU category ("slide", "material", "note"\dots).\\
+The HW category on ther other side has very special words for its domain like "solution", "assignment" and "work".\\
+Good indicator for the WEB category are the words "post", "page", "html", "index", "site" and "blog" which are all obviously connected with this class.\\
+
+We trained two different source code classifier but we will describe only the smaller and more general model (Appendix App:AppendixE).\\
+The DATA category is dominated by numbers which we could read from non-binary files.
+The negative words separate DATA from DEV and DOCS mainly.\\
+The DEV category is a mixture of different programming languages which are not part of the WEB category.
+Keywords of object oriented programming languages are dominant in DEV.
+In contrast HTML and CSS is recognizable in WEB.\\
+The categories DOCS, EDU and HW are structureless with some typical words from the previous classifiers. 
 
 \todo[inline]{positive/negative words wiki}
 
