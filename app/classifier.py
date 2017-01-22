@@ -7,7 +7,7 @@ from operator import itemgetter
 from preprocess import ColumnSumFilter, ColumnStdFilter, PolynomialTransformer
 from scipy.sparse import csr_matrix
 from scipy.stats import randint as sp_randint
-from sklearn.ensemble import RandomForestClassifier, BaggingClassifier, AdaBoostClassifier, GradientBoostingClassifier, VotingClassifier
+from sklearn.ensemble import RandomForestClassifier, BaggingClassifier, AdaBoostClassifier, GradientBoostingClassifier, VotingClassifier, ExtraTreesClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.grid_search import RandomizedSearchCV
 from sklearn.linear_model import SGDClassifier
@@ -18,6 +18,7 @@ from sklearn.svm import SVC, LinearSVC
 from sklearn.tree import DecisionTreeClassifier
 from xgboost import XGBClassifier
 
+TOP_NUMERIC_FEATURES = 30
 
 try:
     import theanets as tn
@@ -293,26 +294,25 @@ class ReadmeClassifier(MetaClassifier):
 
 class NumericEnsembleClassifier(MetaClassifier):
     fill_character = 0
-    ppl = Pipeline([
-        ('clmn_std_filter', ColumnStdFilter(min_std=1)),
-        ('clmn_sum_filter', ColumnSumFilter(min_sum=10)),
-    ])
-    poly_transf = PolynomialTransformer(degree=2)
 
     def __init__(self, **args):
         self.clf = get_voting_classifier(**args)
+        self.useful_features = []
 
     def fit(self, df_origin, Y, tune_parameters=False):
         df = df_origin.copy()
         self.tune_parameters = tune_parameters
         self.numeric_columns = df.select_dtypes(include=[np.number]).columns
-        self.ppl = self.ppl.fit(df[self.numeric_columns])
-        X_reduced = self.ppl.transform(df[self.numeric_columns])
-        self.important_column = X_reduced.columns
-        self.useful_features = list(X_reduced.columns)
-        X_poly = self.poly_transf.transform(X_reduced)
-        X_poly.fillna(self.fill_character, inplace=True)
-        self.clf.fit(X_poly, Y)
+        df = df[self.numeric_columns]
+        model = ExtraTreesClassifier(n_jobs=-1)
+        df.fillna(self.fill_character, inplace=True)
+        model.fit(df, Y)
+        zipped = zip(df.columns, model.feature_importances_)
+        zipped.sort(key=lambda x: x[1], reverse=True)
+        self.useful_features = [x[0] for x in zipped[:TOP_NUMERIC_FEATURES]]
+        self.useful_features = list(set(self.useful_features))
+        df = keep_useful_features(df, self.useful_features)
+        self.clf.fit(df, Y)
         return self
 
     def predict(self, df_origin):
@@ -334,7 +334,6 @@ class NumericEnsembleClassifier(MetaClassifier):
         df = df_origin.copy()
         df = df.fillna(self.fill_character)
         df = keep_useful_features(df, self.useful_features)
-        df = self.poly_transf.transform(df)
         return df
 
 
@@ -415,8 +414,8 @@ def get_voting_classifier(**args):
         ('clf_kneighbors', KNeighbors()),
         ('clf_svm', SVM(kernel='rbf', probability=True)),
         #('clf_linear_svm', LinearSVM()),
-        ('clf_grad_boost', GradBoost()),
-        ('clf_xgboost', XGBoost())])
+        ('clf_grad_boost', GradBoost())])
+        #('clf_xgboost', XGBoost())])
         # ('clf_bag_ensemble', BagEnsemble()),
         #('clf_treebag', TreeBag())])
         # ('clf_svm_bag', SVMBag(base_estimator=SVC)),

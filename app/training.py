@@ -17,6 +17,7 @@ from sklearn.preprocessing import LabelEncoder
 JOBLIB_SUFFIX = '.joblib.pkl'
 JOBLIB_DESCRIPTION_PIPELINE_NAME = 'best_description_pipeline_4839'
 JOBLIB_README_PIPELINE_NAME = 'best_readme_pipeline_5161'
+JOBLIB_VOTING_PIPELINE_NAME = 'best_voting_6774_4667'
 
 
 def find_best_text_pipeline(df_values, labels, pipeline=None, params=None):
