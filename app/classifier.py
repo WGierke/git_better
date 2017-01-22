@@ -382,9 +382,9 @@ class EnsembleAllNumeric(MetaClassifier):
             for i in range(len(features)):
                 df[c + "_" + features[i]] = normalized_matrix[:, i]
             df.drop(c, axis=1, inplace=True)
-            del cv
             del matrix
             del normalized_matrix
+        del cv
         return df.fillna(0)
 
 
