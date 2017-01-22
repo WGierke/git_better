@@ -50,6 +50,37 @@ solution'' \\ \hline
 	\label{t-sne-validation-data}
 \end{figure}
 
+\begin{table}[h]
+\centering
+\caption{Numeric Features}
+\label{features}
+\begin{tabularx}{\linewidth}{|l|X|}
+\hline
+Feature Name           & Description                                                                        \\ \hline
+watchers               & Number of users who get notifications about the repo                               \\ \hline
+mentionableUsers       & Number of mentionable users (collaborators, contributors, ...)                     \\ \hline
+open\_pull\_requests   & Number of open pull requests                                                       \\ \hline
+closed\_pull\_requests & Number of closed pull requests                                                     \\ \hline
+merged\_pull\_requests & Number of merged pull requests                                                     \\ \hline
+open\_issues           & Number of open issues                                                              \\ \hline
+closed\_issues         & Number of closed issues                                                            \\ \hline
+forks                  & Number of forks                                                                    \\ \hline
+stargazers             & Number of users who "starred" the repo                                             \\ \hline
+projects               & Number of projects (integrated project management tool)                            \\ \hline
+size                   & Size of the source code in kilobyte                                                \\ \hline
+isOwnerHomepage        & Is the name of the repo REPO\_OWNER.github.io or REPO\_OWNER.github.com?           \\ \hline
+hasHomepage            & Does the website \newline{}REPO\_OWNER.github.io/REPO\_NAME exist?                 \\ \hline
+hasLicense             & Does the repo have a license file?                                                 \\ \hline
+hasTravisConfig        & Does the repo have a Travis configuration file?                                    \\ \hline
+hasCircleConfig        & Does the repo have a CircleCI configuration file?                                  \\ \hline
+hasCiConfig            & hasTravisConfig OR hasCircleConfig                                                 \\ \hline
+commitsCount           & Number of commits                                                                  \\ \hline
+branchesCount          & Number of branches                                                                 \\ \hline
+tagsCount              & Number of tags                                                                     \\ \hline
+releasesCount          & Number of releases                                                                 \\ \hline
+LANGUAGE\_*            & How much code was written in the language in percent (e.g. LANGUAGE\_Python, ...) \\ \hline
+\end{tabularx}
+\end{table}
 
 \begin{figure}[h]
 	\centering
@@ -75,5 +106,17 @@ solution'' \\ \hline
 		hasTravisConfig  &   0.0235 & open\_pull\_requests & 0.0223 \\ \hline
 		releasesCount  &   0.0214 & hasLicense & 0.0148 \\ \hline
 		hasCiConfig  &   0.0124 & LANGUAGE\_Python & 0.0090 \\ \hline
+	\end{tabular}
+\end{table}
+
+\begin{table}[h]
+	\label{benchmark_numeric}
+	\centering
+	\caption{Accuracies on the given validation data and additional validation data}
+	\begin{tabular}{|r|r|r|r|r|r|r|r|}
+	\hline
+	          & Naive Bayes & Tree & Forest & k-NN & SVM & Gradient Boost & Ensemble \\ \hline
+	Validation& 40\%        & 35\%          & 42\%          & 25\% & 25\% & 41\% & 45\%         \\ \hline
+	Add. Val. & 19\%        & 21\%          & 23\%          & 21\% & 20\% & 22\% & 25\%         \\ \hline
 	\end{tabular}
 \end{table}

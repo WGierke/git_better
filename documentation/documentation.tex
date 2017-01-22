@@ -157,39 +157,6 @@ To calculate their final quality, we evaluated them on the validation data.
 Repositories}\label{classification-using-numeric-metadata-of-repositories}
 
 To develop classifiers based on numeric metadata of repositories, we used the features explained in table \ref{features}.
-
-\begin{table}[h]
-\centering
-\caption{My caption}
-\label{features}
-\begin{tabularx}{\linewidth}{|l|X|}
-\hline
-Feature Name           & Description                                                                        \\ \hline
-watchers               & Number of users who watch the repo                                                 \\ \hline
-mentionableUsers       & Number of mentionable users (collaborators, contributors, ...)                     \\ \hline
-open\_pull\_requests   & Number of open pull requests                                                       \\ \hline
-closed\_pull\_requests & Number of closed pull requests                                                     \\ \hline
-merged\_pull\_requests & Number of merged pull requests                                                     \\ \hline
-open\_issues           & Number of open issues                                                              \\ \hline
-closed\_issues         & Number of closed issues                                                            \\ \hline
-forks                  & Number of forks                                                                    \\ \hline
-stargazers             & Number of users who "starred" the repo                                             \\ \hline
-projects               & Number of projects (integrated project management tool)                            \\ \hline
-size                   & Size of the source code in kilobyte                                                \\ \hline
-isOwnerHomepage        & Is the name of the repo REPO\_OWNER.github.io or REPO\_OWNER.github.com?         \\ \hline
-hasHomepage            & Does the website \newline{}REPO\_OWNER.github.io/REPO\_NAME exist?                           \\ \hline
-hasLicense             & Does the repo have a license file?                                                 \\ \hline
-hasTravisConfig        & Does the repo have a Travis configuration file?                                    \\ \hline
-hasCircleConfig        & Does the repo have a CircleCI configuration file?                                  \\ \hline
-hasCiConfig            & hasTravisConfig OR hasCircleConfig                                                 \\ \hline
-commitsCount           & Number of commits                                                                  \\ \hline
-branchesCount          & Number of branches                                                                 \\ \hline
-tagsCount              & Number of tags                                                                     \\ \hline
-releasesCount          & Number of releases                                                                 \\ \hline
-LANGUAGE\_*            & How much code was written in the language in percent (e.g. LANGUAGE\_Python, ...)? \\ \hline
-\end{tabularx}
-\end{table}
-
 Most of the features were available using the GitHub API.
 We added the \textit{isOwnerHomepage} and \textit{hasHomepage} features to detect whether a repository serves its source code using GitHub pages.
 This could allow us to identify WEB repositories easier.
@@ -251,23 +218,19 @@ size$^1$ & watchers$^1$ & size$^1\cdot$watchers$^1$ & size$^2$ & watchers$^2$ \\
 10 & 8 & 80 & 100 & 64 \\ \hline
 \end{tabular}
 \end{table}
-
 As one can see, the number of generated features increases polynomially in the number of input features.
-That's why the previous Feature Selection step was very important.
-
-As alternative we could have used deep learning techniques but you need many training samples because of their higher learning complexity.
-Our \textasciitilde{}1500 samples aren't enough for this.
+That's why the previous Feature Selection step was very important.\\
+As an alternative we could have used deep learning techniques but one needs many training samples because of their higher learning complexity.
+Our roughly 1500 samples aren't enough for this.
 Small feed-forward neural networks are applicable to our problem while deep neural networks are not.
 
 \subsubsection{Numeric Metadata Prediction
 Model}\label{numeric-metadata-prediction-model}
-In a next step, we applied a set of classifiers to the numeric features.
-
-\todo[inline]{Better without language features}
-
-
-\todo[inline]{accuracy from single models}
-\todo[inline]{aaccuracy from ensembled models}
+In a next step, we applied Naives Bayes, Decision Trees, Random Forests, k-Nearest Neighbours (k-NN), Support Vector Machines (SVM) as well as Gradient Boost classifiers on the numeric features.
+We also ensembled the classifiers using a weighted voting approach.
+You can find their averages accuracies scores on the official validation data and on the additional validation data provided by another team from 100 run times in table \ref{benchmark_numeric}.
+One can notice that all classifiers performed much better on the official validation data set than on the additional one.
+The ensemble classifier outperformed all other classifiers which implies that it was able to generalize better and that the ensemble approach worked.
 
 \subsubsection{Validation of Prediction
 Model}\label{validation-of-prediction-model}
