@@ -10,6 +10,10 @@ virtualenv -p /usr/bin/python2.7 venv
 source venv/bin/activate`  
 pip install -r requirements.txt
 ```
+- Download the NLTK corpus
+```bash
+python -m nltk.downloader all
+```
 - Create a [personal access token](https://github.com/settings/tokens), grant "Full control of private repositories" (repo) and put it in your config.ini file  
 ```bash
 cp example.config.ini config.ini

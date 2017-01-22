@@ -89,3 +89,37 @@ def get_training_and_validation_df():
     df = drop_text_features(df)
     val_df = drop_text_features(val_df)
     return df.values, y_train, val_df.values, y_val
+
+
+def print_boolean_matrix(true, pred):
+    """Print a LaTex table containing the precision and recall values
+       of all classes as well as the weighted average."""
+    classes = list(set(true + pred))
+    matrix_true = dict()
+    matrix_false = dict()
+    for c in classes:
+        matrix_true[c] = 0
+        matrix_false[c] = 0
+
+    precision, recall, fscore, support = score(true, pred, labels=classes)
+
+    for i in range(len(true)):
+        label_true = true[i]
+        label_pred = pred[i]
+        if label_true == label_pred:
+            matrix_true[label_true] += 1
+        else:
+            matrix_false[label_true] += 1
+
+    print('\\begin{table}[h]')
+    print('\\centering')
+    print('\\caption{Boolean Matrix}')
+    print('\\label{boolean_matrix}')
+    print('\\begin{tabular}{|r|r|r|r|r|}')
+    print(' \\hline')
+    print "Label & Predicted Correctly & Predicted Incorrectly & Precision & Recall \\\\ \\hline"
+    for i in range(len(classes)):
+        print "{} & {} & {} & {:0.2f} & {:0.2f} \\\\ \\hline".format(classes[i], matrix_true.get(classes[i], 0), matrix_false.get(classes[i], 0), precision[i], recall[i])
+    print "\\multicolumn{{3}}{{|l|}}{{Weighted Average}} & {:0.2f} & {:0.2f} \\\\ \hline".format(precision_score(true, pred, average='weighted'), recall_score(true, pred, average='weighted'))
+    print('\\end{tabular}')
+    print('\\end{table}')
