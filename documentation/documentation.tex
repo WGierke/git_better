@@ -105,7 +105,7 @@ Overall, we were able to collect 1412 labeled repositories.
 One can find the distribution of the collection labeled training data in figure \ref{training_data_distribution}.
 
 As one can see in table \ref{data_sources}, we tried to use key words for automated searching that are as close to the words that were used to describe the different classes as possible.
-Though, it's still possible that the collected training data is biased as we actively selected repositories by searching for them.
+Although, it's still possible that the collected training data is biased as we actively selected repositories by searching for them.
 As an extension, an approach that could minimize this bias would be to randomly select repositories (e.g.~from the GHTorrent project) and label them manually.
 For the beginning, however, we neither had the time nor the manpower to label a large amount of repositories manually.
 Since the difficulty to collect data entries of a certain label differed, we ended up with unbalanced training data.
@@ -126,7 +126,7 @@ is a good way to verify how well the models generalize.
 On the other side, the validation data only contains roughly 30 data entries which is not enough to give reliable statements about the model performances.
 Furthermore, the fact that the validation data seems to be selected manually implies that it's also biased.
 Thus, perfect validation data would be a lot of randomly selected repositories that have been labeled manually.
-The additional data sets\footnote{https://github.com/InformatiCup/InformatiCup2017/tree/master/additional\_data\_sets} from another team could allow us to validate our models better even if they are also biased.
+The additional data sets\footnote{https://github.com/InformatiCup/InformatiCup2017/tree/master/additional\_data\_sets} from another team allowed us to validate our models better although they were also biased.
 As already mentioned, a perfect training and validation set would only contain repositories that have been sampled randomly and labeled manually.
 
 \section{Prediction Model}\label{prediction-model}
@@ -297,12 +297,12 @@ Code}\label{classification-using-source-code}
 
 We tested different approaches to use the source code and connected data of a repository to classify it.
 Data from the repositories are including source code files with comments and git workflow specific data (branches, commits\ldots{}).
-We used in this chapter mainly the source code, file names, commit messages and the wiki pages.
+In this chapter we mainly used the source code, file names, commit messages and the wiki pages.
 
 \subsubsection{Data Cleaning and
 Preprocessing}\label{data-cleaning-and-preprocessing-2}
 
-We cloned each repository and its wiki, which is also a git repository, locally to retrieve the data we need.
+We cloned each repository and its wiki which is also a git repository locally in order to retrieve the data we need.
 After this step we were able to merge all non-binary source code files, all filenames, all git commit messages and all wiki pages into four different files.
 We didn't filter based on languages and all UTF-8 files are included.
 This could be an additional preprocessing step to improve, correct and simplify the stemming and classification.
@@ -326,9 +326,9 @@ Ugurel et al.\footnote{"What's the Code? Automatic Classification of Source Code
 Shortened words in the following tables are caused by the stemming of the input data.\\
 
 In the following paragraph we will discuss the importance of features gained from the file names, see \ref{App:AppendixB}. \\
-As one can see in table \ref{file-names-data} an obvious good indicator for the DATA category is the file ending "json". 
+As one can see in table \ref{file-names-data} an obvious good indicator for the DATA category is the file ending "json".
 Negative Words are mainly connected with development (e.g. "package", "test" and "main") and web (e.g. "css" and "html").\\
-Good features for the DEV category are "util", "package", "yml" and "test". 
+Good features for the DEV category are "util", "package", "yml" and "test".
 This corresponds to the heavily used category or file name "util" (for utility) among developers and "test" for software tests like unit tests. \\
 The strong positive word "contributing" for the DOCS category comes from the CONTRIBUTING.md file, which explains the principles of contributing to open source projects to new users.\\
 PDF files are an indication for EDU repositories, where the other features are very similar between EDU and HW.\\
@@ -336,13 +336,13 @@ The category WEB has no positive words because we used the complete data shown i
 So the classifier classifies each sample as WEB when no negative word occurs.\\
 
 Commit messages provide an additional insightful source for our predictions which one can see in \ref{App:AppendixC}.\\
-The most relevant word in the category DATA is trivially "data". 
+The most relevant word in the category DATA is trivially "data".
 "json" and "csv" are common filetypes used to store the data which are probably retrieved using the "script[s]".
 "Merge" under the highest negative words indicates that people only linearly add files to their repository and don't cause merge conflicts.\\
 "when" in the category DEV probably stands for conditional expressions like "Add second loop when flag is set".
 The other words are typical expressions in this context "test", "option", "support", "fix" and "compile".
-The negative words show that developers do not use the typical beginning of commit message like "add", "update", "change" and "commit" as proposed for example by Chris Beams.\\ \footnote{http://chris.beams.io/posts/git-commit/\#imperative}
-Except of "section", "article" and "book" nearly all other positive words in the DOCS category are git workflow specific phrases.
+The negative words show that developers do not use the typical beginning of commit message like "add", "update", "change" and "commit" as proposed for example by Chris Beams. \footnote{http://chris.beams.io/posts/git-commit/\#imperative} \\
+Apart from "section", "article" and "book" nearly all other positive words in the DOCS category are git workflow specific phrases.
 The negative words separate it from the WEB category ("html", "index", "page" and "post") and from the EDU and HW category ("solution" and "slide").\\
 Almost all of the first eleven positive words are very logical for the EDU category ("slide", "material", "note"\dots).\\
 The HW category on ther other side has very special words for its domain like "solution", "assignment" and "work".\\
@@ -354,7 +354,7 @@ The negative words separate DATA from DEV and DOCS mainly.\\
 The DEV category is a mixture of different programming languages which are not part of the WEB category.
 Keywords of object oriented programming languages are dominant in DEV.
 In contrast HTML and CSS is recognizable in WEB.\\
-The categories DOCS, EDU and HW are structureless with some typical words from the previous classifiers. 
+The categories DOCS, EDU and HW are structureless with some typical words from the previous classifiers.
 
 \todo[inline]{positive/negative words wiki}
 
