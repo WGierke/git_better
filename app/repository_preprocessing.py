@@ -7,6 +7,7 @@ import pandas as pd
 import traceback
 import codecs
 from sklearn.externals import joblib
+import re
 
 REPOS_DIR = "repo/"
 
@@ -67,6 +68,7 @@ def merge_commit_messages(repo_dir, override=False):
 def merge_files(repo_dir, file_name, override=False):
     # check if source code files are already merged
     if override or not os.path.exists(os.path.join(repo_dir,file_name)):
+        prog = re.compile('\/.git')
         with codecs.open(os.path.join(repo_dir,file_name), "w", "utf-8") as outfile:
             for subdir, dirs, files in os.walk(repo_dir):
                 for file in files:
@@ -75,7 +77,7 @@ def merge_files(repo_dir, file_name, override=False):
                     # is_binary() is sth. like a heuristic
                     try:
                         if(not is_binary(filepath)) \
-                                and ".git" not in subdir \
+                                and prog.search(subdir) is None \
                                 and "merged_commit_messages.txt" not in file \
                                 and "merged_file_names.txt" not in file \
                                 and "merged_wiki.txt" not in file \
@@ -161,8 +163,9 @@ def get_data_repos(cloneUrls, labels, owners, names, mode='source_code', pull=Fa
             merged_text = merge_files(repo_dir, 'merged_wiki.txt', override=override)
         else:
             print('Not supported mode')
-        df_merged_text = df_merged_text.append(
-            pd.DataFrame([[owner, name, merged_text,label]],columns=['owner', 'name','source code','label']))
+        if merged_text:
+            df_merged_text = df_merged_text.append(
+                pd.DataFrame([[owner, name, merged_text,label]],columns=['owner', 'name','source code','label']))
             # i+=1
             # if i==1000:
             #     break
