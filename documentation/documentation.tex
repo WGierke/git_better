@@ -363,6 +363,11 @@ Our classifier based on the cloned repositories performed well as one can see in
 We trained the commit message classifier with \texttt{min\_df=0.1} and \texttt{max\_df=0.9}, the file name classifier with \texttt{min\_df=0.1} and \texttt{max\_df=0.9}, the small source code classifier with \texttt{min\_df=0.3} and \texttt{max\_df=0.8} and the big source code classifier with \texttt{max\_df=0.8}.\\
 \texttt{max\_df} specifies the maximum document frequency, \texttt{min\_df} the minimum document frequency.\footnote{http://scikit-learn.org/stable/modules/generated/sklearn.feature\_extraction.text.TfidfVectorizer.html}
 A higher \texttt{min\_df} leads to fewer rare words and a better generalization, a lower \texttt{max\_df} excludes words which are present in many documents and doesn't hold much information.\\
+
+One can find the boolean matrix for the file name classifier on the validation data in the table \ref{boolean_matrix_file_names_validation} and on the additional validation data in the table \ref{boolean_matrix_file_names_add_validation}.\\
+One can find the boolean matrix for the commit message classifier on the validation data in the table \ref{boolean_matrix_commit_messages_validation} and on the additional validation data in the table \ref{boolean_matrix_commit_messages_add_validation}.\\
+One can find the boolean matrix for the source code classifier on the validation data in the table \ref{boolean_matrix_small_source_code_validation} and on the additional validation data in the table \ref{boolean_matrix_small_source_code_add_validation}.\\
+
 \begin{table}[h]
 \centering
 \caption{Accuracy of different classifier}
