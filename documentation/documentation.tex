@@ -359,10 +359,23 @@ The categories DOCS, EDU and HW are structureless with some typical words from t
 \subsubsection{Validation of Prediction
 Model}\label{validation-of-prediction-model-2}
 
-\todo[inline]{accuracy+confusion matrix}
-File names:
-\ref{boolean_matrix_file_names_validation}
-\ref{boolean_matrix_file_names_add_validation}
+Our classifier based on the cloned repositories performed well as one can see in the table \ref{accuracy-different-classifier}.
+We trained the commit message classifier with \texttt{min\_df=0.1} and \texttt{max\_df=0.9}, the file name classifier with \texttt{min\_df=0.1} and \texttt{max\_df=0.9}, the small source code classifier with \texttt{min\_df=0.3} and \texttt{max\_df=0.8} and the big source code classifier with \texttt{max\_df=0.8}.\\
+\texttt{max\_df} specifies the maximum document frequency, \texttt{min\_df} the minimum document frequency.\footnote{http://scikit-learn.org/stable/modules/generated/sklearn.feature\_extraction.text.TfidfVectorizer.html}
+A higher \texttt{min\_df} leads to fewer rare words and a better generalization, a lower \texttt{max\_df} excludes words which are present in many documents and doesn't hold much information.\\
+\begin{table}[h]
+\centering
+\caption{Accuracy of different classifier}
+\label{accuracy-different-classifier}
+\begin{tabular}{|l|l|l|}
+\hline
+                                                                            & validation & additional validation \\ \hline
+commit message                                                             & 38.7\%     & 38.3\%                \\ \hline
+file name                                                                  & 48.4\%     & 29.3\%                \\ \hline
+\begin{tabular}[c]{@{}l@{}}source code\\ (1600 features)\end{tabular}       & 38.7\%     & 26.3\%                \\ \hline
+\begin{tabular}[c]{@{}l@{}}source code\\ (30 million features)\end{tabular} & 51.6\%     & 34.3\%                \\ \hline
+\end{tabular}
+\end{table}
 
 \subsection{Overall Prediction
 Model}\label{overall-prediction-model}
