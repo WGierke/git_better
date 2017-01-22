@@ -12,11 +12,12 @@ from preprocess import ColumnSumFilter, ColumnStdFilter, PolynomialTransformer
 from sklearn.cross_validation import train_test_split
 from sklearn.ensemble import VotingClassifier, ExtraTreesClassifier
 from sklearn.pipeline import Pipeline
-from training import load_pickle, get_undersample_df, drop_defect_rows, JOBLIB_DESCRIPTION_PIPELINE_NAME, JOBLIB_README_PIPELINE_NAME, save_pickle
+from training import load_pickle, get_undersample_df, drop_defect_rows, JOBLIB_VOTING_PIPELINE_NAME, save_pickle
 
 N_BEST_FEATURES = 100
 LOOPS = 10
 NUMERIZE_README = False
+SAVE_PCIKLES = True
 
 def main():
     parser = argparse.ArgumentParser(
@@ -67,7 +68,7 @@ def split_features(df_origin):
 
 
 def train_and_predict(df_training, df_input):
-    #use_numeric_flat_prediction(df_training.copy(), df_input.copy())
+    use_numeric_flat_prediction(df_training.copy(), df_input.copy())
     use_mixed_stack_prediction(df_training.copy(), df_input.copy())
 
 
@@ -134,7 +135,8 @@ def use_numeric_flat_prediction(df, df_input):
                 val_scores[i] += val_score
                 val_add_score = clf.score(val_add_df, y_val_add)
                 val_add_scores[i] += val_add_score
-                #save_pickle(clf, "{}_{}_{}_{}".format(clf.__class__, i, val_score, val_add_score))
+                if SAVE_PCIKLES:
+                    save_pickle(clf, "{}_{}_{}_{}".format(clf.__class__, i, val_score, val_add_score))
             except Exception, e:
                 print e
     for i in range(len(clfs)):
@@ -144,6 +146,8 @@ def use_numeric_flat_prediction(df, df_input):
 
 
 def use_mixed_stack_prediction(df_training, df_input):
+    """Use a VotingClassifier on top of an ensemble of numeric classifiers
+    and classifiers for the description and readme features"""
     print 50*"="
     print "Fitting Mixed Stack"
     print 50*"="
@@ -182,7 +186,8 @@ def use_mixed_stack_prediction(df_training, df_input):
             val_scores[i] += val_score
             val_add_score = clf.score(val_add_df, y_val_add)
             val_add_scores[i] += val_add_score
-            #save_pickle(clf, "{}_{}_{}_{}".format(clf.__class__, i, val_score, val_add_score))
+            if SAVE_PCIKLES:
+                save_pickle(clf, "{}_{}_{}_{}".format(clf.__class__, i, val_score, val_add_score))
 
     for i in range(len(clfs)):
         print clfs[i].__class__
@@ -191,15 +196,18 @@ def use_mixed_stack_prediction(df_training, df_input):
 
 
 def predict(df_input):
-    model_description = load_pickle(JOBLIB_DESCRIPTION_PIPELINE_NAME)
-    model_readme = load_pickle(JOBLIB_README_PIPELINE_NAME)
-    probabilities = [model_description.predict_proba(df_input["description"])]
-    probabilities.append(model_readme.predict_proba(df_input["readme"]))
-    probabilities = [sum(e) / len(e) for e in zip(*probabilities)]
-    predictions = [model_readme.classes_[list(prob).index(max(prob))] for prob in probabilities]
-    labels = predictions
-    df_input["label"] = labels
-    df_input.repository = df_input.repository.apply(lambda x: "https://github.com/" + x)
+    repository = df_input["repository"]
+    df_input = normalize(df_input)
+    model_voting = load_pickle(JOBLIB_VOTING_PIPELINE_NAME)
+    descr = df_input["description"]
+    readme = df_input["readme"]
+    df_input = keep_useful_features(df_input, model_voting.estimators_[-1].useful_features)
+    df_input["description"] = descr
+    df_input["readme"] = readme
+    predictions = model_voting.predict(df_input)
+    df_input["label"] = predictions
+    df_input["repository"] = repository
+    df_input["repository"] = df_input.repository.apply(lambda x: "https://github.com/" + x)
     df_input[["repository", "label"]].to_csv("predictions.txt", sep=' ', header=False, index=False, encoding='utf-8')
     print "Saved predictions in predictions.txt"
     return
