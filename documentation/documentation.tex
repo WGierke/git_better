@@ -238,7 +238,6 @@ Model}\label{validation-of-prediction-model}
 After the classifier was applied on a random undersampled set of our training data for 100 times, it achieved accuracies of 39,3\% and 26.7\% on the validation respectively additional validation data on average.
 Figure \ref{confusion_matrix_numeric_ensemble} visualizes one confusion matrix of the ensemble and table \ref{boolean_matrix_numeric_ensemble} shows the according boolean matrix.
 
-
 \subsection{Classification Using Text Data (Description and
 Readme)}\label{classification-using-text-data-description-and-readme}
 
@@ -271,7 +270,8 @@ In our example, we dropped words with a document frequency of under 0.01 and ove
 We chose to use the stochastic gradient descent (SGD) algorithm to apply it on the feature matrix.
 The reason is that SGD can work efficiently with sparse features which is why it has been successfully applied to further NLP problems before.
 
-\todo[inline]{Include positive and negative words}
+
+
 \subsubsection{Validation of Prediction Model}\label{validation-of-prediction-model-1}
 
 As one can see in Figures \ref{confusion-matrix-readme-classifier} and \ref{confusion-matrix-description-classifier}, the description and readme classifiers outperformed the numeric ensemble classifier with 51.6\% respectively 48.4\% accuracy.
@@ -334,7 +334,7 @@ PDF files are an indication for EDU repositories, where the other features are v
 The category WEB has no positive words because we used the complete data shown in the table \ref{training_data_distribution} and didn't undersample.\\
 So the classifier classifies each sample as WEB when no negative word occurs.\\
 
-Commit messages provide an additional insightful source for our predictions which one can see in Appendix \ref{App:AppendixE}.\\
+Commit messages provide an additional insightful source for our predictions which one can see in Appendix \ref{App:AppendixC}.\\
 The most relevant word in the category DATA is trivially "data".
 "json" and "csv" are common filetypes used to store the data which are probably retrieved using the "script[s]".
 "Merge" under the highest negative words indicates that people only linearly add files to their repository and don't cause merge conflicts.\\
@@ -487,7 +487,7 @@ To implement the latter one, we could use tf-idf matrices like we already used f
 \FloatBarrier
 
 \newpage
-\section{\\Evaluation of readme classifier} \label{App:AppendixC}
+\section{\\Evaluation of readme classifier} \label{App:AppendixF}
 % the \\ insures the section title is centered below the phrase: AppendixA
 
 \FloatBarrier
@@ -495,7 +495,7 @@ To implement the latter one, we could use tf-idf matrices like we already used f
 \FloatBarrier
 
 \newpage
-\section{\\Evaluation of file name classifier} \label{App:AppendixD}
+\section{\\Evaluation of file name classifier} \label{App:AppendixG}
 % the \\ insures the section title is centered below the phrase: AppendixA
 
 \FloatBarrier
@@ -503,7 +503,7 @@ To implement the latter one, we could use tf-idf matrices like we already used f
 \FloatBarrier
 
 \newpage
-\section{\\Evaluation of commit message classifier} \label{App:AppendixE}
+\section{\\Evaluation of commit message classifier} \label{App:AppendixC}
 % the \\ insures the section title is centered below the phrase: Appendix B
 
 \FloatBarrier
@@ -511,7 +511,7 @@ To implement the latter one, we could use tf-idf matrices like we already used f
 \FloatBarrier
 
 \newpage
-\section{\\Evaluation of source code classifier} \label{App:AppendixF}
+\section{\\Evaluation of source code classifier} \label{App:AppendixD}
 % the \\ insures the section title is centered below the phrase: Appendix B
 
 \FloatBarrier
@@ -519,7 +519,7 @@ To implement the latter one, we could use tf-idf matrices like we already used f
 \FloatBarrier
 
 \newpage
-\section{\\Evaluation of small source code classifier} \label{App:AppendixG}
+\section{\\Evaluation of small source code classifier} \label{App:AppendixE}
 % the \\ insures the section title is centered below the phrase: Appendix B
 
 \FloatBarrier
