@@ -429,7 +429,7 @@ For setup instructions please refer to the README.md file.
 In this chapter we want to evaluate the performance of our chosen \textit{meta-ensemble classifier}.
 After 100 times being applied on a random undersampled set of our training data, the classifier achieved accuracies of 61,3\% and 47.7\% on the validation respectively additional validation data.
 The best classifier we were able to train achieved on average an accuracy of 67.7 \% on the validation data and 46.7\% on the additional validation data set.
-One can find its confusion matrix of the official validation data in Figure \ref{confusion_matrix_meta_ensemble} and the according boolean matrix with precision and recall values in table \ref{boolean_matrix_meta_ensemble}.
+One can find its confusion matrix of the official validation data in Figure \ref{confusion_matrix_meta_ensemble} and the according boolean matrix with precision and recall values in table \ref{boolean_matrix_meta_ensemble}.//
 
 \begin{table}[H]
 \centering
@@ -454,6 +454,10 @@ One can find its confusion matrix of the official validation data in Figure \ref
 	\caption{Confusion Matrix for Meta Ensemble (67.7\% Accuracy)}
 	\label{confusion_matrix_meta_ensemble}
 \end{figure}
+
+In our opinion, we prefer a higher recall over a higher precision.
+We would like to use our prediction model to recommend repos to a user that are similar to his own repositorries.
+In this situation it might be better for a user to reject a repository by himself as interesting (high recall and low precision) than not seing an interesting repo at all (low recall and high precision).
 
 The great benefit of our ensemble classifier is that the base classifiers are independent of each other.
 This means that even if one classifier predicts the class label incorrectly, the remaining two classifiers can outrule him using their prediction confidences.\\
