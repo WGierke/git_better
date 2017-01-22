@@ -1,4 +1,8 @@
 from __future__ import division
+def warn(*args, **kwargs):
+    pass
+import warnings
+warnings.warn = warn
 import argparse
 import os
 import pandas as pd
@@ -9,13 +13,12 @@ from constants import VALIDATION_DATA_PATH, ADDITIONAL_VALIDATION_DATA_PATH
 from evaluation import drop_text_features
 from load_data import process_data
 from preprocess import ColumnSumFilter, ColumnStdFilter, PolynomialTransformer
-from sklearn.cross_validation import train_test_split
+from sklearn.model_selection import train_test_split
 from sklearn.ensemble import VotingClassifier, ExtraTreesClassifier
 from sklearn.pipeline import Pipeline
 from training import load_pickle, get_undersample_df, drop_defect_rows, JOBLIB_VOTING_PIPELINE_NAME, save_pickle
 
 N_BEST_FEATURES = 100
-LOOPS = 10
 NUMERIZE_README = False
 SAVE_PCIKLES = True
 
@@ -29,6 +32,8 @@ def main():
                         'Repository URL and label should be separated by a comma or a whitespace character.')
     parser.add_argument('-p', '--processed', action='store_true',
                         help='Specifies that training file already contains fetched features.')
+    parser.add_argument('-l', '--loops',
+                        help='Specifies how many classifiers should be trained on the given training data. The classifier with the highest average score on the validation data is used for the prediction (default=1).')
     args = parser.parse_args()
 
     if os.path.isfile(args.input_file):
@@ -41,6 +46,7 @@ def main():
 def classify(args):
     input_path = args.input_file
     df_input = get_input_data(input_path)
+    print "Fetching features for {} input samples".format(len(df_input))
     df_input = process_data(data_frame=df_input)
     if args.training_file:
         if args.processed:
@@ -48,8 +54,11 @@ def classify(args):
         else:
             df_train = pd.read_csv(args.training_file, sep=' ', names=[
                                    "repository", "label"])
+            print "Fetching features for {} training samples".format(len(df_train))
             df_train = process_data(data_frame=df_train)
-        train_and_predict(df_train, df_input)
+        loops = args.loops or 1
+        loops = int(loops)
+        train_and_predict(df_train, df_input, loops)
     else:
         predict(df_input)
 
@@ -67,90 +76,12 @@ def split_features(df_origin):
     return df, descr, readme, y
 
 
-def train_and_predict(df_training, df_input):
-    use_numeric_flat_prediction(df_training.copy(), df_input.copy())
-    use_mixed_stack_prediction(df_training.copy(), df_input.copy())
-
-
-def use_numeric_flat_prediction(df, df_input):
-    """Add the normalized term frequencies of the text features
-       to the numeric features and train a set of classifiers on that."""
-    print 50*"="
-    print "Fitting Numeric Flat"
-    print 50*"="
-    df = normalize(df)
-
-    val_df = normalize(pd.read_csv("data/validation_data_processed.csv"))
-    val_add_df = normalize(pd.read_csv("data/validation_additional_processed_data.csv"))
-
-    if not NUMERIZE_README:
-        _ = df.pop("readme")
-        _ = val_df.pop("readme")
-        _ = val_add_df.pop("readme")
-
-    y = df.pop("label")
-    y_val = val_df.pop("label")
-    y_val_add = val_add_df.pop("label")
-
-    _ = df.pop("Unnamed: 0")
-    _ = val_df.pop("Unnamed: 0")
-    _ = val_add_df.pop("Unnamed: 0")
-
-    ensemble_clf = EnsembleAllNumeric(n_jobs=-1).fit(df, y)
-    df = ensemble_clf.transform(df)
-    useful_features = ensemble_clf.useful_features
-    val_df = ensemble_clf.transform(val_df)
-    val_add_df = ensemble_clf.transform(val_add_df)
-
-    model = ExtraTreesClassifier()
-    model.fit(df, y)
-
-    zipped = zip(useful_features, model.feature_importances_)
-    zipped.sort(key=lambda x: x[1], reverse=True)
-    best_features = [x[0] for x in zipped[:N_BEST_FEATURES]]
-
-    df = keep_useful_features(df, best_features)
-    val_df = keep_useful_features(val_df, best_features)
-    val_add_df = keep_useful_features(val_add_df, best_features)
-    df_input = keep_useful_features(df_input, best_features)
-
-    df["label"] = y
-
-    clfs = [clf[1] for clf in get_voting_classifier().estimators]
-    clfs.append(ExtraTreesClassifier(n_jobs=-1))
-    clfs.append(get_voting_classifier())
-
-    val_scores = [0] *len(clfs)
-    val_add_scores = [0] *len(clfs)
-
-    for _ in tqdm(range(LOOPS)):
-        df_train = get_undersample_df(df.copy())
-        _ = df_train.pop("index")
-        y_train = df_train.pop("label")
-        for i in range(len(clfs)):
-            try:
-                clf = clfs[i]
-                clf.fit(df_train, y_train)
-                val_score = clf.score(val_df, y_val)
-                val_scores[i] += val_score
-                val_add_score = clf.score(val_add_df, y_val_add)
-                val_add_scores[i] += val_add_score
-                if SAVE_PCIKLES:
-                    save_pickle(clf, "{}_{}_{}_{}".format(clf.__class__, i, val_score, val_add_score))
-            except Exception, e:
-                print e
-    for i in range(len(clfs)):
-        print clfs[i].__class__
-        print "Validation: " + str(val_scores[i]/LOOPS)
-        print "Additional: " + str(val_add_scores[i]/LOOPS)
-
-
-def use_mixed_stack_prediction(df_training, df_input):
+def train_and_predict(df_training, df_input, loops):
     """Use a VotingClassifier on top of an ensemble of numeric classifiers
     and classifiers for the description and readme features"""
-    print 50*"="
-    print "Fitting Mixed Stack"
-    print 50*"="
+    print 30 * "="
+    print "Fitting {} Voting Classifier(s)".format(loops)
+    print 30 * "="
 
     df_training = normalize(df_training)
 
@@ -165,40 +96,37 @@ def use_mixed_stack_prediction(df_training, df_input):
     _ = val_df.pop("Unnamed: 0")
     _ = val_add_df.pop("Unnamed: 0")
 
-    meta_ensemble = VotingClassifier(estimators=[('description', DescriptionClassifier()),
-                                                 ('readme', ReadmeClassifier()),
-                                                 ('ensemble', NumericEnsembleClassifier())],
-                                    voting='soft')
+    best_average_score = 0
+    best_clf = None
 
-    clfs = [DescriptionClassifier(), ReadmeClassifier(), NumericEnsembleClassifier(), meta_ensemble]
-    clfs.extend([clf[1] for clf in get_voting_classifier().estimators])
-    val_scores = [0] * len(clfs)
-    val_add_scores = [0] * len(clfs)
-
-    for _ in tqdm(range(LOOPS)):
+    for i in tqdm(range(loops)):
+        clf = VotingClassifier(estimators=[('description', DescriptionClassifier()),
+                                                     ('readme', ReadmeClassifier()),
+                                                     ('ensemble', NumericEnsembleClassifier())],
+                               voting='soft')
         df_train = get_undersample_df(df_training.copy())
         _ = df_train.pop("index")
         y_train = df_train.pop("label")
-        for i in range(len(clfs)):
-            clf = clfs[i]
-            clf.fit(df_train, y_train)
-            val_score = clf.score(val_df, y_val)
-            val_scores[i] += val_score
-            val_add_score = clf.score(val_add_df, y_val_add)
-            val_add_scores[i] += val_add_score
-            if SAVE_PCIKLES:
-                save_pickle(clf, "{}_{}_{}_{}".format(clf.__class__, i, val_score, val_add_score))
+        clf.fit(df_train, y_train)
+        val_score = clf.score(val_df, y_val)
+        val_add_score = clf.score(val_add_df, y_val_add)
+        if (val_score + val_add_score) / 2 > best_average_score:
+            best_clf = clf
+            best_average_score = (val_score + val_add_score) / 2
 
-    for i in range(len(clfs)):
-        print clfs[i].__class__
-        print "Validation: " + str(val_scores[i]/LOOPS)
-        print "Additional: " + str(val_add_scores[i]/LOOPS)
+    print 74 * "="
+    print "Using trained Voting Classifier with average accuracy on validation sets of {0:2f}".format((best_average_score))
+    print 74 * "="
+    predict(df_input, model_voting=best_clf)
 
-
-def predict(df_input):
+def predict(df_input, model_voting=None):
+    if model_voting is None:
+        print 35 * "="
+        print 'Using pretrained Voting Classifier (67.74% on validation and 46.67% on additional validation data)'
+        print 35 * "="
+        model_voting = load_pickle(JOBLIB_VOTING_PIPELINE_NAME)
     repository = df_input["repository"]
     df_input = normalize(df_input)
-    model_voting = load_pickle(JOBLIB_VOTING_PIPELINE_NAME)
     descr = df_input["description"]
     readme = df_input["readme"]
     df_input = keep_useful_features(df_input, model_voting.estimators_[-1].useful_features)
