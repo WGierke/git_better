@@ -191,9 +191,9 @@ LANGUAGE\_*            & How much code was written in the language in percent (e
 \end{table}
 
 Most of the features were available using the GitHub API.
-We added the \emph{isOwnerHomepage} and \emph{hasHomepage} features to detect whether a repository serves its source code using GitHub pages.
+We added the \textit{isOwnerHomepage} and \textit{hasHomepage} features to detect whether a repository serves its source code using GitHub pages.
 This could allow us to identify WEB repositories easier.
-We furthermore hoped that using \emph{hasCiConfig}, so whether a repo contains a configuration file for a Continuous Integration service, would improve the accuracy of detecting DEV repositories.
+We furthermore hoped that using \textit{hasCiConfig}, so whether a repo contains a configuration file for a Continuous Integration service like Travis CI\footnote{https://travis-ci.org/} or CircleCI\footnote{https://circleci.com/}, would improve the accuracy of detecting DEV repositories.
 
 \subsubsection{Data Cleaning and
 Preprocessing}\label{data-cleaning-and-preprocessing}
@@ -202,13 +202,22 @@ Using the GitHub REST API and the GitHub GraphQL API, we were able to receive al
 
 \subsubsection{Feature Selection}\label{feature-selection}
 
-Feature Selection describes the process of dropping features that yield no or very little additional information in order to decrease overfitting and accelerate model fitting.
+Feature Selection describes the process of removing features that yield no or very little additional information in order to decrease overfitting and accelerate model fitting.
 Especially the programming language features needed to be reduced using Feature Selection.\\
 GitHub detects over 300 used programming languages\footnote{https://github.com/github/linguist/blob/master/lib/linguist/languages.yml} in repositories.
 The problem is that a lot of them are used only in a few repositories such that there are a lot of features that only hold very little variance and information.
-As an example, among the collected 1400 repositories there were 46 programming languages, like Pony or KiCad, that were only used in one repository at all.
-To remove those, we dropped features with low standard deviation and a low overall sum.
-As an example, we are already able to drop 135 language features if we require that the sum of a language feature over all 1400 training data entries is supposed to be bigger than 5.
+As an example, among the collected 1400 repositories there were 46 programming languages, like Pony or KiCad, that were only used in one repository at all.\\
+In the beginning of the project, we dropped features with low standard deviations and a low overall sum according to chosen thresholds.
+While this statistical approach is very fast, it didn't improve the accuracy a lot.
+Instead, we used extremely randomized trees\footnote{Geurts et al., "Extremely randomized trees", Machine Learning, 63(1), 3-42, 2006} to compute the feature importances.
+The earlier a feature is used in a decision tree to split the data by a threshold, the more important is the feature.
+Intuitively, the closer a feature is to the root of a decision tree, the higher is its importance score.
+Figure \ref{feature_importance_numeric_graphic} visualizes that only approximately 30 of the 172 features of the training data were important for predictions.
+Table \ref{feature_importance_numeric} shows the top 20 features and their importance scores.
+One can note that it's important whether a repository serves a website or even serves the owners homepage.
+This is very comprehensible as very few projects containing data, documents or homework serve their own websites.
+It's also remarkable that the feature \textit{projects} feature is not important enough to occur among the top 20 features.
+This might be due to the fact that this project management tool was introduced late 2016 so there aren't so many project teams already using it, yet.
 
 \subsubsection{Feature Engineering}\label{feature-engineering}
 
@@ -252,8 +261,7 @@ Small feed-forward neural networks are applicable to our problem while deep neur
 
 \subsubsection{Numeric Metadata Prediction
 Model}\label{numeric-metadata-prediction-model}
-
-We tried the following classifiers: \ldots{}
+In a next step, we applied a set of classifiers to the numeric features.
 
 \todo[inline]{Better without language features}
 
@@ -351,11 +359,11 @@ Ugurel et al.\footnote{"What's the Code? Automatic Classification of Source Code
 
 \todo[inline]{positive/negative words file names}
 
-In the following paragraph we will discuss the importance of features gained from the file names. 
-As one can see in table \ref{file-names-data} an obvious good indicator for the DATA category is the file ending "json". 
+In the following paragraph we will discuss the importance of features gained from the file names.
+As one can see in table \ref{file-names-data} an obvious good indicator for the DATA category is the file ending "json".
 Negative Words are mainly connected with development (e.g. "package", "test" and "main") and web (e.g. "css" and "html").
-Good features for the DEV category are "util", "package", "yml" and "test". 
-This corresponds to the heavily used category or file name "util" (for utility) among developers and "test" for software tests like unit tests. 
+Good features for the DEV category are "util", "package", "yml" and "test".
+This corresponds to the heavily used category or file name "util" (for utility) among developers and "test" for software tests like unit tests.
 The strong positive word "contributing" for the DOCS category comes from the CONTRIBUTING.md file, which explains the principles of contributing to open source projects to new users.
 PDF files are a indication for EDU repositories, where the other features are very similar between EDU and HW.
 The category WEB has no positive words because we used the complete data shown in the table \ref{training_data_distribution} and didn't undersample.
