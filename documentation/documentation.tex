@@ -235,10 +235,9 @@ The ensemble classifier outperformed all other classifiers which implies that it
 \subsubsection{Validation of Prediction
 Model}\label{validation-of-prediction-model}
 
-\ref{confusion_matrix_numeric_ensemble}
-\ref{boolean_matrix_numeric_ensemble}
+After the classifier was applied on a random undersampled set of our training data for 100 times, it achieved accuracies of 39,3\% and 26.7\% on the validation respectively additional validation data on average.
+Figure \ref{confusion_matrix_numeric_ensemble} visualizes one confusion matrix of the ensemble and table \ref{boolean_matrix_numeric_ensemble} shows the according boolean matrix.
 
-\todo[inline]{accuracy+confusion matrix}
 
 \subsection{Classification Using Text Data (Description and
 Readme)}\label{classification-using-text-data-description-and-readme}
@@ -326,7 +325,7 @@ Shortened words in the following tables are caused by the stemming of the input 
 \todo[inline]{positive/negative words commit messages}
 
 In the following paragraph we will discuss the importance of features gained from the file names, see Appendix \ref{App:AppendixB}. \\
-As one can see in table \ref{file-names-data} an obvious good indicator for the DATA category is the file ending "json". 
+As one can see in table \ref{file-names-data} an obvious good indicator for the DATA category is the file ending "json".
 Negative Words are mainly connected with development (e.g. "package", "test" and "main") and web (e.g. "css" and "html").\\
 Good features for the DEV category are "util", "package", "yml" and "test".
 This corresponds to the heavily used category or file name "util" (for utility) among developers and "test" for software tests like unit tests. \\
@@ -335,8 +334,8 @@ PDF files are an indication for EDU repositories, where the other features are v
 The category WEB has no positive words because we used the complete data shown in the table \ref{training_data_distribution} and didn't undersample.\\
 So the classifier classifies each sample as WEB when no negative word occurs.\\
 
-Commit messages provide an additional insightful source for our predictions which one can see in Appendix \ref{App:AppendixC}.\\
-The most relevant word in the category DATA is trivially "data". 
+Commit messages provide an additional insightful source for our predictions which one can see in Appendix \ref{App:AppendixE}.\\
+The most relevant word in the category DATA is trivially "data".
 "json" and "csv" are common filetypes used to store the data which are probably retrieved using the "script[s]".
 "Merge" under the highest negative words indicates that people only linearly add files to their repository and don't cause merge conflicts.\\
 "when" in the category DEV probably stands for conditional expressions like "Add second loop when flag is set".
@@ -354,7 +353,7 @@ The negative words separate DATA from DEV and DOCS mainly.\\
 The DEV category is a mixture of different programming languages which are not part of the WEB category.
 Keywords of object oriented programming languages are dominant in DEV.
 In contrast HTML and CSS is recognizable in WEB.\\
-The categories DOCS, EDU and HW are structureless with some typical words from the previous classifiers. 
+The categories DOCS, EDU and HW are structureless with some typical words from the previous classifiers.
 
 \todo[inline]{positive/negative words wiki}
 
@@ -480,7 +479,23 @@ To implement the latter one, we could use tf-idf matrices like we already used f
 \FloatBarrier
 
 \newpage
-\section{\\Evaluation of file name classifier} \label{App:AppendixB}
+\section{\\Evaluation of description classifier} \label{App:AppendixB}
+% the \\ insures the section title is centered below the phrase: AppendixA
+
+\FloatBarrier
+\input{appendix-description.tex}
+\FloatBarrier
+
+\newpage
+\section{\\Evaluation of readme classifier} \label{App:AppendixC}
+% the \\ insures the section title is centered below the phrase: AppendixA
+
+\FloatBarrier
+\input{appendix-readme.tex}
+\FloatBarrier
+
+\newpage
+\section{\\Evaluation of file name classifier} \label{App:AppendixD}
 % the \\ insures the section title is centered below the phrase: AppendixA
 
 \FloatBarrier
@@ -488,7 +503,7 @@ To implement the latter one, we could use tf-idf matrices like we already used f
 \FloatBarrier
 
 \newpage
-\section{\\Evaluation of commit message classifier} \label{App:AppendixC}
+\section{\\Evaluation of commit message classifier} \label{App:AppendixE}
 % the \\ insures the section title is centered below the phrase: Appendix B
 
 \FloatBarrier
@@ -496,7 +511,7 @@ To implement the latter one, we could use tf-idf matrices like we already used f
 \FloatBarrier
 
 \newpage
-\section{\\Evaluation of source code classifier} \label{App:AppendixD}
+\section{\\Evaluation of source code classifier} \label{App:AppendixF}
 % the \\ insures the section title is centered below the phrase: Appendix B
 
 \FloatBarrier
@@ -504,7 +519,7 @@ To implement the latter one, we could use tf-idf matrices like we already used f
 \FloatBarrier
 
 \newpage
-\section{\\Evaluation of small source code classifier} \label{App:AppendixE}
+\section{\\Evaluation of small source code classifier} \label{App:AppendixG}
 % the \\ insures the section title is centered below the phrase: Appendix B
 
 \FloatBarrier
