@@ -21,3 +21,5 @@ scipy
 theanets
 tensorflow
 nose_parameterized
+gittle
+binaryornot
