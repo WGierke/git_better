@@ -74,7 +74,7 @@ openbib,
 
 \section{Challenge Description}\label{challenge-description}
 
-This years informatiCup challenge was to classify GitHub repositories (repos) automatically based on given class descriptions and sample data.
+This years informatiCup challenge was to automatically classify GitHub repositories (repos) based on given class descriptions and sample data from the exercise description.
 In this work we present how we explored the given data, detected relevant features and built an application that predicts repository labels using different machine learning algorithms.
 
 \section{Data Exploration}\label{data-exploration}
@@ -226,7 +226,7 @@ Small feed-forward neural networks are applicable to our problem while deep neur
 
 \subsubsection{Numeric Metadata Prediction
 Model}\label{numeric-metadata-prediction-model}
-In a next step, we applied Naïves Bayes, Decision Trees, Random Forests, k-Nearest Neighbours (k-NN), Support Vector Machines (SVM) as well as Gradient Boost classifiers on the numeric features.
+In a next step, we applied Naives Bayes, Decision Trees, Random Forests, k-Nearest Neighbours (k-NN), Support Vector Machines (SVM) as well as Gradient Boost classifiers on the numeric features.
 We also ensembled the classifiers using a weighted voting approach.
 You can find their average accuracies scores on the official validation data and on the additional validation data provided by another team from 100 run times in table \ref{benchmark_numeric}.
 One can notice that all classifiers performed much better on the official validation data set than on the additional one.
