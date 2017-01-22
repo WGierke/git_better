@@ -178,3 +178,38 @@
 20 & 1.4863  &            height  &  -0.9266  &            sourc \\  \hline
 \end{tabular}
 \end{table}
+
+\begin{table}[h]
+\centering
+\caption{Boolean Matrix for Validation Data}
+\label{boolean_matrix_small_source_code_validation}}
+\begin{tabular}{|r|r|r|r|r|}
+ \hline
+Label & Predicted Correctly & Predicted Incorrectly & Precision & Recall \\ \hline
+WEB & 4 & 0 & 0.27 & 1.00 \\ \hline
+DOCS & 4 & 0 & 0.40 & 1.00 \\ \hline
+HW & 0 & 5 & 0.00 & 0.00 \\ \hline
+DEV & 3 & 8 & 0.60 & 0.27 \\ \hline
+EDU & 0 & 4 & 0.00 & 0.00 \\ \hline
+DATA & 1 & 2 & 1.00 & 0.33 \\ \hline
+\multicolumn{3}{|l|}{Weighted Average} & 0.40 & 0.39 \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[h]
+\centering
+\caption{Boolean Matrix for Additional Validation Data}
+\label{boolean_matrix_small_source_code_add_validation}
+\begin{tabular}{|r|r|r|r|r|}
+ \hline
+Label & Predicted Correctly & Predicted Incorrectly & Precision & Recall \\ \hline
+WEB & 35 & 5 & 0.21 & 0.88 \\ \hline
+DOCS & 13 & 23 & 0.17 & 0.36 \\ \hline
+HW & 2 & 41 & 0.67 & 0.05 \\ \hline
+DEV & 17 & 39 & 0.49 & 0.30 \\ \hline
+OTHER & 0 & 57 & 0.00 & 0.00 \\ \hline
+EDU & 7 & 28 & 0.39 & 0.20 \\ \hline
+DATA & 5 & 28 & 0.83 & 0.15 \\ \hline
+\multicolumn{3}{|l|}{Weighted Average} & 0.37 & 0.26 \\ \hline
+\end{tabular}
+\end{table}
