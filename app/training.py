@@ -17,6 +17,7 @@ from sklearn.preprocessing import LabelEncoder
 JOBLIB_SUFFIX = '.joblib.pkl'
 JOBLIB_DESCRIPTION_PIPELINE_NAME = 'best_description_pipeline_4839'
 JOBLIB_README_PIPELINE_NAME = 'best_readme_pipeline_5161'
+JOBLIB_VOTING_PIPELINE_NAME = 'best_voting_6774_4667'
 
 
 def find_best_text_pipeline(df_values, labels, pipeline=None, parameters=None):
@@ -131,7 +132,8 @@ def drop_defect_rows(df):
 
 
 def get_undersample_df(df):
-    df = get_cleaned_processed_df()
+    if df is None:
+        df = get_cleaned_processed_df()
     samples_df = pd.DataFrame(columns=df.columns)
     label_counts = df.groupby('label').count().iloc[:, 0]
     minimum_count = label_counts.min()

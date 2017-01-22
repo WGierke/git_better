@@ -7,17 +7,18 @@ from operator import itemgetter
 from preprocess import ColumnSumFilter, ColumnStdFilter, PolynomialTransformer
 from scipy.sparse import csr_matrix
 from scipy.stats import randint as sp_randint
-from sklearn.ensemble import RandomForestClassifier, BaggingClassifier, AdaBoostClassifier, GradientBoostingClassifier, VotingClassifier
+from sklearn.ensemble import RandomForestClassifier, BaggingClassifier, AdaBoostClassifier, GradientBoostingClassifier, VotingClassifier, ExtraTreesClassifier
 from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from sklearn.grid_search import RandomizedSearchCV
 from sklearn.linear_model import SGDClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.pipeline import Pipeline
-from sklearn.svm import SVC
+from sklearn.svm import SVC, LinearSVC
 from sklearn.tree import DecisionTreeClassifier
 from xgboost import XGBClassifier
 
+TOP_NUMERIC_FEATURES = 30
 
 try:
     import theanets as tn
@@ -64,20 +65,23 @@ class GIClassifier(object):
 
     def fit(self, df, Y, tune_parameters=False):
         self.tune_parameters = tune_parameters
-        self.clf.fit(df.values, Y)
+        self.clf.fit(df[df.select_dtypes(include=[np.number]).columns], Y)
         return self
 
     def predict(self, df):
-        return self.clf.predict(df.values)
+        return self.clf.predict(df[df.select_dtypes(include=[np.number]).columns])
 
     def predict_proba(self, df):
-        return self.clf.predict_proba(df.values)
+        return self.clf.predict_proba(df[df.select_dtypes(include=[np.number]).columns])
+
+    def set_params(self, **args):
+        return self.clf.set_params(**args)
 
     def get_params(self, **args):
         return self.clf.get_params(**args)
 
     def score(self, df, Y):
-        return self.clf.score(df, Y)
+        return self.clf.score(df[df.select_dtypes(include=[np.number]).columns], Y)
 
 
 class DecisionTree(GIClassifier):
@@ -114,6 +118,13 @@ class SVM(GIClassifier):
                                       'degree': sp_randint(2, 5)}
         self.clf = SVC(**args)
 
+
+class LinearSVM(GIClassifier):
+    def __init__(self, **args):
+        self.param_dist_random = {'shrinking': [True, False],
+                                      'kernel': ['linear', 'poly', 'rbf', 'sigmoid'],
+                                      'degree': sp_randint(2, 5)}
+        self.clf = LinearSVC(**args)
 
 
 class BagEnsemble(GIClassifier):
@@ -183,6 +194,11 @@ class XGBoost(GIClassifier):
                                       'n_estimators' : sp_randint(50, 200)}
         self.clf = XGBClassifier(**args)
 
+    def score(self, df, Y):
+        return self.clf.score(df[df.select_dtypes(include=[np.number]).columns].values, Y)
+
+    def predict(self, df):
+        return self.clf.score(df[df.select_dtypes(include=[np.number]).columns].values)
 
 
 class TheanoNeuralNetwork(GIClassifier):
@@ -278,28 +294,25 @@ class ReadmeClassifier(MetaClassifier):
 
 class NumericEnsembleClassifier(MetaClassifier):
     fill_character = 0
-    ppl = Pipeline([
-        ('clmn_std_filter', ColumnStdFilter(min_std=1)),
-        ('clmn_sum_filter', ColumnSumFilter(min_sum=10)),
-    ])
-    poly_transf = PolynomialTransformer(degree=2)
 
     def __init__(self, **args):
         self.clf = get_voting_classifier(**args)
+        self.useful_features = []
 
     def fit(self, df_origin, Y, tune_parameters=False):
         df = df_origin.copy()
         self.tune_parameters = tune_parameters
         self.numeric_columns = df.select_dtypes(include=[np.number]).columns
-        self.numeric_columns.drop("index")
-        self.ppl = self.ppl.fit(df[self.numeric_columns])
-        X_reduced = self.ppl.transform(df[self.numeric_columns])
-        self.important_column = X_reduced.columns
-        self.important_column = self.important_column.drop("index")
-        self.useful_features = list(X_reduced.columns)
-        X_poly = self.poly_transf.transform(X_reduced)
-        X_poly.fillna(self.fill_character, inplace=True)
-        self.clf.fit(X_poly, Y)
+        df = df[self.numeric_columns]
+        model = ExtraTreesClassifier(n_jobs=-1)
+        df.fillna(self.fill_character, inplace=True)
+        model.fit(df, Y)
+        zipped = zip(df.columns, model.feature_importances_)
+        zipped.sort(key=lambda x: x[1], reverse=True)
+        self.useful_features = [x[0] for x in zipped[:TOP_NUMERIC_FEATURES]]
+        self.useful_features = list(set(self.useful_features))
+        df = keep_useful_features(df, self.useful_features)
+        self.clf.fit(df, Y)
         return self
 
     def predict(self, df_origin):
@@ -317,28 +330,69 @@ class NumericEnsembleClassifier(MetaClassifier):
         df = self.transform_to_fitted_features(df)
         return self.clf.score(df, Y)
 
-    def keep_useful_features(self, df, useful_features):
-        for c in df.columns:
-            if c not in useful_features:
-                df.drop(c, axis=1, inplace=True)
-        for f in useful_features:
-            if f not in df.columns:
-                df[f] = 0
-        return df
-
     def transform_to_fitted_features(self, df_origin):
         df = df_origin.copy()
         df = df.fillna(self.fill_character)
-        df = self.keep_useful_features(df, self.useful_features)
-        df = self.poly_transf.transform(df)
+        df = keep_useful_features(df, self.useful_features)
         return df
+
+
+class EnsembleAllNumeric(MetaClassifier):
+    """Fits a RandomForestClassifier on the features where the text features have been transformed to numeric ones"""
+    fill_character = 0
+
+    def __init__(self, **args):
+        from sklearn.ensemble import RandomForestClassifier
+        self.clf = RandomForestClassifier(**args)
+
+    def fit(self, df_origin, Y, tune_parameters=False):
+        df = df_origin.copy()
+        df = normalize(df)
+        df = self.transform(df)
+        self.useful_features = list(df.columns)
+        self.clf.fit(df, Y)
+        return self
+
+    def predict(self, df_origin):
+        df = df_origin.copy()
+        df = self.transform(df)
+        df = keep_useful_features(df, self.useful_features)
+        return self.clf.predict(df)
+
+    def predict_proba(self, df_origin):
+        df = df_origin.copy()
+        df = self.transform(df)
+        df = keep_useful_features(df, self.useful_features)
+        return self.clf.predict_proba(df)
+
+    def score(self, df_origin, Y):
+        df = df_origin.copy()
+        df = self.transform(df)
+        df = keep_useful_features(df, self.useful_features)
+        return self.clf.score(df, Y)
+
+    def transform(self, df):
+        text_columns = df.select_dtypes(exclude=[np.number]).columns
+        cv = CountVectorizer(token_pattern="[a-zA-Z0-9.:]{3,}", min_df=0.001)
+        for c in text_columns:
+            df[c] = df[c].astype(str)
+            matrix = cv.fit_transform(df[c]).todense()
+            features = cv.get_feature_names()
+            normalized_matrix = matrix / matrix.sum(axis=1, dtype=float)
+            for i in range(len(features)):
+                df[c + "_" + features[i]] = normalized_matrix[:, i]
+            df.drop(c, axis=1, inplace=True)
+            del cv
+            del matrix
+            del normalized_matrix
+        return df.fillna(0)
 
 
 def get_text_pipeline(**args):
     ppl = Pipeline([
         ('vect', CountVectorizer(stop_words='english', analyzer=stemmed_words, token_pattern='[a-zA-Z]{3,}')),
         ('tfidf', TfidfTransformer()),
-        ('clf', SGDClassifier(loss="log")),
+        ('clf', SGDClassifier(loss="log", n_jobs=-1)),
     ])
 
     if args:
@@ -356,11 +410,12 @@ def get_voting_classifier(**args):
     voting_clf = VotingClassifier(voting='soft', estimators=[
         ('clf_bayes', NaiveBayes()),
         ('clf_tree', DecisionTree()),
-        ('clf_forest', Forest()),
+        ('clf_forest', Forest(n_jobs=-1)),
         ('clf_kneighbors', KNeighbors()),
-        ('clf_svm', SVM(kernel='rbf', shrinking=True, probability=True)),
-        ('clf_grad_boost', GradBoost()),
-        ('clf_xgboost', XGBoost())])
+        ('clf_svm', SVM(kernel='rbf', probability=True)),
+        #('clf_linear_svm', LinearSVM()),
+        ('clf_grad_boost', GradBoost())])
+        #('clf_xgboost', XGBoost())])
         # ('clf_bag_ensemble', BagEnsemble()),
         #('clf_treebag', TreeBag())])
         # ('clf_svm_bag', SVMBag(base_estimator=SVC)),
@@ -373,3 +428,32 @@ def get_voting_classifier(**args):
         voting_clf.set_params(**args)
 
     return voting_clf
+
+
+def normalize(df_origin):
+    """Fill missing values, drop unneeded columns and convert columns to appropriate dtypes"""
+    df = df_origin.copy()
+    drop_columns = ["name", "owner", "repository"]
+    for c in drop_columns:
+        if c in df.columns:
+            df.drop(c, axis=1, inplace=True)
+    for c in df.columns:
+        if df[c].dtype == 'O':
+            if c in ['isOwnerHomepage', 'hasHomepage', 'hasLicense', 'hasTravisConfig', 'hasCircleConfig', 'hasCiConfig']:
+                df[c] = (df[c] == 'True').astype(int)
+            else:
+                df[c].fillna('', inplace=True)
+        else:
+            df[c].fillna(0, inplace=True)
+            df[c] = df[c].astype(int)
+    return df
+
+
+def keep_useful_features(df, useful_features):
+    for c in df.columns:
+        if c not in useful_features:
+            df.drop(c, axis=1, inplace=True)
+    for f in useful_features:
+        if f not in df.columns:
+            df[f] = 0
+    return df
