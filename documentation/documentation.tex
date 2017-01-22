@@ -347,7 +347,7 @@ Almost all of the first eleven positive words are very logical for the EDU categ
 The HW category on ther other side has very special words for its domain like "solution", "assignment" and "work".\\
 Good indicator for the WEB category are the words "post", "page", "html", "index", "site" and "blog" which are all obviously connected with this class.\\
 
-We trained two different source code classifier but we will describe only the smaller and more general model (Appendix App:AppendixE).\\
+We trained two different source code classifier but we will describe only the smaller and more general model (Appendix \ref{App:AppendixE}).\\
 The DATA category is dominated by numbers which we could read from non-binary files.
 The negative words separate DATA from DEV and DOCS mainly.\\
 The DEV category is a mixture of different programming languages which are not part of the WEB category.
@@ -426,8 +426,11 @@ As an example, to classify the example data given by the challenge using the tra
 \begin{lstlisting}[language=bash]
   $ python app/main.py -i data/example-input.txt
                        -t data/training_data_small.csv
+                       -l 10
 \end{lstlisting}
 
+The script would load all features for the training data \textit{training\_data\_small.csv} and the input data \textit{example-input.txt}.
+It would then train 10 \textit{meta-ensemble classifiers} on the training data and it would use the one with the best average score on the validation sets to predict the input data.
 The saved output file \texttt{predictions.txt} will have the format of the challenge example\footnote{https://github.com/InformatiCup/InformatiCup2017/blob/master/example-output}.\\
 For setup instructions please refer to the README.md file.
 
