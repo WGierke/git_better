@@ -66,7 +66,6 @@ openbib,
 \end{center}
 \end{titlepage}
 
-\listoftodos
 \pagebreak
 
 \tableofcontents
@@ -360,13 +359,21 @@ file name                                                                  & 48.
 \end{tabular}
 \end{table}
 
-\subsection{Overall Prediction
-Model}\label{overall-prediction-model}
+\subsection{Overall Prediction Model}\label{overall-prediction-model}
 
 The different approaches to classify the repositories based on the source code achieved even better results than the description/readme classifiers.
 Though, the current state of the prediction using the source code is not ready for production use so far as it required us to download the full repository code, all commit messages and the complete wikis.
 Overall, this required us to download over 200 GB of data for the training data which took over 24 hours due to the slow Git cloning protocol.
-For this reasons we decided to ensemble the numeric ensemble classifier and the description/readme classifiers using weighted voting as we already did it with the classifiers on the numeric features.
+For this reasons we decided to ensemble the numeric ensemble classifier and the description/readme classifiers using weighted voting as we already did it with the classifiers on the numeric features.\\
+Figure \ref{process} visualizes our used \textit{meta-ensemble classifier}.
+Due to performance reasons we're not using classifiers in production that require to clone repository content.
+In the beginning, we're fetching relevant features using the GitHub REST and GraphQL API.
+We're also adding our own calculated features such as \textit{hasHomepage}, \textit{isOwnerHomepage}, \textit{hasCiConfig} etc.
+We then apply a set of classifiers on the numeric features and ensemble them using weighted voting.
+The content of the \textit{description} and \textit{readme} features are then transformed to a tf-idf matrix.
+A SGD classifier the learns to predict the labels based on them.
+In the end, the numeric ensemble classifier, the description classifier and the readme classifier are then ensembled using weighted voting.
+
 
 \section{Implemented Application}\label{implemented-application}
 \subsection{Tooling Choices}\label{tooling-choices}
@@ -416,7 +423,7 @@ For setup instructions please refer to the README.md file.
 In this chapter we want to evaluate the performance of our chosen \textit{meta-ensemble classifier}.
 After 100 times being applied on a random undersampled set of our training data, the classifier achieved accuracies of 61,3\% and 47.7\% on the validation respectively additional validation data.
 The best classifier we were able to train achieved on average an accuracy of 67.7 \% on the validation data and 46.7\% on the additional validation data set.
-One can find its confusion matrix of the official validation data in Figure \ref{confusion_matrix_meta_ensemble} and the according boolean matrix with precision and recall values in table \ref{boolean_matrix_meta_ensemble}.
+One can find its confusion matrix of the official validation data in Figure \ref{confusion_matrix_meta_ensemble} and the according boolean matrix with precision and recall values in table \ref{boolean_matrix_meta_ensemble}.//
 
 \begin{table}[H]
 \centering
@@ -442,6 +449,10 @@ One can find its confusion matrix of the official validation data in Figure \ref
 	\label{confusion_matrix_meta_ensemble}
 \end{figure}
 
+In our opinion, we prefer a higher recall over a higher precision.
+We would like to use our prediction model to recommend repos to a user that are similar to his own repositorries.
+In this situation it might be better for a user to reject a repository by himself as interesting (high recall and low precision) than not seing an interesting repo at all (low recall and high precision).
+
 The great benefit of our ensemble classifier is that the base classifiers are independent of each other.
 This means that even if one classifier predicts the class label incorrectly, the remaining two classifiers can outrule him using their prediction confidences.\\
 One example would be the repository ga-chicago/wdi5-homework\footnote{https://github.com/ga-chicago/wdi5-homework}.
@@ -450,7 +461,6 @@ Instead, our description classifier can predict \textit{HW} with a high confiden
 The readme and the numeric ensemble classifiers of our meta ensemble predict the label \textit{DEV} for certain as there multiple positive \textit{DEV} words included in the readme like "source code" or "bugs" and as there are a lot of issues, pull requests and commits.\\
 Fellow solution approaches that only use numeric meta data of repos would probably classify openaddresses/openaddresses\footnote{https://github.com/openaddresses/openaddresses} as \textit{DEV} as it contains a lot of contributions, stargazers, forks, issues and pull requests.
 Since there are a lot of positive \textit{DATA} words contained in the description and the readme of the repo, like "open" and "data", the description and readme classifiers would certainly overrule the numeric ensemble classifier with the predicted \textit{DATA} label.
-\todo[inline]{discuss quality of results and whether higher yield or higher precision is more important}
 The description of the repo PowerDNS/pdns\footnote{https://github.com/PowerDNS/pdns} doesn't include any words that could be assigned to any label for certain.
 Approaches that only use the description could simply fail here.
 
@@ -464,8 +474,6 @@ Since there is no official GitHub API for the trending repositories, we would cr
 https://github.com/trending/\textit{language}?since=\textit{since} once a day, where \textit{language} is a supported programming language like Python or Ruby, and \textit{since} is one of `daily', `weekly' or `monthly'.
 We would then recommend repositories to the user based on their classified labels, on the preferred language of the user, on the text or even code similarity between the trending projects and those of the user.
 To implement the latter one, we could use tf-idf matrices like we already used for the text classifiers.
-
-\todo[inline]{maybe add pictures as fall-back}
 
 \newpage
 \appendix
