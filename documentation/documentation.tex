@@ -235,10 +235,8 @@ The ensemble classifier outperformed all other classifiers which implies that it
 \subsubsection{Validation of Prediction
 Model}\label{validation-of-prediction-model}
 
-\ref{confusion_matrix_numeric_ensemble}
-\ref{boolean_matrix_numeric_ensemble}
-
-\todo[inline]{accuracy+confusion matrix}
+After the classifier was applied on a random undersampled set of our training data for 100 times, it achieved accuracies of 39,3\% and 26.7\% on the validation respectively additional validation data on average.
+Figure \ref{confusion_matrix_numeric_ensemble} visualizes one confusion matrix of the ensemble and table \ref{boolean_matrix_numeric_ensemble} shows the according boolean matrix.
 
 \subsection{Classification Using Text Data (Description and
 Readme)}\label{classification-using-text-data-description-and-readme}
@@ -272,7 +270,8 @@ In our example, we dropped words with a document frequency of under 0.01 and ove
 We chose to use the stochastic gradient descent (SGD) algorithm to apply it on the feature matrix.
 The reason is that SGD can work efficiently with sparse features which is why it has been successfully applied to further NLP problems before.
 
-\todo[inline]{Include positive and negative words}
+
+
 \subsubsection{Validation of Prediction Model}\label{validation-of-prediction-model-1}
 
 As one can see in Figures \ref{confusion-matrix-readme-classifier} and \ref{confusion-matrix-description-classifier}, the description and readme classifiers outperformed the numeric ensemble classifier with 51.6\% respectively 48.4\% accuracy.
@@ -321,8 +320,6 @@ Ugurel et al.\footnote{"What's the Code? Automatic Classification of Source Code
 
 \subsubsection{Prediction Model}\label{prediction-model-2}
 
-\todo[inline]{Same as text data}
-
 Shortened words in the following tables are caused by the stemming of the input data.\\
 
 In the following paragraph we will discuss the importance of features gained from the file names, see \ref{App:AppendixB}. \\
@@ -348,7 +345,7 @@ Almost all of the first eleven positive words are very logical for the EDU categ
 The HW category on ther other side has very special words for its domain like "solution", "assignment" and "work".\\
 Good indicator for the WEB category are the words "post", "page", "html", "index", "site" and "blog" which are all obviously connected with this class.\\
 
-We trained two different source code classifier but we will describe only the smaller and more general model.\\
+We trained two different source code classifier but we will describe only the smaller and more general model (Appendix App:AppendixE).\\
 The DATA category is dominated by numbers which we could read from non-binary files.
 The negative words separate DATA from DEV and DOCS mainly.\\
 The DEV category is a mixture of different programming languages which are not part of the WEB category.
@@ -361,16 +358,36 @@ The categories DOCS, EDU and HW are structureless with some typical words from t
 \subsubsection{Validation of Prediction
 Model}\label{validation-of-prediction-model-2}
 
-\todo[inline]{accuracy+confusion matrix}
-File names:
-\ref{boolean_matrix_file_names_validation}
-\ref{boolean_matrix_file_names_add_validation}
+Our classifier based on the cloned repositories performed well as one can see in the table \ref{accuracy-different-classifier}.
+We trained the commit message classifier with \texttt{min\_df=0.1} and \texttt{max\_df=0.9}, the file name classifier with \texttt{min\_df=0.1} and \texttt{max\_df=0.9}, the small source code classifier with \texttt{min\_df=0.3} and \texttt{max\_df=0.8} and the big source code classifier with \texttt{max\_df=0.8}.\\
+\texttt{max\_df} specifies the maximum document frequency, \texttt{min\_df} the minimum document frequency.\footnote{http://scikit-learn.org/stable/modules/generated/sklearn.feature\_extraction.text.TfidfVectorizer.html}
+A higher \texttt{min\_df} leads to fewer rare words and a better generalization, a lower \texttt{max\_df} excludes words which are present in many documents and doesn't hold much information.\\
+
+One can find the boolean matrix for the file name classifier on the validation data in the table \ref{boolean_matrix_file_names_validation} and on the additional validation data in the table \ref{boolean_matrix_file_names_add_validation}.\\
+One can find the boolean matrix for the commit message classifier on the validation data in the table \ref{boolean_matrix_commit_messages_validation} and on the additional validation data in the table \ref{boolean_matrix_commit_messages_add_validation}.\\
+One can find the boolean matrix for the source code classifier on the validation data in the table \ref{boolean_matrix_small_source_code_validation} and on the additional validation data in the table \ref{boolean_matrix_small_source_code_add_validation}.\\
+
+\begin{table}[h]
+\centering
+\caption{Accuracy of different classifier}
+\label{accuracy-different-classifier}
+\begin{tabular}{|l|l|l|}
+\hline
+                                                                            & validation & additional validation \\ \hline
+commit message                                                             & 38.7\%     & 38.3\%                \\ \hline
+file name                                                                  & 48.4\%     & 29.3\%                \\ \hline
+\begin{tabular}[c]{@{}l@{}}source code\\ (1600 features)\end{tabular}       & 38.7\%     & 26.3\%                \\ \hline
+\begin{tabular}[c]{@{}l@{}}source code\\ (30 million features)\end{tabular} & 51.6\%     & 34.3\%                \\ \hline
+\end{tabular}
+\end{table}
 
 \subsection{Overall Prediction
 Model}\label{overall-prediction-model}
 
-\todo[inline]{Describe our ensembled model}
-\todo[inline]{Document three repositories which work well}
+The different approaches to classify the repositories based on the source code achieved even better results than the description/readme classifiers.
+Though, the current state of the prediction using the source code is not ready for production use so far as it required us to download the full repository code, all commit messages and the complete wikis.
+Overall, this required us to download over 200 GB of data for the training data which took over 24 hours due to the slow Git cloning protocol.
+For this reasons we decided to ensemble the numeric ensemble classifier and the description/readme classifiers using weighted voting as we already did it with the classifiers on the numeric features.
 
 \section{Implemented Application}\label{implemented-application}
 \subsection{Tooling Choices}\label{tooling-choices}
@@ -414,10 +431,46 @@ For setup instructions please refer to the README.md file.
 
 \section{Validation}\label{validation}
 
-\todo[inline]{boolean(!) matrix on validation data}
-\todo[inline]{compute recall and precision}
+In this chapter we want to evaluate the performance of our chosen \textit{meta-ensemble classifier}.
+After 100 times being applied on a random undersampled set of our training data, the classifier achieved accuracies of 61,3\% and 47.7\% on the validation respectively additional validation data.
+The best classifier we were able to train achieved on average an accuracy of 67.7 \% on the validation data and 46.7\% on the additional validation data set.
+One can find its confusion matrix of the official validation data in Figure \ref{confusion_matrix_meta_ensemble} and the according boolean matrix with precision and recall values in table \ref{boolean_matrix_meta_ensemble}.
+
+\begin{table}[H]
+\centering
+\caption{Boolean Matrix for Meta-Ensemble}
+\label{boolean_matrix_meta_ensemble}
+\begin{tabular}{|r|r|r|r|r|}
+ \hline
+ Label & Predicted Correctly & Predicted Incorrectly & Precision & Recall \\ \hline
+ WEB & 2 & 2 & 0.40 & 0.50 \\ \hline
+ DOCS & 2 & 2 & 0.50 & 0.50 \\ \hline
+ HW & 5 & 0 & 0.71 & 1.00 \\ \hline
+ DEV & 8 & 3 & 0.89 & 0.73 \\ \hline
+ EDU & 2 & 2 & 1.00 & 0.50 \\ \hline
+ DATA & 2 & 1 & 0.50 & 0.67 \\ \hline
+ \multicolumn{3}{|l|}{Weighted Average} & 0.72 & 0.68 \\ \hline
+ \end{tabular}
+\end{table}
+
+\begin{figure}[H]
+	\centering
+		\includegraphics[width=8cm]{graphics/confusion_matrix_meta_ensemble.png}
+	\caption{Confusion Matrix for Meta Ensemble (67.7\% Accuracy)}
+	\label{confusion_matrix_meta_ensemble}
+\end{figure}
+
+The great benefit of our ensemble classifier is that the base classifiers are independent of each other.
+This means that even if one classifier predicts the class label incorrectly, the remaining two classifiers can outrule him using their prediction confidences.\\
+One example would be the repository ga-chicago/wdi5-homework\footnote{https://github.com/ga-chicago/wdi5-homework}.
+Since its readme file is empty, fellow approaches that might only use the content of the readme file to predict the label wouldn't be able to predict a label with high certainty.
+Instead, our description classifier can predict \textit{HW} with a high confidence as the description includes positive \textit{HW} words like "homework", "assignment" and "submission".\\
+The readme and the numeric ensemble classifiers of our meta ensemble predict the label \textit{DEV} for certain as there multiple positive \textit{DEV} words included in the readme like "source code" or "bugs" and as there are a lot of issues, pull requests and commits.\\
+Fellow solution approaches that only use numeric meta data of repos would probably classify openaddresses/openaddresses\footnote{https://github.com/openaddresses/openaddresses} as \textit{DEV} as it contains a lot of contributions, stargazers, forks, issues and pull requests.
+Since there are a lot of positive \textit{DATA} words contained in the description and the readme of the repo, like "open" and "data", the description and readme classifiers would certainly overrule the numeric ensemble classifier with the predicted \textit{DATA} label.
 \todo[inline]{discuss quality of results and whether higher yield or higher precision is more important}
-\todo[inline]{(elaborate on the additional dataset given by another team?)}
+The description of the repo PowerDNS/pdns\footnote{https://github.com/PowerDNS/pdns} doesn't include any words that could be assigned to any label for certain.
+Approaches that only use the description could simply fail here.
 
 \section{Extensions}\label{extensions}
 
@@ -442,7 +495,23 @@ To implement the latter one, we could use tf-idf matrices like we already used f
 \FloatBarrier
 
 \newpage
-\section{\\Evaluation of file name classifier} \label{App:AppendixB}
+\section{\\Evaluation of description classifier} \label{App:AppendixB}
+% the \\ insures the section title is centered below the phrase: AppendixA
+
+\FloatBarrier
+\input{appendix-description.tex}
+\FloatBarrier
+
+\newpage
+\section{\\Evaluation of readme classifier} \label{App:AppendixF}
+% the \\ insures the section title is centered below the phrase: AppendixA
+
+\FloatBarrier
+\input{appendix-readme.tex}
+\FloatBarrier
+
+\newpage
+\section{\\Evaluation of file name classifier} \label{App:AppendixG}
 % the \\ insures the section title is centered below the phrase: AppendixA
 
 \FloatBarrier
