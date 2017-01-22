@@ -7,7 +7,8 @@ try:
 except Exception, e:
     logging.error("Can't import Matplotlib: " + str(e))
 from constants import PROCESSED_DATA_PATH, VALIDATION_DATA_PATH
-from sklearn.metrics import accuracy_score, confusion_matrix
+from sklearn.metrics import accuracy_score, confusion_matrix, precision_score, recall_score
+from sklearn.metrics import precision_recall_fscore_support as score
 
 
 def eval_classifier(clf, X, y_correct, classes, plot_cm=True):
@@ -94,14 +95,16 @@ def get_training_and_validation_df():
 def print_boolean_matrix(true, pred):
     """Print a LaTex table containing the precision and recall values
        of all classes as well as the weighted average."""
-    classes = list(set(true + pred))
+    classes = list(true)
+    classes.extend(pred)
+    classes = list(set(classes))
     matrix_true = dict()
     matrix_false = dict()
     for c in classes:
         matrix_true[c] = 0
         matrix_false[c] = 0
 
-    precision, recall, fscore, support = score(true, pred, labels=classes)
+    precision, recall, _, _ = score(true, pred, labels=classes)
 
     for i in range(len(true)):
         label_true = true[i]
