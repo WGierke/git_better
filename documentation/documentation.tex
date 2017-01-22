@@ -323,7 +323,7 @@ Ugurel et al.\footnote{"What's the Code? Automatic Classification of Source Code
 
 \todo[inline]{Same as text data}
 
-\todo[inline]{positive/negative words commit messages}
+Shortened words in the following tables are caused by the stemming of the input data.\\
 
 In the following paragraph we will discuss the importance of features gained from the file names, see \ref{App:AppendixB}. \\
 As one can see in table \ref{file-names-data} an obvious good indicator for the DATA category is the file ending "json". 
@@ -334,6 +334,19 @@ The strong positive word "contributing" for the DOCS category comes from the CON
 PDF files are an indication for EDU repositories, where the other features are very similar between EDU and HW.\\
 The category WEB has no positive words because we used the complete data shown in the table \ref{training_data_distribution} and didn't undersample.\\
 So the classifier classifies each sample as WEB when no negative word occurs.\\
+
+Commit messages provide an additional insightful source for our predictions which one can see in \ref{App:AppendixC}.\\
+The most relevant word in the category DATA is trivially "data". 
+"json" and "csv" are common filetypes used to store the data which are probably retrieved using the "script[s]".
+"Merge" under the highest negative words indicates that people only linearly add files to their repository and don't cause merge conflicts.\\
+"when" in the category DEV probably stands for conditional expressions like "Add second loop when flag is set".
+The other words are typical expressions in this context "test", "option", "support", "fix" and "compile".
+The negative words show that developers do not use the typical beginning of commit message like "add", "update", "change" and "commit" as proposed for example by Chris Beams.\\ \footnote{http://chris.beams.io/posts/git-commit/\#imperative}
+Except of "section", "article" and "book" nearly all other positive words in the DOCS category are git workflow specific phrases.
+The negative words separate it from the WEB category ("html", "index", "page" and "post") and from the EDU and HW category ("solution" and "slide").\\
+Almost all of the first eleven positive words are very logical for the EDU category ("slide", "material", "note"\dots).\\
+The HW category on ther other side has very special words for its domain like "solution", "assignment" and "work".\\
+Good indicator for the WEB category are the words "post", "page", "html", "index", "site" and "blog" which are all obviously connected with this class.\\
 
 \todo[inline]{positive/negative words source code}
 
