@@ -12,7 +12,7 @@ from preprocess import ColumnSumFilter, ColumnStdFilter, PolynomialTransformer
 from sklearn.cross_validation import train_test_split
 from sklearn.ensemble import VotingClassifier, ExtraTreesClassifier
 from sklearn.pipeline import Pipeline
-from training import load_pickle, get_undersample_df, drop_defect_rows, JOBLIB_DESCRIPTION_PIPELINE_NAME, JOBLIB_README_PIPELINE_NAME
+from training import load_pickle, get_undersample_df, drop_defect_rows, JOBLIB_DESCRIPTION_PIPELINE_NAME, JOBLIB_README_PIPELINE_NAME, save_pickle
 
 N_BEST_FEATURES = 100
 LOOPS = 10
@@ -130,8 +130,11 @@ def use_numeric_flat_prediction(df, df_input):
             try:
                 clf = clfs[i]
                 clf.fit(df_train, y_train)
-                val_scores[i] += clf.score(val_df, y_val)
-                val_add_scores[i] += clf.score(val_add_df, y_val_add)
+                val_score = clf.score(val_df, y_val)
+                val_scores[i] += val_score
+                val_add_score = clf.score(val_add_df, y_val_add)
+                val_add_scores[i] += val_add_score
+                #save_pickle(clf, "{}_{}_{}_{}".format(clf.__class__, i, val_score, val_add_score))
             except Exception, e:
                 print e
     for i in range(len(clfs)):
@@ -150,13 +153,13 @@ def use_mixed_stack_prediction(df_training, df_input):
     val_df = normalize(pd.read_csv(VALIDATION_DATA_PATH))
     val_df = keep_useful_features(val_df, df_training.columns)
     y_val = val_df.pop("label")
-    val_df_add = normalize(pd.read_csv(ADDITIONAL_VALIDATION_DATA_PATH))
-    val_df_add = keep_useful_features(val_df_add, df_training.columns)
-    y_val_add = val_df_add.pop("label")
+    val_add_df = normalize(pd.read_csv(ADDITIONAL_VALIDATION_DATA_PATH))
+    val_add_df = keep_useful_features(val_add_df, df_training.columns)
+    y_val_add = val_add_df.pop("label")
 
     _ = df_training.pop("Unnamed: 0")
     _ = val_df.pop("Unnamed: 0")
-    _ = val_df_add.pop("Unnamed: 0")
+    _ = val_add_df.pop("Unnamed: 0")
 
     meta_ensemble = VotingClassifier(estimators=[('description', DescriptionClassifier()),
                                                  ('readme', ReadmeClassifier()),
@@ -175,8 +178,12 @@ def use_mixed_stack_prediction(df_training, df_input):
         for i in range(len(clfs)):
             clf = clfs[i]
             clf.fit(df_train, y_train)
-            val_scores[i] += clf.score(val_df, y_val)
-            val_add_scores[i] += clf.score(val_df_add, y_val_add)
+            val_score = clf.score(val_df, y_val)
+            val_scores[i] += val_score
+            val_add_score = clf.score(val_add_df, y_val_add)
+            val_add_scores[i] += val_add_score
+            #save_pickle(clf, "{}_{}_{}_{}".format(clf.__class__, i, val_score, val_add_score))
+
     for i in range(len(clfs)):
         print clfs[i].__class__
         print "Validation: " + str(val_scores[i]/LOOPS)
