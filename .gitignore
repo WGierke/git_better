@@ -19,3 +19,5 @@ log
 *.synctex.gz
 *.toc
 documentation/*.pdf
+
+repo
