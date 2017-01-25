@@ -1,10 +1,11 @@
 import re
 from github import Github
 from app.training import load_pickle, JOBLIB_DESCRIPTION_PIPELINE_NAME, JOBLIB_README_PIPELINE_NAME
-
+from sklearn.ensemble import VotingClassifier
 
 def add_repo_header(repo_list):
-    return '''  <div class="repositories">
+    return '''  For performance reasons we're just using the description and the content of the README file of your public repositories to classify them in this example.
+                <div class="repositories">
                     <ul class="list-group">
                         <li class="list-group-item">
                             <div class="row">
@@ -16,10 +17,10 @@ def add_repo_header(repo_list):
                                     <strong>Description</strong>
                                 </div>
                                 <div class="col-md-2">
-                                    <strong>Description_Class (Confidence)</strong>
+                                    <strong>Description Classifier (Confidence)</strong>
                                 </div>
                                 <div class="col-md-2">
-                                    <strong>Readme_Class (Confidence)</strong>
+                                    <strong>Readme Classifier (Confidence)</strong>
                                 </div>
                             </div>
                         </li>
@@ -71,7 +72,6 @@ def build_repo_html(token):
         descr_model = load_pickle(JOBLIB_DESCRIPTION_PIPELINE_NAME)
         readme_model = load_pickle(JOBLIB_README_PIPELINE_NAME)
         repo_infos = []
-        print "Token: " + token
         client = Github(token)
         user = client.get_user()
         readme_regex = re.compile('[^a-zA-Z0-9 :\/-]')
