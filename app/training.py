@@ -2,7 +2,7 @@ import warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 import numpy as np
 import pandas as pd
-from classifier import AdaTree, AdaBayes, AdaSVM, GradBoost, DecisionTree, Forest, NaiveBayes, SVM, TheanoNeuralNetwork, TensorFlowNeuralNetwork, XGBoost, TreeBag, SVMBag, get_text_pipeline
+from classifier import AdaTree, AdaBayes, AdaSVM, GradBoost, DecisionTree, Forest, NaiveBayes, SVM, TheanoNeuralNetwork, TensorFlowNeuralNetwork, XGBoost, TreeBag, SVMBag, get_text_pipeline, stemmed_words
 from evaluation import complete_columns, get_cleaned_processed_df, eval_classifier, drop_text_features
 from nltk.stem.snowball import EnglishStemmer
 from sklearn.externals import joblib
