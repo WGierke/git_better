@@ -9,10 +9,10 @@ tqdm
 seaborn
 matplotlib
 xgboost
-sklearn
+scikit-learn==0.18.1
 lxml
 django>=1.4,<1.8
-python-social-auth
+python-social-auth==0.2.21
 BeautifulSoup
 dj-database-url
 psycopg2
