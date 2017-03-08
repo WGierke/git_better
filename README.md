@@ -1,6 +1,12 @@
 # git_better [![CircleCI](https://circleci.com/gh/WGierke/git_better.svg?style=svg&circle-token=3fb4bac4bb656bc2e7b9dbb6d9dc77a303bd240c)](https://circleci.com/gh/WGierke/git_better)
 [Demo](http://git-better.herokuapp.com/)  
 [Documentation](https://github.com/WGierke/git_better/blob/master/documentation.pdf)
+
+### :tada: We were 3rd place! Check out the official challenge results [here](https://github.com/InformatiCup/InformatiCup2017/blob/master/results/README.md) :tada:
+
+## Solution Approach and Performance
+![](https://cloud.githubusercontent.com/assets/6676439/23728110/5af5ca74-045b-11e7-84f3-3814b3f2f757.png)
+
 ## Installation
 ### Repository Classification
 - Make sure that you've installed Python 2.7
@@ -19,7 +25,7 @@ python -m nltk.downloader all
 ```bash
 cp example.config.ini config.ini
 ```
-- Accept the [Github Pre-release Program agreement](https://github.com/prerelease/agreement) so your access token can also use GitHub's GraphQL API  
+- Accept the [Github Pre-release Program agreement](https://github.com/prerelease/agreement) so your access token can also use GitHubs GraphQL API  
 
 ### Django Server
 #### Manual

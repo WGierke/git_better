@@ -71,7 +71,7 @@ class TestCase(unittest2.TestCase):
         self.assertEqual(data_frame['branchesCount'], 1)
 
     def test_trending_repo_fetching(self):
-        self.assertEqual(len(get_trending_links()), 25)
+        self.assertEqual(len(get_trending_links()), 28)
 
 
 if __name__ == '__main__':

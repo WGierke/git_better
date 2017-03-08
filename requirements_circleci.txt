@@ -9,3 +9,4 @@ scipy
 lxml
 tqdm
 BeautifulSoup
+scikit-learn==0.18.1
